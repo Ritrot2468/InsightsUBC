@@ -1,0 +1,30 @@
+{
+	"title": "SELECT dept, uuid, avg WHERE NOT avg > 95 AND dep = *psc",
+	"input": {
+		"WHERE": {
+			"AND": [
+				{
+					"NOT": {
+						"GT": {
+							"sections_avg": 65
+						}
+					}
+				},
+				{
+					"IS": {
+						"sections_dept": "*psc"
+					}
+				}
+			]
+		},
+		"OPTIONS": {
+			"columns": [
+				"sections_dept",
+				"sections_uuid",
+				"sections_avg"
+			]
+		}
+	},
+	"errorExpected": true,
+	"expected":"InsightError"
+}

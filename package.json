@@ -6,7 +6,7 @@
 	"private": true,
 	"version": "1.0.0",
 	"engines": {
-		"node": ">= 18 < 19"
+		"node": ">= 18 < 21"
 	},
 	"dependencies": {
 		"decimal.js": "10.4.3",

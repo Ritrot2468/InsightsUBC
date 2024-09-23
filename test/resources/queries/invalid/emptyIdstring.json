@@ -1,0 +1,29 @@
+{
+	"title": "empty idstring",
+	"input": {
+		"WHERE": {
+			"AND": [
+				{
+					"GT": {
+						"_avg": 93
+					}
+				},
+				{
+					"IS": {
+						"_dept": "CPS*"
+					}
+				}
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"_dept",
+				"_uuid",
+				"_avg"
+			],
+			"ORDER": "_avg"
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

@@ -1,0 +1,21 @@
+{
+	"title": "SELECT pass, audit, dept, avg WHERE dept = apbl",
+	"input": {
+		"WHERE": {
+			"Is": {
+				"sections_dept": "apbl"
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"sections_pass",
+				"sections_audit",
+				"sections_dept",
+				"sections_avg"
+			],
+			"ORDER": "sections_avg"
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

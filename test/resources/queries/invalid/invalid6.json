@@ -1,0 +1,29 @@
+{
+	"title":"SELECT dept, uuid, avg WHERE avg > 93 AND avg is 95",
+	"input":{
+		"WHERE":{
+			"AND":[
+				{
+					"GT":{
+						"sections_avg":93
+					}
+				},
+				{
+					"IS":{
+						"sections_avg": 95
+					}
+				}
+			]
+		},
+		"OPTIONS":{
+			"COLUMNS":[
+				"sections_dept",
+				"sections_uuid",
+				"sections_avg"
+			],
+			"ORDER":"sections_instructor"
+		}
+	},
+	"errorExpected":true,
+	"expected":"InsightError"
+}

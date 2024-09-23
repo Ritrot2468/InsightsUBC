@@ -1,0 +1,64 @@
+{
+	"title": "body body options",
+	"input": {
+		"WHERE": {
+			"AND": [
+				{
+					"GT": {
+						"sections_avg": 93
+					}
+				},
+				{
+					"IS": {
+						"sections_dept": "ap*"
+					}
+				}
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"sections_dept",
+				"sections_uuid",
+				"sections_avg"
+			]
+		}
+	},
+	"errorExpected": false,
+	"expected": [
+		{
+			"sections_dept": "apsc",
+			"sections_uuid": "18718",
+			"sections_avg": 95.94
+		},
+		{
+			"sections_dept": "apsc",
+			"sections_uuid": "18722",
+			"sections_avg": 94.94
+		},
+		{
+			"sections_dept": "apsc",
+			"sections_uuid": "18727",
+			"sections_avg": 94.17
+		},
+		{
+			"sections_dept": "apsc",
+			"sections_uuid": "19858",
+			"sections_avg": 96
+		},
+		{
+			"sections_dept": "apsc",
+			"sections_uuid": "19859",
+			"sections_avg": 95.05
+		},
+		{
+			"sections_dept": "apsc",
+			"sections_uuid": "22439",
+			"sections_avg": 94.1
+		},
+		{
+			"sections_dept": "apsc",
+			"sections_uuid": "22441",
+			"sections_avg": 95.95
+		}
+	]
+}

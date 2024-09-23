@@ -1,0 +1,23 @@
+{
+	"title": "lower case or",
+	"input": {
+		"WHERE": {
+			"or": {
+				"GT": {
+					"sections_avg": 93
+				}
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"sections_pass",
+				"sections_audit",
+				"sections_dept",
+				"sections_avg"
+			],
+			"ORDER": "sections_avg"
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

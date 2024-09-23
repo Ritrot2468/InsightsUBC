@@ -1,0 +1,34 @@
+
+{
+	"title": "filter by id",
+	"input": {
+		"WHERE": {
+			"AND": [
+				{
+					"NOT": {
+						"GT": {
+							"sections_avg": 69
+						}
+					}
+				},
+				{
+					"IS": {
+						"sections_id": "210"
+					}
+				}
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"sections_dept",
+				"sections_instructor",
+				"sections_uuid"
+			],
+			"ORDER": "sections_uuid"
+		}
+	},
+	"errorExpected":false,
+	"expected": [{"sections_dept":"civl","sections_instructor":"fannin, r jonathan;taiebat, mahdi","sections_uuid":"10730"},{"sections_dept":"civl","sections_instructor":"fannin, r jonathan;taiebat, mahdi","sections_uuid":"10731"},{"sections_dept":"civl","sections_instructor":"","sections_uuid":"10732"},{"sections_dept":"fmst","sections_instructor":"weatherby, maria","sections_uuid":"13253"},{"sections_dept":"fmst","sections_instructor":"weatherby, maria","sections_uuid":"13257"},{"sections_dept":"fmst","sections_instructor":"","sections_uuid":"22206"},{"sections_dept":"apbi","sections_instructor":"ellis, shona margaret","sections_uuid":"24513"},{"sections_dept":"apbi","sections_instructor":"","sections_uuid":"24514"},{"sections_dept":"japn","sections_instructor":"fan, belen","sections_uuid":"26875"},{"sections_dept":"math","sections_instructor":"","sections_uuid":"29816"},{"sections_dept":"math","sections_instructor":"","sections_uuid":"29817"},{"sections_dept":"math","sections_instructor":"moyles, iain","sections_uuid":"34037"},{"sections_dept":"math","sections_instructor":"","sections_uuid":"34038"},{"sections_dept":"civl","sections_instructor":"","sections_uuid":"37572"},{"sections_dept":"civl","sections_instructor":"","sections_uuid":"37573"},{"sections_dept":"civl","sections_instructor":"","sections_uuid":"37574"},{"sections_dept":"fmst","sections_instructor":"weatherby, maria","sections_uuid":"46234"},{"sections_dept":"fmst","sections_instructor":"weatherby, maria","sections_uuid":"46237"},{"sections_dept":"fmst","sections_instructor":"weatherby, maria","sections_uuid":"46238"},{"sections_dept":"fmst","sections_instructor":"","sections_uuid":"46239"},{"sections_dept":"math","sections_instructor":"","sections_uuid":"47089"},{"sections_dept":"math","sections_instructor":"","sections_uuid":"47090"},{"sections_dept":"civl","sections_instructor":"fannin, r jonathan","sections_uuid":"47523"},{"sections_dept":"fmst","sections_instructor":"weatherby, maria","sections_uuid":"48632"},{"sections_dept":"fmst","sections_instructor":"weatherby, maria","sections_uuid":"48635"},{"sections_dept":"fmst","sections_instructor":"","sections_uuid":"48636"},{"sections_dept":"math","sections_instructor":"israel, robert b","sections_uuid":"5205"},{"sections_dept":"math","sections_instructor":"","sections_uuid":"5206"},{"sections_dept":"fmst","sections_instructor":"weatherby, maria","sections_uuid":"5464"},{"sections_dept":"fmst","sections_instructor":"weatherby, maria","sections_uuid":"5465"},{"sections_dept":"frst","sections_instructor":"aitken, sally","sections_uuid":"54902"},{"sections_dept":"frst","sections_instructor":"","sections_uuid":"54903"},{"sections_dept":"frst","sections_instructor":"","sections_uuid":"59653"},{"sections_dept":"frst","sections_instructor":"","sections_uuid":"59654"},{"sections_dept":"japn","sections_instructor":"","sections_uuid":"60860"},{"sections_dept":"japn","sections_instructor":"sato, akiko","sections_uuid":"66930"},{"sections_dept":"cpsc","sections_instructor":"carter, paul martin","sections_uuid":"72332"},{"sections_dept":"japn","sections_instructor":"fan, belen","sections_uuid":"73726"},{"sections_dept":"japn","sections_instructor":"","sections_uuid":"73727"},{"sections_dept":"japn","sections_instructor":"koizumi, keiko","sections_uuid":"76"},{"sections_dept":"japn","sections_instructor":"","sections_uuid":"79"},{"sections_dept":"eosc","sections_instructor":"","sections_uuid":"82838"},{"sections_dept":"eosc","sections_instructor":"","sections_uuid":"82839"},{"sections_dept":"visa","sections_instructor":"pina, manuel","sections_uuid":"83276"},{"sections_dept":"cpsc","sections_instructor":"allen, meghan","sections_uuid":"83406"},{"sections_dept":"frst","sections_instructor":"ellis, simon;wang, tongli","sections_uuid":"86553"},{"sections_dept":"frst","sections_instructor":"","sections_uuid":"86554"},{"sections_dept":"biol","sections_instructor":"ellis, shona margaret;graham, sean;samuels, anne lacey","sections_uuid":"88977"},{"sections_dept":"biol","sections_instructor":"","sections_uuid":"88978"},{"sections_dept":"fmst","sections_instructor":"weatherby, maria","sections_uuid":"9365"},{"sections_dept":"fmst","sections_instructor":"weatherby, maria","sections_uuid":"9367"},{"sections_dept":"fmst","sections_instructor":"weatherby, maria","sections_uuid":"9368"},{"sections_dept":"fmst","sections_instructor":"","sections_uuid":"9370"},{"sections_dept":"frst","sections_instructor":"aitken, sally","sections_uuid":"97633"},{"sections_dept":"frst","sections_instructor":"","sections_uuid":"97634"},{"sections_dept":"fmst","sections_instructor":"weatherby, maria","sections_uuid":"9928"}]
+}
+
+

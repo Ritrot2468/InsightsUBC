@@ -1,0 +1,29 @@
+{
+	"title": "case sensitive idstring",
+	"input": {
+		"WHERE": {
+			"AND": [
+				{
+					"GT": {
+						"secTIons_avg": 93
+					}
+				},
+				{
+					"IS": {
+						"secTIons_dept": "CPS*"
+					}
+				}
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"secTIons_dept",
+				"secTIons_uuid",
+				"secTIons_avg"
+			],
+			"ORDER": "secTIons_avg"
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

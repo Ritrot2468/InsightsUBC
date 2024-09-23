@@ -1,0 +1,39 @@
+{
+	"title": "double negation",
+	"input": {
+		"WHERE": {
+			"AND": [
+				{
+					"NOT": {
+						"NOT": {
+							"EQ": {
+								"sections_avg": 90
+							}
+						}
+					}
+				},
+				{
+					"IS": {
+						"sections_dept": "*psc"
+					}
+				}
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"sections_dept",
+				"sections_uuid",
+				"sections_avg"
+			],
+			"ORDER": "sections_avg"
+		}
+	},
+	"errorExpected": false,
+	"expected": [
+		{
+			"sections_dept": "apsc",
+			"sections_uuid": "36596",
+			"sections_avg": 90
+		}
+	]
+}

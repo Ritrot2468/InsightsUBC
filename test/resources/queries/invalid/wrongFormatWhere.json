@@ -1,0 +1,14 @@
+{
+	"title": "wrong format where",
+	"input": {
+		"input": {
+			"where": {
+				"GT": {
+					"sections_avg": 93
+				}
+			}
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

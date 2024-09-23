@@ -119,29 +119,35 @@ export default class InsightFacade implements IInsightFacade {
 		// 	`InsightFacadeImpl::addDataset() is unimplemented! - id=${id}; content=${content?.length}; kind=${kind}`
 		// );
 	}
-	private addNewSection(id: string, jsonData: any): void {
+	private addNewSection(section_id: string, jsonData: any): void {
+		const result = jsonData.result[0];
+
+		const [uuid, id, title, instructor, dept] = this.sFields.map((sfield) => result[sfield]);
+
 		const sectionSfields: Sfield = {
-			uuid: jsonData.result[0][this.sFields[0]],
-			id: jsonData.result[0][this.sFields[1]],
-			title: jsonData.result[0][this.sFields[2]],
-			instructor: jsonData.result[0][this.sFields[3]],
-			dept: jsonData.result[0][this.sFields[4]],
+			uuid,
+			id,
+			title,
+			instructor,
+			dept,
 		};
 
+		const [year, avg, pass, fail, audit] = this.mFields.map((mfield) => result[mfield]);
+
 		const sectionMfields: Mfield = {
-			year: jsonData.result[0][this.mFields[0]],
-			avg: jsonData.result[0][this.mFields[1]],
-			pass: jsonData.result[0][this.mFields[2]],
-			fail: jsonData.result[0][this.mFields[3]],
-			audit: jsonData.result[0][this.mFields[4]],
+			year,
+			avg,
+			pass,
+			fail,
+			audit,
 		};
 		// log section into database of datasets
 		// if id has not been logged yet, log it, else append new section to list of sections in dictionary
 		const newSection: Section = new Section(sectionMfields, sectionSfields);
 		if (id in this.sectionsDatabase) {
-			this.sectionsDatabase.get(id)?.push(newSection);
+			this.sectionsDatabase.get(section_id)?.push(newSection);
 		} else {
-			this.sectionsDatabase.set(id, [newSection]);
+			this.sectionsDatabase.set(section_id, [newSection]);
 		}
 	}
 
@@ -156,6 +162,9 @@ export default class InsightFacade implements IInsightFacade {
 		const zip = await JSZip.loadAsync(buffer);
 		let numSections = 0;
 
+		// tracks all the promises in
+		const allPromises = [];
+
 		//console.log(zip.files);
 
 		// iterates through each course
@@ -165,48 +174,57 @@ export default class InsightFacade implements IInsightFacade {
 			//console.log(name);
 			//console.log(numSections);
 
-			// check that the file name contains courses at start AND is followed by at least on alpha-numeric char
+			// check that the file name contains courses at start AND is followed by at least one alpha-numeric char
 			// and that it doesn't an ending with a .(...) indicative of any unwanted file type
 			if (name.match(/^courses\/\w/) && name.match(/^[^.]+$/)) {
 				//console.log('current File:', zip.files[key]);
-				const content0 = await zip.files[key].async("string");
-				//console.log('File Content:', content0);
 
-				// Parse JSON file in content
-				const jsonData = JSON.parse(content0);
+				// run async
+				const promiseContent = zip.files[key].async("string").then(async (content0) => {
+					//console.log('File Content:', content0);
 
-				//console.log('JSON FILE:', jsonData);
+					// Parse JSON file in content
+					const jsonData = JSON.parse(content0);
 
-				if (jsonData.result.length === 0) {
-					continue;
-				}
-
-				//console.log('key:', jsonData.result);
-				const courseSections = Object.keys(jsonData.result);
-
-				// iterate through the sections of each course in the dataset
-				for (let i = 0; i < courseSections.length; i++) {
-					const fieldKeys = Object.keys(jsonData.result[i]);
-
-					//console.log('value:', jsonData.result[0][this.valid_fields[0]]);
-					//console.log('required keys:', this.valid_fields)
-
-					// checks if current section has all the valid fields, otherwise move on to next course
-					if (this.valid_fields.every((element) => fieldKeys.includes(element))) {
-						// 1) first create a list strings of our SFields and MFields string form to index into JSON object
-						// 2) retrieve value associated with field and store into appropriate Sfield variable
-						// 3) repeat steps with mfields
-						// 4) instatiate new section with mfields and sfields collected
-						// 5) store dataset info into our this.sectionsDataset
-						this.addNewSection(id, jsonData);
-						numSections++;
-
-						//console.log(numSections)
-						//console.log(this.sectionsDatabase.get(id))
+					//console.log('JSON FILE:', jsonData);
+					if (jsonData.result.length === 0) {
+						return;
 					}
-				}
+
+					//console.log('key:', jsonData.result);
+					const courseSections = Object.keys(jsonData.result);
+
+					// iterate through the sections of each course in the dataset
+					for (let i = 0; i < courseSections.length; i++) {
+						const fieldKeys = Object.keys(jsonData.result[i]);
+
+						//console.log('value:', jsonData.result[0][this.valid_fields[0]]);
+						//console.log('required keys:', this.valid_fields)
+
+						// checks if current section has all the valid fields, otherwise move on to next course
+						if (this.valid_fields.every((element) => fieldKeys.includes(element))) {
+							// 1) first create a list strings of our SFields and MFields string form to index into JSON object
+							// 2) retrieve value associated with field and store into appropriate Sfield variable
+							// 3) repeat steps with mfields
+							// 4) instantiate new section with mfields and sfields collected
+							// 5) store dataset info into our this.sectionsDataset
+							this.addNewSection(id, jsonData);
+							numSections++;
+
+							//console.log(numSections)
+							//console.log(this.sectionsDatabase.get(id))
+						}
+					}
+				});
+				//.catch((error) => {
+				// 	throw error
+				// });
+
+				allPromises.push(promiseContent);
 			}
 		}
+		// wait for all promises from the datasets to be fufilled
+		await Promise.all(allPromises);
 
 		// after iterating through all courses in dataset, if no valid section -> throw error
 		if (numSections === 0) {

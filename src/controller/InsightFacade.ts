@@ -6,6 +6,7 @@ import Section, {
 	InsightError,
 	InsightResult,
 	Mfield,
+	NotFoundError,
 	Sfield,
 } from "./IInsightFacade";
 import JSZip from "jszip";
@@ -93,7 +94,6 @@ export default class InsightFacade implements IInsightFacade {
 			// Number of rows found associated with the insightKind
 			const numRows = await this.countRows(content, id);
 			//console.log(numRows)
-			//const numRows = 2;
 
 			// Create an InsightResult record
 			const newRecord: InsightResult = {
@@ -110,15 +110,12 @@ export default class InsightFacade implements IInsightFacade {
 			if (err instanceof InsightError) {
 				throw err;
 			} else {
-				// 	// Handle unexpected errors
-				// 	//throw err;
 				throw new InsightError(`An unexpected error occurred: ${err}`);
 			}
 		}
-		// throw new Error(
-		// 	`InsightFacadeImpl::addDataset() is unimplemented! - id=${id}; content=${content?.length}; kind=${kind}`
-		// );
 	}
+
+	// helper function to create and add new section sections_database
 	private addNewSection(section_id: string, jsonData: any): void {
 		const result = jsonData.result[0];
 
@@ -151,22 +148,24 @@ export default class InsightFacade implements IInsightFacade {
 		}
 	}
 
+	// helper function to countRows in a given dataset
 	private async countRows(content: string, id: string): Promise<number> {
 		// Decode base64 string into buffer
 		const buffer = Buffer.from(content, "base64");
 
-		// list of valid keys allowed for a query mapped to a string[]
+		// list of valid keys allowed for a query mapped to a string[] --> will keep for performQuery helper
 		//const reqKeys = this.valid_fields.map((field) => `${id}_${field}`);
 
 		// load buffer in JSZip -> zip file
 		const zip = await JSZip.loadAsync(buffer);
+
+		// tracks number of sections in a given dataset and is initialized to 0
 		let numSections = 0;
 
-		// tracks all the promises in
+		// where each promise is appended to for each course object
 		const allPromises = [];
 
 		//console.log(zip.files);
-
 		// iterates through each course
 		for (const key in zip.files) {
 			//console.log("new course /n")
@@ -175,23 +174,22 @@ export default class InsightFacade implements IInsightFacade {
 			//console.log(numSections);
 
 			// check that the file name contains courses at start AND is followed by at least one alpha-numeric char
-			// and that it doesn't an ending with a .(...) indicative of any unwanted file type
+			// and that it doesn't an ending with a .(...)  (ex .png or .json or etc) indicative of an unwanted file type
 			if (name.match(/^courses\/\w/) && name.match(/^[^.]+$/)) {
-				//console.log('current File:', zip.files[key]);
-
-				// run async
+				// run async to start loading the courses concurently into a string -> then parse int JSON object
 				const promiseContent = zip.files[key].async("string").then(async (content0) => {
 					//console.log('File Content:', content0);
 
 					// Parse JSON file in content
 					const jsonData = JSON.parse(content0);
-
 					//console.log('JSON FILE:', jsonData);
+
+					// for cases where result:[] with no sections inside
 					if (jsonData.result.length === 0) {
 						return;
 					}
 
-					//console.log('key:', jsonData.result);
+					//console.log('sections:', jsonData.result);
 					const courseSections = Object.keys(jsonData.result);
 
 					// iterate through the sections of each course in the dataset
@@ -235,8 +233,34 @@ export default class InsightFacade implements IInsightFacade {
 	}
 
 	public async removeDataset(id: string): Promise<string> {
-		// TODO: Remove this once you implement the methods!
-		throw new Error(`InsightFacadeImpl::removeDataset() is unimplemented! - id=${id};`);
+		try {
+			// Validate ID follows proper format
+			if (id.includes("_") || id.trim().length === 0) {
+				throw new InsightError("Invalid ID structure");
+			}
+
+			// check that ID already exists
+			if (this.datasets.has(id)) {
+				this.currIDs = this.currIDs.filter((currentId) => currentId !== id);
+				this.datasets["delete"](id);
+				this.sectionsDatabase["delete"](id);
+
+				// return id name of set currently removed
+				return id;
+			} else {
+				throw new NotFoundError("Dataset not found");
+			}
+		} catch (err) {
+			if (err instanceof InsightError) {
+				throw new InsightError("");
+			}
+
+			if (err instanceof NotFoundError) {
+				throw new NotFoundError("Not found");
+			}
+			// Handle unexpected errors
+			throw new InsightError("An unexpected error occurred ${err.message}");
+		}
 	}
 
 	public async performQuery(query: unknown): Promise<InsightResult[]> {
@@ -245,7 +269,20 @@ export default class InsightFacade implements IInsightFacade {
 	}
 
 	public async listDatasets(): Promise<InsightDataset[]> {
-		// TODO: Remove this once you implement the methods!
-		throw new Error(`InsightFacadeImpl::listDatasets is unimplemented!`);
+		return new Promise((resolve) => {
+			const result: InsightDataset[] = [];
+
+			this.datasets.forEach((val, key) => {
+				const newInsightDataset: InsightDataset = {
+					id: key,
+					// So far since adding dataset with the same ID twice is not allowed ******
+					kind: Object.keys(val)[0] as InsightDatasetKind,
+					numRows: val[Object.keys(val)[0]] as number,
+				};
+				result.push(newInsightDataset);
+			});
+			resolve(result);
+		});
+		//throw new Error(`InsightFacadeImpl::listDatasets is unimplemented!`);
 	}
 }

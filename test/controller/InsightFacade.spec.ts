@@ -3,6 +3,7 @@ import {
 	InsightDatasetKind,
 	InsightError,
 	InsightResult,
+	NotFoundError,
 	ResultTooLargeError,
 } from "../../src/controller/IInsightFacade";
 import InsightFacade from "../../src/controller/InsightFacade";
@@ -235,6 +236,65 @@ describe("InsightFacade", function () {
 				expect(result2).to.include.members(["section", "courses"]);
 			} catch (err) {
 				expect.fail(`Not valid entry: ${err}`);
+			}
+		});
+	});
+
+	describe("RemoveDataset", function () {
+		let sections2: string;
+		beforeEach(async function () {
+			// This section resets the insightFacade instance
+			// This runs before each test
+			await clearDisk();
+			facade = new InsightFacade();
+		});
+		before(async function () {
+			// This block runs once and loads the datasets.
+			sections = await getContentFromArchives("test1.zip");
+			sections2 = await getContentFromArchives("test3.zip");
+
+			// Just in case there is anything hanging around from a previous run of the test suite
+			//await clearDisk();
+		});
+
+		it("invalid id structure1 (remove dataset)", async function () {
+			await expect(facade.removeDataset("_1_")).to.eventually.be.rejectedWith(InsightError);
+		});
+
+		it("invalid id structure2 (remove dataset)", async function () {
+			// const result = await ;
+			await expect(facade.removeDataset("1")).to.eventually.be.rejectedWith(NotFoundError);
+		});
+
+		it("invalid id structure3 (remove dataset)", async function () {
+			await expect(facade.addDataset("test1", sections, InsightDatasetKind.Sections)).to.eventually.have.members([
+				"test1",
+			]);
+
+			await facade.removeDataset("test1");
+
+			//await expect(facade.listDatasets().length).to.eventually.equal(1);
+			await expect(facade.listDatasets()).to.eventually.not.have.members(["test1"]);
+			//const result = await facade.removeDataset("1");
+			await expect(facade.removeDataset("test1")).to.be.rejectedWith(NotFoundError);
+		});
+
+		it("remove diff datasets - invalid id (remove dataset)", async function () {
+			try {
+				await expect(facade.addDataset("test1", sections, InsightDatasetKind.Sections)).to.eventually.have.members([
+					"test1",
+				]);
+
+				await expect(facade.addDataset("test2", sections2, InsightDatasetKind.Sections)).to.eventually.include.members([
+					"test1",
+					"test2",
+				]);
+
+				await expect(facade.removeDataset("test1_")).to.be.rejectedWith(InsightError);
+				await expect(facade.removeDataset("test1")).to.eventually.deep.equal("test1");
+				await expect(facade.removeDataset("test1")).to.be.rejectedWith(NotFoundError);
+			} catch (err) {
+				expect.fail(`${err}`);
 			}
 		});
 	});
@@ -478,5 +538,146 @@ describe("InsightFacade", function () {
 			"[invalid/reference_too_many_datasets.json] SELECT sections_dept sections_avg WHERE section_avg > 80 AND section_year = 202*",
 			checkQuery
 		);
+	});
+
+	describe("ListDataset", function () {
+		beforeEach(async function () {
+			// This section resets the insightFacade instance
+			// This runs before each test
+			await clearDisk();
+			facade = new InsightFacade();
+		});
+
+		it("list all ubc sections", async function () {
+			sections = await getContentFromArchives("pair.zip");
+			await facade.addDataset("ubc", sections, InsightDatasetKind.Sections);
+			const datasets = await facade.listDatasets();
+
+			expect(datasets).to.deep.equal([
+				{
+					id: "ubc",
+					kind: InsightDatasetKind.Sections,
+					numRows: 64612,
+				},
+			]);
+		});
+
+		it("list one dataset", async function () {
+			sections = await getContentFromArchives("test3.zip");
+			await facade.addDataset("test3", sections, InsightDatasetKind.Sections);
+			const datasets = await facade.listDatasets();
+
+			expect(datasets).to.deep.equal([
+				{
+					id: "test3",
+					kind: InsightDatasetKind.Sections,
+					numRows: 2,
+				},
+			]);
+		});
+
+		it("list 2 datasets", async function () {
+			try {
+				sections = await getContentFromArchives("test3.zip");
+				await facade.addDataset("test3", sections, InsightDatasetKind.Sections);
+
+				const sections1 = await getContentFromArchives("test5.zip");
+				await facade.addDataset("test5", sections1, InsightDatasetKind.Sections);
+
+				const datasets = await facade.listDatasets();
+				const EXPECTED_LENGTH = 2;
+				expect(datasets.length).to.equal(EXPECTED_LENGTH);
+				expect(datasets).to.include.deep.members([
+					{
+						id: "test3",
+						kind: InsightDatasetKind.Sections,
+						numRows: 2,
+					},
+					{
+						id: "test5",
+						kind: InsightDatasetKind.Sections,
+						numRows: 2,
+					},
+				]);
+			} catch (err) {
+				expect.fail(`you failed to load the right sets ${err}`);
+			}
+		});
+
+		it("list and remove datasets", async function () {
+			try {
+				sections = await getContentFromArchives("test3.zip");
+				await facade.addDataset("test3", sections, InsightDatasetKind.Sections);
+
+				const sections1 = await getContentFromArchives("test5.zip");
+				await facade.addDataset("test5", sections1, InsightDatasetKind.Sections);
+
+				const datasets = await facade.listDatasets();
+				const EXPECTED_LENGTH = 2;
+				expect(datasets.length).to.equal(EXPECTED_LENGTH);
+				expect(datasets).to.include.deep.members([
+					{
+						id: "test3",
+						kind: InsightDatasetKind.Sections,
+						numRows: 2,
+					},
+					{
+						id: "test5",
+						kind: InsightDatasetKind.Sections,
+						numRows: 2,
+					},
+				]);
+
+				await facade.removeDataset("test3");
+				const result2 = await facade.listDatasets();
+				const EXPECTED_NEW_LENGTH = 1;
+				expect(result2.length).to.equal(EXPECTED_NEW_LENGTH);
+				expect(result2).to.include.deep.members([
+					{
+						id: "test5",
+						kind: InsightDatasetKind.Sections,
+						numRows: 2,
+					},
+				]);
+			} catch (err) {
+				expect.fail(`you failed to load the right sets: ${err}`);
+			}
+		});
+
+		it("list mult datasets", async function () {
+			try {
+				sections = await getContentFromArchives("test3.zip");
+				await facade.addDataset("test3", sections, InsightDatasetKind.Sections);
+
+				const sections1 = await getContentFromArchives("test5.zip");
+				await facade.addDataset("test5", sections1, InsightDatasetKind.Sections);
+
+				const sections2 = await getContentFromArchives("test6.zip");
+				await facade.addDataset("test6", sections2, InsightDatasetKind.Sections);
+
+				const datasets = await facade.listDatasets();
+				const EXPECTED_LENGTH = 3;
+				expect(datasets.length).to.equal(EXPECTED_LENGTH);
+				expect(datasets).to.include.deep.members([
+					{
+						id: "test6",
+						kind: InsightDatasetKind.Sections,
+						numRows: 9,
+					},
+					{
+						id: "test3",
+						kind: InsightDatasetKind.Sections,
+						numRows: 2,
+					},
+					{
+						id: "test5",
+						kind: InsightDatasetKind.Sections,
+						numRows: 2,
+					},
+				]);
+			} catch (err) {
+				expect.fail(`you failed to load the right sets ${err}`);
+			}
+		});
 	});
 });

@@ -1,0 +1,24 @@
+{
+	"title": "invalid key in columns",
+	"input": {
+		"WHERE": {
+			"OR": [
+				{
+					"GT": {
+						"sections_avg": 93
+					}
+				}
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"sectionsdept",
+				"sections_uuid",
+				"sections_avg"
+			],
+			"ORDER": "sections_uuid"
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

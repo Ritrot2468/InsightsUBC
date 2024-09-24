@@ -1,0 +1,30 @@
+{
+	"title":"SELECT dept, uuid, avg WHERE avg > 93 AND dep = cps*",
+	"input":{
+		"WHERE":{
+			"AND":[
+				{
+					"GT":{
+						"sections_avg":93
+					}
+				},
+				{
+					"IS":{
+						"sections_dept":"cps*"
+					}
+				}
+			]
+		},
+		"OPTIONS":{
+			"COLUMNS":[
+				"sections_dept",
+				"sections_uuid",
+				"sections_avg"
+			],
+			"ORDER":"sections_avg"
+		}
+	},
+	"errorExpected": false,
+	"expected": [{"sections_dept":"cpsc","sections_uuid":"49957","sections_avg":93.38},{"sections_dept":"cpsc","sections_uuid":"49956","sections_avg":93.38},{"sections_dept":"cpsc","sections_uuid":"61187","sections_avg":93.5},{"sections_dept":"cpsc","sections_uuid":"61186","sections_avg":93.5},{"sections_dept":"cpsc","sections_uuid":"90604","sections_avg":94},{"sections_dept":"cpsc","sections_uuid":"90603","sections_avg":94},{"sections_dept":"cpsc","sections_uuid":"90608","sections_avg":94.5},{"sections_dept":"cpsc","sections_uuid":"90607","sections_avg":94.5},{"sections_dept":"cpsc","sections_uuid":"1386","sections_avg":95},{"sections_dept":"cpsc","sections_uuid":"1385","sections_avg":95}]
+
+}

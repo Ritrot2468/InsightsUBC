@@ -1,0 +1,129 @@
+{
+	"title": "options body options",
+	"input": {
+		"OPTIONS": {
+			"COLUMNS": [
+				"sections_dept",
+				"sections_uuid",
+				"sections_avg"
+			]
+		},
+		"WHERE": {
+			"AND": [
+				{
+					"GT": {
+						"sections_avg": 92
+					}
+				},
+				{
+					"IS": {
+						"sections_dept": "cps*"
+					}
+				}
+			]
+		}
+	},
+	"errorExpected": false,
+	"expected": [
+		{
+			"sections_dept": "cpsc",
+			"sections_uuid": "46756",
+			"sections_avg": 92.63
+		},
+		{
+			"sections_dept": "cpsc",
+			"sections_uuid": "46757",
+			"sections_avg": 92.63
+		},
+		{
+			"sections_dept": "cpsc",
+			"sections_uuid": "49956",
+			"sections_avg": 93.38
+		},
+		{
+			"sections_dept": "cpsc",
+			"sections_uuid": "49957",
+			"sections_avg": 93.38
+		},
+		{
+			"sections_dept": "cpsc",
+			"sections_uuid": "61186",
+			"sections_avg": 93.5
+		},
+		{
+			"sections_dept": "cpsc",
+			"sections_uuid": "61187",
+			"sections_avg": 93.5
+		},
+		{
+			"sections_dept": "cpsc",
+			"sections_uuid": "83491",
+			"sections_avg": 92.5
+		},
+		{
+			"sections_dept": "cpsc",
+			"sections_uuid": "83492",
+			"sections_avg": 92.5
+		},
+		{
+			"sections_dept": "cpsc",
+			"sections_uuid": "1354",
+			"sections_avg": 92.4
+		},
+		{
+			"sections_dept": "cpsc",
+			"sections_uuid": "1355",
+			"sections_avg": 92.4
+		},
+		{
+			"sections_dept": "cpsc",
+			"sections_uuid": "46762",
+			"sections_avg": 92.43
+		},
+		{
+			"sections_dept": "cpsc",
+			"sections_uuid": "46763",
+			"sections_avg": 92.43
+		},
+		{
+			"sections_dept": "cpsc",
+			"sections_uuid": "83495",
+			"sections_avg": 92.75
+		},
+		{
+			"sections_dept": "cpsc",
+			"sections_uuid": "83496",
+			"sections_avg": 92.75
+		},
+		{
+			"sections_dept": "cpsc",
+			"sections_uuid": "90603",
+			"sections_avg": 94
+		},
+		{
+			"sections_dept": "cpsc",
+			"sections_uuid": "90604",
+			"sections_avg": 94
+		},
+		{
+			"sections_dept": "cpsc",
+			"sections_uuid": "90607",
+			"sections_avg": 94.5
+		},
+		{
+			"sections_dept": "cpsc",
+			"sections_uuid": "90608",
+			"sections_avg": 94.5
+		},
+		{
+			"sections_dept": "cpsc",
+			"sections_uuid": "1385",
+			"sections_avg": 95
+		},
+		{
+			"sections_dept": "cpsc",
+			"sections_uuid": "1386",
+			"sections_avg": 95
+		}
+	]
+}

@@ -1,0 +1,30 @@
+{
+	"title":"no order",
+	"input": {
+		"WHERE": {
+			"AND": [
+				{
+					"NOT": {
+						"GT": {
+							"sections_avg": 65
+						}
+					}
+				},
+				{
+					"IS": {
+						"sections_dept": "*psc"
+					}
+				}
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"sections_dept",
+				"sections_uuid",
+				"sections_avg"
+			]
+		}
+	},
+	"errorExpected": false,
+	"expected": [{"sections_dept":"apsc","sections_uuid":"7305","sections_avg":64.14},{"sections_dept":"apsc","sections_uuid":"7308","sections_avg":64.32},{"sections_dept":"apsc","sections_uuid":"8263","sections_avg":64.73},{"sections_dept":"apsc","sections_uuid":"18672","sections_avg":57.68},{"sections_dept":"apsc","sections_uuid":"18675","sections_avg":62.37},{"sections_dept":"apsc","sections_uuid":"18680","sections_avg":63.17},{"sections_dept":"apsc","sections_uuid":"18685","sections_avg":57.81},{"sections_dept":"apsc","sections_uuid":"18686","sections_avg":64.38},{"sections_dept":"apsc","sections_uuid":"18695","sections_avg":64.48},{"sections_dept":"apsc","sections_uuid":"22364","sections_avg":64.76},{"sections_dept":"apsc","sections_uuid":"22365","sections_avg":63.61},{"sections_dept":"apsc","sections_uuid":"22396","sections_avg":64.76},{"sections_dept":"apsc","sections_uuid":"82412","sections_avg":60.52},{"sections_dept":"apsc","sections_uuid":"92100","sections_avg":64.41},{"sections_dept":"apsc","sections_uuid":"97869","sections_avg":64.78},{"sections_dept":"apsc","sections_uuid":"97875","sections_avg":63.96},{"sections_dept":"apsc","sections_uuid":"97877","sections_avg":59.23},{"sections_dept":"apsc","sections_uuid":"97889","sections_avg":62.53},{"sections_dept":"apsc","sections_uuid":"97893","sections_avg":62.69},{"sections_dept":"apsc","sections_uuid":"36586","sections_avg":63.48},{"sections_dept":"apsc","sections_uuid":"19850","sections_avg":63.33},{"sections_dept":"cpsc","sections_uuid":"83409","sections_avg":64.62},{"sections_dept":"cpsc","sections_uuid":"46774","sections_avg":64},{"sections_dept":"cpsc","sections_uuid":"46775","sections_avg":64}]
+}

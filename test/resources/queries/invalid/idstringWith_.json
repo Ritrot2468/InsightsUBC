@@ -1,0 +1,29 @@
+{
+	"title": "idstring with _",
+	"input": {
+		"WHERE": {
+			"AND": [
+				{
+					"GT": {
+						"sections__avg": 93
+					}
+				},
+				{
+					"IS": {
+						"sections__dept": "CPS*"
+					}
+				}
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"sections__dept",
+				"sections__uuid",
+				"sections__avg"
+			],
+			"ORDER": "sections__avg"
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

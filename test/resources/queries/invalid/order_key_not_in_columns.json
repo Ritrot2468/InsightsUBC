@@ -1,0 +1,33 @@
+{
+	"title": "Wrong ORDER key",
+	"input": {
+		"WHERE": {
+			"AND": [
+				{
+					"GT": {
+						"sections_avg": 90
+					}
+				},
+				{
+					"LT": {
+						"sections_avg": 100
+					}
+				},
+				{
+					"IS": {
+						"sections_dept": "apb*"
+					}
+				}
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"sections_dept",
+				"sections_avg"
+			],
+			"ORDER": "sections_audit"
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

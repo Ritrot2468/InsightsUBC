@@ -1,0 +1,21 @@
+{
+	"title": "where has 2 keys",
+	"input": {
+		"WHERE": {
+			"OPTIONS": {
+				"COLUMNS": [
+					"sections_dept",
+					"sections_uuid",
+					"sections_avg"
+				]
+			},
+			"AND": {
+				"GT": {
+					"sections_avg": 93
+				}
+			}
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

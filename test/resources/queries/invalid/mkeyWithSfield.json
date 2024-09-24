@@ -1,0 +1,29 @@
+{
+	"title": "mkey with sfield",
+	"input": {
+		"WHERE": {
+			"AND": [
+				{
+					"GT": {
+						"sections_id": 93
+					}
+				},
+				{
+					"IS": {
+						"sections_dept": "CPS*"
+					}
+				}
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"sections_dept",
+				"sections_uuid",
+				"sections_avg"
+			],
+			"ORDER": "sections_avg"
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

@@ -1,0 +1,29 @@
+{
+	"title": "mkey no _",
+	"input": {
+		"WHERE": {
+			"AND": [
+				{
+					"GT": {
+						"sectionsavg": 93
+					}
+				},
+				{
+					"IS": {
+						"sectionsdept": "CPS*"
+					}
+				}
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"sectionsdept",
+				"sectionsuuid",
+				"sectionsavg"
+			],
+			"ORDER": "sectionsavg"
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

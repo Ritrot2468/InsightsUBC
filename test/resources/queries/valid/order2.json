@@ -1,0 +1,35 @@
+
+{
+	"title": "order by audit",
+	"input": {
+		"WHERE": {
+			"AND": [
+				{
+					"NOT": {
+						"GT": {
+							"sections_avg": 65
+						}
+					}
+				},
+				{
+					"IS": {
+						"sections_dept": "*psc"
+					}
+				}
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"sections_dept",
+				"sections_instructor",
+				"sections_audit"
+			],
+			"ORDER": "sections_audit"
+		}
+	},
+	"errorExpected":false,
+	"expected":[{"sections_dept":"cpsc","sections_instructor":"","sections_audit":0},{"sections_dept":"cpsc","sections_instructor":"mitchell, ian","sections_audit":0},{"sections_dept":"cpsc","sections_instructor":"munzner, tamara","sections_audit":0},{"sections_dept":"apsc","sections_instructor":"wassink, berend","sections_audit":0},{"sections_dept":"apsc","sections_instructor":"","sections_audit":0},{"sections_dept":"apsc","sections_instructor":"","sections_audit":0},{"sections_dept":"apsc","sections_instructor":"","sections_audit":0},{"sections_dept":"apsc","sections_instructor":"","sections_audit":0},{"sections_dept":"apsc","sections_instructor":"","sections_audit":0},{"sections_dept":"apsc","sections_instructor":"qi, hongxing estella","sections_audit":0},{"sections_dept":"apsc","sections_instructor":"kerr, randall","sections_audit":0},{"sections_dept":"apsc","sections_instructor":"schoen, michael;swail, brian","sections_audit":0},{"sections_dept":"apsc","sections_instructor":"berndt, annette","sections_audit":0},{"sections_dept":"apsc","sections_instructor":"berndt, annette","sections_audit":0},{"sections_dept":"apsc","sections_instructor":"derksen, ruth","sections_audit":0},{"sections_dept":"apsc","sections_instructor":"berndt, annette","sections_audit":0},{"sections_dept":"apsc","sections_instructor":"berndt, annette","sections_audit":0},{"sections_dept":"apsc","sections_instructor":"berndt, annette","sections_audit":0},{"sections_dept":"apsc","sections_instructor":"berndt, annette","sections_audit":0},{"sections_dept":"apsc","sections_instructor":"berndt, annette","sections_audit":0},{"sections_dept":"apsc","sections_instructor":"derksen, ruth","sections_audit":0},{"sections_dept":"apsc","sections_instructor":"qi, hongxing estella;schoen, michael","sections_audit":0},{"sections_dept":"apsc","sections_instructor":"kerr, randall;schoen, michael","sections_audit":0},{"sections_dept":"apsc","sections_instructor":"fernlund, goran","sections_audit":2}]
+
+}
+
+

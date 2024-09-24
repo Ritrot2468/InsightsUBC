@@ -1,0 +1,29 @@
+{
+	"title": "SELECT dept, uuid, avg WHERE avg > 98 AND dep = *ps*",
+	"input": {
+		"WHERE": {
+			"AND": [
+				{
+					"GT": {
+						"sections_avg": 98
+					}
+				},
+				{
+					"IS": {
+						"sections_dept": "*ps*"
+					}
+				}
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"sections_dept",
+				"sections_uuid",
+				"sections_avg"
+			],
+			"ORDER": "sections_avg"
+		}
+	},
+	"errorExpected": false,
+	"expected": [{"sections_dept":"epse","sections_uuid":"33779","sections_avg":98.08},{"sections_dept":"epse","sections_uuid":"33781","sections_avg":98.36},{"sections_dept":"epse","sections_uuid":"49678","sections_avg":98.45},{"sections_dept":"epse","sections_uuid":"49677","sections_avg":98.45},{"sections_dept":"epse","sections_uuid":"29256","sections_avg":98.58},{"sections_dept":"epse","sections_uuid":"29255","sections_avg":98.58},{"sections_dept":"epse","sections_uuid":"33780","sections_avg":98.7},{"sections_dept":"epse","sections_uuid":"44817","sections_avg":98.76},{"sections_dept":"epse","sections_uuid":"44816","sections_avg":98.76},{"sections_dept":"epse","sections_uuid":"6320","sections_avg":98.8},{"sections_dept":"cnps","sections_uuid":"26777","sections_avg":99.19}]
+}

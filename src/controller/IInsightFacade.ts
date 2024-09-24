@@ -15,7 +15,49 @@ export interface InsightDataset {
 	numRows: number;
 }
 
+export interface Sfield {
+	uuid: string;
+	id: string;
+	title: string;
+	instructor: string;
+	dept: string;
+}
+
+export interface Mfield {
+	year: number;
+	avg: number;
+	pass: number;
+	fail: number;
+	audit: number;
+}
+export default class Section {
+	public get mfields(): Mfield {
+		return this._mfields;
+	}
+
+	public set mfields(value: Mfield) {
+		this._mfields = value;
+	}
+
+	public get sfields(): Sfield {
+		return this._sfields;
+	}
+
+	public set sfields(value: Sfield) {
+		this._sfields = value;
+	}
+	private _mfields: Mfield;
+	private _sfields: Sfield;
+
+	constructor(mfields: Mfield, sfields: Sfield) {
+		this._mfields = mfields;
+		this._sfields = sfields;
+	}
+}
+
 export type InsightResult = Record<string, string | number>;
+
+export type FieldsDictionary = Record<string, string>;
 
 export class InsightError extends Error {
 	constructor(message?: string) {

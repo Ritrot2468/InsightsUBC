@@ -10,6 +10,7 @@ import Section, {
 	Sfield,
 } from "./IInsightFacade";
 import JSZip from "jszip";
+import fs from "fs-extra";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -179,6 +180,7 @@ export default class InsightFacade implements IInsightFacade {
 				// run async to start loading the courses concurently into a string -> then parse int JSON object
 				const promiseContent = zip.files[key].async("string").then(async (content0) => {
 					//console.log('File Content:', content0);
+					await fs.outputJson(`src/data/${id}/${name}.json`, content0);
 
 					// Parse JSON file in content
 					const jsonData = JSON.parse(content0);
@@ -245,6 +247,7 @@ export default class InsightFacade implements IInsightFacade {
 				this.datasets["delete"](id);
 				this.sectionsDatabase["delete"](id);
 
+				await fs.remove(`src/data/${id}`);
 				// return id name of set currently removed
 				return id;
 			} else {

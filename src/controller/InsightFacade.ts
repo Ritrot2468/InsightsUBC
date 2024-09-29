@@ -54,10 +54,10 @@ export default class InsightFacade implements IInsightFacade {
 	private dictionary: FieldsDictionary = {};
 
 	// map to track record
-	private datasets: Map<string, InsightResult>;
+	private readonly datasets: Map<string, InsightResult>;
 
 	// tracks all sections added from a dataset using their associated id as the key
-	private sectionsDatabase: Map<string, Section[]>;
+	private readonly sectionsDatabase: Map<string, Section[]>;
 
 	// list of name of current IDs added
 	private currIDs: string[];
@@ -118,7 +118,7 @@ export default class InsightFacade implements IInsightFacade {
 
 	// helper function to create and add new section sections_database
 	private addNewSection(section_id: string, jsonData: any): void {
-		const result = jsonData.result[0];
+		const result = jsonData;
 
 		const [uuid, id, title, instructor, dept] = this.sFields.map((sfield) => result[sfield]);
 
@@ -153,10 +153,6 @@ export default class InsightFacade implements IInsightFacade {
 	private async countRows(content: string, id: string): Promise<number> {
 		// Decode base64 string into buffer
 		const buffer = Buffer.from(content, "base64");
-
-		// list of valid keys allowed for a query mapped to a string[] --> will keep for performQuery helper
-		//const reqKeys = this.valid_fields.map((field) => `${id}_${field}`);
-
 		// load buffer in JSZip -> zip file
 		const zip = await JSZip.loadAsync(buffer);
 
@@ -165,66 +161,55 @@ export default class InsightFacade implements IInsightFacade {
 
 		// where each promise is appended to for each course object
 		const allPromises = [];
-
-		//console.log(zip.files);
 		// iterates through each course
 		for (const key in zip.files) {
-			//console.log("new course /n")
 			const name = key;
-			//console.log(name);
-			//console.log(numSections);
 
 			// check that the file name contains courses at start AND is followed by at least one alpha-numeric char
 			// and that it doesn't an ending with a .(...)  (ex .png or .json or etc) indicative of an unwanted file type
 			if (name.match(/^courses\/\w/) && name.match(/^[^.]+$/)) {
-				// run async to start loading the courses concurently into a string -> then parse int JSON object
+				// run async to start loading the courses concurrently into a string -> then parse int JSON object
+
 				const promiseContent = zip.files[key].async("string").then(async (content0) => {
 					//console.log('File Content:', content0);
-					await fs.outputJson(`src/data/${id}/${name}.json`, content0);
-
 					// Parse JSON file in content
 					const jsonData = JSON.parse(content0);
 					//console.log('JSON FILE:', jsonData);
 
 					// for cases where result:[] with no sections inside
 					if (jsonData.result.length === 0) {
-						return;
+						return null;
 					}
 
-					//console.log('sections:', jsonData.result);
-					const courseSections = Object.keys(jsonData.result);
+					// 1) first create a list strings of our SFields and MFields string form to index into JSON object
+					// 2) retrieve value associated with field and store into appropriate Sfield variable
+					// 3) repeat steps with mfields
+					// 4) instantiate new section with mfields and sfields collected
+					// 5) store dataset info into our this.sectionsDataset
 
 					// iterate through the sections of each course in the dataset
-					for (let i = 0; i < courseSections.length; i++) {
-						const fieldKeys = Object.keys(jsonData.result[i]);
+					// Then filter the valid sections based on the required fields
 
-						//console.log('value:', jsonData.result[0][this.valid_fields[0]]);
-						//console.log('required keys:', this.valid_fields)
+					const validSectionsInCourse = this.filterValidSections(jsonData);
 
-						// checks if current section has all the valid fields, otherwise move on to next course
-						if (this.valid_fields.every((element) => fieldKeys.includes(element))) {
-							// 1) first create a list strings of our SFields and MFields string form to index into JSON object
-							// 2) retrieve value associated with field and store into appropriate Sfield variable
-							// 3) repeat steps with mfields
-							// 4) instantiate new section with mfields and sfields collected
-							// 5) store dataset info into our this.sectionsDataset
-							this.addNewSection(id, jsonData);
-							numSections++;
+					jsonData.result = validSectionsInCourse;
 
-							//console.log(numSections)
-							//console.log(this.sectionsDatabase.get(id))
-						}
-					}
+					// turn all valid sections to Sections objects
+					validSectionsInCourse.forEach((section: any) => {
+						this.addNewSection(id, section);
+						numSections++;
+					})
+					return {name, jsonData};
 				});
-				//.catch((error) => {
-				// 	throw error
-				// });
-
 				allPromises.push(promiseContent);
+
 			}
+
+
 		}
-		// wait for all promises from the datasets to be fufilled
-		await Promise.all(allPromises);
+		const courseDataList = await Promise.all(allPromises);
+		await this.storeCoursesOnDisk
+		(courseDataList, id);
 
 		// after iterating through all courses in dataset, if no valid section -> throw error
 		if (numSections === 0) {
@@ -232,6 +217,31 @@ export default class InsightFacade implements IInsightFacade {
 		}
 
 		return numSections;
+	}
+
+	private filterValidSections(jsonData: any): any {
+		const hasAllValidFields = (section: any, validFields: string[]): boolean => {
+			const fieldKeys = Object.keys(section);
+			return validFields.every((field) => fieldKeys.includes(field));
+		};
+
+		const validSectionsInCourse = jsonData.result.filter((section: any) =>
+			hasAllValidFields(section, this.valid_fields)
+		);
+		return validSectionsInCourse;
+	}
+
+	private async storeCoursesOnDisk(courseDataList:
+										Awaited<null | {jsonData: any; name: string}>[], id: string):Promise<void> {
+		const allCoursePromises = []
+		for (const course of courseDataList) {
+			if (course) {
+				const courseData = fs.outputJson(`./data/${id}/${course.name}.json`, course.jsonData)
+				allCoursePromises.push(courseData)
+			}
+
+		}
+		await Promise.all(allCoursePromises);
 	}
 
 	public async removeDataset(id: string): Promise<string> {
@@ -244,10 +254,10 @@ export default class InsightFacade implements IInsightFacade {
 			// check that ID already exists
 			if (this.datasets.has(id)) {
 				this.currIDs = this.currIDs.filter((currentId) => currentId !== id);
-				this.datasets["delete"](id);
-				this.sectionsDatabase["delete"](id);
+				this.datasets.delete(id);
+				this.sectionsDatabase.delete(id);
 
-				await fs.remove(`src/data/${id}`);
+				await fs.remove(`./data/${id}`);
 				// return id name of set currently removed
 				return id;
 			} else {
@@ -286,6 +296,36 @@ export default class InsightFacade implements IInsightFacade {
 			});
 			resolve(result);
 		});
-		//throw new Error(`InsightFacadeImpl::listDatasets is unimplemented!`);
 	}
+
+	// public async listDatasets(): Promise<InsightDataset[]> {
+	// 	const result: InsightDataset[] = [];
+	//
+	// 	try {
+	// 		const sets = await fs.promises.readdir("./data");
+	// 		const promises = sets.map(async (set) => {
+	// 			try {
+	// 				const rows = await fs.promises.readdir(`./data/${set}/courses`);
+	// 				const newInsightDataset: InsightDataset = {
+	// 					id: set,
+	// 					kind: InsightDatasetKind.Sections,
+	// 					numRows: rows.length
+	// 				};
+	// 				result.push(newInsightDataset);
+	// 			} catch (err) {
+	// 				console.error(`Error reading data for dataset ${set}:`, err);
+	// 			}
+	// 		});
+	//
+	// 		// Wait for all promises to resolve
+	// 		await Promise.all(promises);
+	//
+	// 		return result;
+	// 	} catch (err) {
+	// 		console.error("Error reading 'src/data' directory:", err);
+	// 		throw err; // Handle errors
+	// 	}
+	// }
+
 }
+

@@ -240,7 +240,7 @@ describe("InsightFacade", function () {
 		});
 	});
 
-	// added James' tests for removeDataset
+	// added James' tests for removeDataset (async tests with try catch)
 	describe("RemoveDataset", function () {
 		beforeEach(async function () {
 			//  This section resets the insightFacade instance

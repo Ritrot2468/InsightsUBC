@@ -153,12 +153,12 @@ export default class InsightFacade implements IInsightFacade {
 	private async countRows(content: string, id: string): Promise<number> {
 		// Decode base64 string into buffer
 		const buffer = Buffer.from(content, "base64");
+
 		// load buffer in JSZip -> zip file
 		const zip = await JSZip.loadAsync(buffer);
 
 		// tracks number of sections in a given dataset and is initialized to 0
 		let numSections = 0;
-
 		// where each promise is appended to for each course object
 		const allPromises = [];
 		// iterates through each course
@@ -168,8 +168,6 @@ export default class InsightFacade implements IInsightFacade {
 			// check that the file name contains courses at start AND is followed by at least one alpha-numeric char
 			// and that it doesn't an ending with a .(...)  (ex .png or .json or etc) indicative of an unwanted file type
 			if (name.match(/^courses\/\w/) && name.match(/^[^.]+$/)) {
-				// run async to start loading the courses concurrently into a string -> then parse int JSON object
-
 				const promiseContent = zip.files[key].async("string").then(async (content0) => {
 					//console.log('File Content:', content0);
 					// Parse JSON file in content

@@ -240,61 +240,92 @@ describe("InsightFacade", function () {
 		});
 	});
 
+	// added James' tests for removeDataset
 	describe("RemoveDataset", function () {
-		let sections2: string;
 		beforeEach(async function () {
-			// This section resets the insightFacade instance
+			//  This section resets the insightFacade instance
 			// This runs before each test
 			await clearDisk();
 			facade = new InsightFacade();
 		});
-		before(async function () {
-			// This block runs once and loads the datasets.
-			sections = await getContentFromArchives("test1.zip");
-			sections2 = await getContentFromArchives("test3.zip");
 
-			// Just in case there is anything hanging around from a previous run of the test suite
-			//await clearDisk();
+		afterEach(async function () {
+			// This section resets the data directory (removing any cached data)
+			// This runs after each test, which should make each test independent of the previous one
+			await clearDisk();
 		});
 
-		it("invalid id structure1 (remove dataset)", async function () {
-			await expect(facade.removeDataset("_1_")).to.eventually.be.rejectedWith(InsightError);
-		});
-
-		it("invalid id structure2 (remove dataset)", async function () {
-			// const result = await ;
-			await expect(facade.removeDataset("1")).to.eventually.be.rejectedWith(NotFoundError);
-		});
-
-		it("invalid id structure3 (remove dataset)", async function () {
-			await expect(facade.addDataset("test1", sections, InsightDatasetKind.Sections)).to.eventually.have.members([
-				"test1",
-			]);
-
-			await facade.removeDataset("test1");
-
-			//await expect(facade.listDatasets().length).to.eventually.equal(1);
-			await expect(facade.listDatasets()).to.eventually.not.have.members(["test1"]);
-			//const result = await facade.removeDataset("1");
-			await expect(facade.removeDataset("test1")).to.be.rejectedWith(NotFoundError);
-		});
-
-		it("remove diff datasets - invalid id (remove dataset)", async function () {
+		it("should reject remove with empty dataset id", async function () {
+			await facade.addDataset("UBC", sections, InsightDatasetKind.Sections);
 			try {
-				await expect(facade.addDataset("test1", sections, InsightDatasetKind.Sections)).to.eventually.have.members([
-					"test1",
-				]);
-
-				await expect(facade.addDataset("test2", sections2, InsightDatasetKind.Sections)).to.eventually.include.members([
-					"test1",
-					"test2",
-				]);
-
-				await expect(facade.removeDataset("test1_")).to.be.rejectedWith(InsightError);
-				await expect(facade.removeDataset("test1")).to.eventually.deep.equal("test1");
-				await expect(facade.removeDataset("test1")).to.be.rejectedWith(NotFoundError);
+				await facade.removeDataset("");
+				expect.fail("Error should have been thrown.");
 			} catch (err) {
-				expect.fail(`${err}`);
+				expect(err).to.be.instanceOf(InsightError);
+			}
+		});
+
+		it("should reject remove with underscore in dataset id", async function () {
+			await facade.addDataset("UBC", sections, InsightDatasetKind.Sections);
+			try {
+				await facade.removeDataset("UBC_1");
+				expect.fail("Error should have been thrown.");
+			} catch (err) {
+				expect(err).to.be.instanceOf(InsightError);
+			}
+		});
+
+		it("should reject remove with datasets empty", async function () {
+			try {
+				await facade.removeDataset("UBC");
+				expect.fail("Error should have been thrown.");
+			} catch (err) {
+				expect(err).to.be.instanceOf(NotFoundError);
+			}
+		});
+
+		it("should reject remove with id not found", async function () {
+			await facade.addDataset("UBC", sections, InsightDatasetKind.Sections);
+			try {
+				await facade.removeDataset("SFU");
+				expect.fail("Error should have been thrown.");
+			} catch (err) {
+				expect(err).to.be.instanceOf(NotFoundError);
+			}
+		});
+
+		it("should reject remove same dataset twice", async function () {
+			await facade.addDataset("UBC", sections, InsightDatasetKind.Sections);
+			try {
+				let result = await facade.removeDataset("UBC");
+				expect(result).to.equal("UBC");
+				result = await facade.removeDataset("UBC");
+				expect.fail("Error should have been thrown.");
+			} catch (err) {
+				expect(err).to.be.instanceOf(NotFoundError);
+			}
+		});
+
+		it("should remove valid dataset", async function () {
+			await facade.addDataset("UBC", sections, InsightDatasetKind.Sections);
+			try {
+				const result = await facade.removeDataset("UBC");
+				expect(result).to.equal("UBC");
+			} catch (err) {
+				expect.fail("Error should not have been thrown.");
+			}
+		});
+
+		it("should remove two valid datasets", async function () {
+			await facade.addDataset("UBC", sections, InsightDatasetKind.Sections);
+			await facade.addDataset("SFU", sections, InsightDatasetKind.Sections);
+			try {
+				let result = await facade.removeDataset("UBC");
+				expect(result).to.equal("UBC");
+				result = await facade.removeDataset("SFU");
+				expect(result).to.equal("SFU");
+			} catch (err) {
+				expect.fail("Error should not have been thrown.");
 			}
 		});
 	});

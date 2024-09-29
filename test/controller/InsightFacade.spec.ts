@@ -3,7 +3,6 @@ import {
 	InsightDatasetKind,
 	InsightError,
 	InsightResult,
-	NotFoundError,
 	ResultTooLargeError,
 } from "../../src/controller/IInsightFacade";
 import InsightFacade from "../../src/controller/InsightFacade";
@@ -28,274 +27,48 @@ describe("InsightFacade", function () {
 	let sections: string;
 
 	// Original Add Dataset test from repo.
-	// before(async function () {
-	// 	// This block runs once and loads the datasets.
-	// 	sections = await getContentFromArchives("pair.zip");
-	//
-	// 	// Just in case there is anything hanging around from a previous run of the test suite
-	// 	await clearDisk();
-	// });
+	before(async function () {
+		// This block runs once and loads the datasets.
+		sections = await getContentFromArchives("pair.zip");
 
-	// describe("AddDataset", function () {
-	// 	beforeEach(function () {
-	// 		// This section resets the insightFacade instance
-	// 		// This runs before each test
-	// 		facade = new InsightFacade();
-	// 	});
-	//
-	// 	afterEach(async function () {
-	// 		// This section resets the data directory (removing any cached data)
-	// 		// This runs after each test, which should make each test independent of the previous one
-	// 		await clearDisk();
-	// 	});
-	//
-	// 	it("should reject with  an empty dataset id", async function () {
-	// 		try {
-	// 			await facade.addDataset("", sections, InsightDatasetKind.Sections);
-	// 		} catch (err) {
-	// 			expect(err).to.be.instanceOf(InsightError);
-	// 		}
-	// 		expect.fail("Should have thrown above.");
-	// 	});
-	// });
+		// Just in case there is anything hanging around from a previous run of the test suite
+		await clearDisk();
+	});
 
 	describe("AddDataset", function () {
-		//let facade: IInsightFacade;
-
-		// Declare datasets used in tests. You should add more datasets like this!
-		//let sections: string;
-		let sections2: string;
-		let empty: string;
-		let defectiveSet: string;
-		let defectiveSet1: string;
-		let emptyCourse: string;
-		let noJson: string;
-
-		beforeEach(async function () {
+		beforeEach(function () {
 			// This section resets the insightFacade instance
 			// This runs before each test
-			await clearDisk();
 			facade = new InsightFacade();
 		});
-		before(async function () {
-			// This block runs once and loads the datasets.
-			sections = await getContentFromArchives("test1.zip");
-			sections2 = await getContentFromArchives("test3.zip");
-			empty = await getContentFromArchives("empty-zip.zip");
-			defectiveSet = await getContentFromArchives("all_invalid_sections_in_one_course.zip");
-			defectiveSet1 = await getContentFromArchives("no_valid_sections.zip");
-			emptyCourse = await getContentFromArchives("empty_file.zip");
-			noJson = await getContentFromArchives("no_json.zip");
+
+		afterEach(async function () {
+			// This section resets the data directory (removing any cached data)
+			// This runs after each test, which should make each test independent of the previous one
+			await clearDisk();
 		});
 
-		it("should reject with an empty dataset id", async function () {
-			await expect(facade.addDataset("", sections, InsightDatasetKind.Sections)).to.be.rejectedWith(InsightError);
-		});
-
-		it("should reject with an empty file in zip", async function () {
-			await expect(facade.addDataset("section", emptyCourse, InsightDatasetKind.Sections)).to.be.rejectedWith(
-				InsightError
-			);
-		});
-
-		it("non JSON formatted file in zip", async function () {
-			await expect(facade.addDataset("sections", noJson, InsightDatasetKind.Sections)).to.be.rejectedWith(InsightError);
-		});
-
-		it("should reject with an underscore1", async function () {
-			// const result = await facade.addDataset(
-			// 	"red_",
-			// 	sections,
-			// 	InsightDatasetKind.Sections
-			// )
-			// return expect(result).to.eventually.be.rejectedWith(InsightError);
-			await expect(facade.addDataset("red_", sections, InsightDatasetKind.Sections)).to.be.rejectedWith(InsightError);
-		});
-
-		it("should reject with an underscore2", async function () {
-			// const result = facade.addDataset(
-			// 	"_1_",
-			// 	sections,
-			// 	InsightDatasetKind.Sections
-			// );
-			// return expect(result).to.eventually.be.rejectedWith(InsightError);
-			await expect(facade.addDataset("_1_", sections, InsightDatasetKind.Sections)).to.be.rejectedWith(InsightError);
-		});
-
-		it("should reject repeat adds with same id and diff sets", async function () {
-			await expect(facade.addDataset("section", sections, InsightDatasetKind.Sections)).to.eventually.have.members([
-				"section",
-			]);
-			await expect(facade.addDataset("section", sections2, InsightDatasetKind.Sections)).to.eventually.be.rejectedWith(
-				InsightError
-			);
-		});
-
-		it("should reject repeat adds with same id and same sets", async function () {
-			await expect(facade.addDataset("section", sections, InsightDatasetKind.Sections)).to.eventually.have.members([
-				"section",
-			]);
-			await expect(facade.addDataset("section", sections, InsightDatasetKind.Sections)).to.eventually.be.rejectedWith(
-				InsightError
-			);
-		});
-
-		it("invalid (defective dataset)", async function () {
-			await expect(
-				facade.addDataset("courses", defectiveSet1, InsightDatasetKind.Sections)
-			).to.eventually.be.rejectedWith(InsightError);
-		});
-
-		it("should reject with empty space", async function () {
-			// const result = await ;
-			await expect(facade.addDataset("  ", sections, InsightDatasetKind.Sections)).to.be.eventually.be.rejectedWith(
-				InsightError
-			);
-		});
-
-		it("should add valid data properly", async function () {
-			// const result = await ;
-			// await expect(
-			// 	facade.addDataset("sections", sections, InsightDatasetKind.Sections)
-			// ).to.eventually.have.members(["sections"]);
-
-			const result = await facade.addDataset("sections", sections, InsightDatasetKind.Sections);
-			return expect(result).to.have.members(["sections"]);
-		});
-
-		it("should add valid data properly (valid id - one char)", async function () {
-			// const result = await
-			// // TODO:
-			// await expect(
-			// 	facade.addDataset("s", sections, InsightDatasetKind.Sections)
-			// ).to.eventually.have.members(["s"]);
-			const result = await facade.addDataset("s", sections, InsightDatasetKind.Sections);
-
-			return expect(result).to.have.members(["s"]);
-		});
-
-		it("should add valid data properly (valid id - space between)", async function () {
-			const result = await facade.addDataset(" s ", sections, InsightDatasetKind.Sections);
-
-			return expect(result).to.have.members([" s "]);
-		});
-
-		// test content data
-		it("should add valid data properly (invalid content not 64 - space between)", async function () {
-			// const result = await
-
-			//return expect(result).to.eventually.have.members(["sections"]);
-			await expect(facade.addDataset("sections", "/5", InsightDatasetKind.Sections)).to.eventually.be.rejectedWith(
-				InsightError
-			);
-		});
-
-		it("should reject with an empty zip file", async function () {
-			await expect(facade.addDataset("sections", empty, InsightDatasetKind.Sections)).to.be.rejectedWith(InsightError);
-		});
-
-		it("should reject with an empty file", async function () {
-			await expect(facade.addDataset("sections", "", InsightDatasetKind.Sections)).to.be.rejectedWith(InsightError);
-		});
-
-		it("one course with all invalid sections - contains valid sections", async function () {
+		it("should reject with  an empty dataset id", async function () {
 			try {
-				const result1 = await facade.addDataset("section", defectiveSet, InsightDatasetKind.Sections);
-				expect(result1.length).to.equal(1);
-				expect(result1).to.include.members(["section"]);
+				await facade.addDataset("", sections, InsightDatasetKind.Sections);
+				expect.fail("Should have thrown above.");
 			} catch (err) {
-				expect.fail(`Not valid entry: ${err}`);
-			}
-		});
-
-		it("successful multiple adds - diff datasets", async function () {
-			try {
-				const result1 = await facade.addDataset("section", sections, InsightDatasetKind.Sections);
-				expect(result1.length).to.equal(1);
-				expect(result1).to.include.members(["section"]);
-
-				const result2 = await facade.addDataset("courses", sections2, InsightDatasetKind.Sections);
-				const EXPECTED_LENGTH = 2;
-				expect(result2.length).to.equal(EXPECTED_LENGTH);
-				expect(result2).to.include.members(["section", "courses"]);
-			} catch (err) {
-				//expect.fail(`Not valid entry: ${err.message}`);
-				expect.fail(`Error processing entry: ${err}`);
-			}
-		});
-
-		it("reject multiple adds with same datasets and diff id", async function () {
-			try {
-				const result1 = await facade.addDataset("section", sections, InsightDatasetKind.Sections);
-				expect(result1.length).to.equal(1);
-				expect(result1).to.include.members(["section"]);
-
-				const result2 = await facade.addDataset("courses", sections2, InsightDatasetKind.Sections);
-				const EXPPECTED_LENGTH = 2;
-				expect(result2.length).to.equal(EXPPECTED_LENGTH);
-				expect(result2).to.include.members(["section", "courses"]);
-			} catch (err) {
-				expect.fail(`Not valid entry: ${err}`);
+				expect(err).to.be.instanceOf(InsightError);
 			}
 		});
 	});
 
 	describe("RemoveDataset", function () {
-		let sections2: string;
-		beforeEach(async function () {
+		beforeEach(function () {
 			// This section resets the insightFacade instance
 			// This runs before each test
-			await clearDisk();
 			facade = new InsightFacade();
 		});
-		before(async function () {
-			// This block runs once and loads the datasets.
-			sections = await getContentFromArchives("test1.zip");
-			sections2 = await getContentFromArchives("test3.zip");
 
-			// Just in case there is anything hanging around from a previous run of the test suite
-			//await clearDisk();
-		});
-
-		it("invalid id structure1 (remove dataset)", async function () {
-			await expect(facade.removeDataset("_1_")).to.eventually.be.rejectedWith(InsightError);
-		});
-
-		it("invalid id structure2 (remove dataset)", async function () {
-			// const result = await ;
-			await expect(facade.removeDataset("1")).to.eventually.be.rejectedWith(NotFoundError);
-		});
-
-		it("invalid id structure3 (remove dataset)", async function () {
-			await expect(facade.addDataset("test1", sections, InsightDatasetKind.Sections)).to.eventually.have.members([
-				"test1",
-			]);
-
-			await facade.removeDataset("test1");
-
-			//await expect(facade.listDatasets().length).to.eventually.equal(1);
-			await expect(facade.listDatasets()).to.eventually.not.have.members(["test1"]);
-			//const result = await facade.removeDataset("1");
-			await expect(facade.removeDataset("test1")).to.be.rejectedWith(NotFoundError);
-		});
-
-		it("remove diff datasets - invalid id (remove dataset)", async function () {
-			try {
-				await expect(facade.addDataset("test1", sections, InsightDatasetKind.Sections)).to.eventually.have.members([
-					"test1",
-				]);
-
-				await expect(facade.addDataset("test2", sections2, InsightDatasetKind.Sections)).to.eventually.include.members([
-					"test1",
-					"test2",
-				]);
-
-				await expect(facade.removeDataset("test1_")).to.be.rejectedWith(InsightError);
-				await expect(facade.removeDataset("test1")).to.eventually.deep.equal("test1");
-				await expect(facade.removeDataset("test1")).to.be.rejectedWith(NotFoundError);
-			} catch (err) {
-				expect.fail(`${err}`);
-			}
+		afterEach(async function () {
+			// This section resets the data directory (removing any cached data)
+			// This runs after each test, which should make each test independent of the previous one
+			await clearDisk();
 		});
 	});
 

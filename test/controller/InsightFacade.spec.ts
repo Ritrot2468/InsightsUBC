@@ -311,7 +311,7 @@ describe("InsightFacade", function () {
 			try {
 				const result = await facade.removeDataset("UBC");
 				expect(result).to.equal("UBC");
-			} catch (err) {
+			} catch {
 				expect.fail("Error should not have been thrown.");
 			}
 		});
@@ -324,7 +324,7 @@ describe("InsightFacade", function () {
 				expect(result).to.equal("UBC");
 				result = await facade.removeDataset("SFU");
 				expect(result).to.equal("SFU");
-			} catch (err) {
+			} catch {
 				expect.fail("Error should not have been thrown.");
 			}
 		});

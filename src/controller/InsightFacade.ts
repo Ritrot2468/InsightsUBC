@@ -163,7 +163,6 @@ export default class InsightFacade implements IInsightFacade {
 		// where each promise is appended to for each course object
 		const allPromises = [];
 
-
 		// iterates through each course
 		for (const key in zip.files) {
 			const name = key;
@@ -171,7 +170,6 @@ export default class InsightFacade implements IInsightFacade {
 			// check that the file name contains courses at start AND is followed by at least one alpha-numeric char
 			// and that it doesn't an ending with a .(...)  (ex .png or .json or etc) indicative of an unwanted file type
 			if (name.match(/^courses\/\w/) && name.match(/^[^.]+$/)) {
-
 				const promiseContent = zip.files[key].async("string").then(async (content0) => {
 					//console.log('File Content:', content0);
 					// Parse JSON file in content
@@ -183,14 +181,11 @@ export default class InsightFacade implements IInsightFacade {
 						return null;
 					}
 
-
 					// 1) first create a list strings of our SFields and MFields string form to index into JSON object
 					// 2) retrieve value associated with field and store into appropriate Sfield variable
 					// 3) repeat steps with mfields
 					// 4) instantiate new section with mfields and sfields collected
 					// 5) store dataset info into our this.sectionsDataset
-
-	
 
 					// iterate through the sections of each course in the dataset
 					// Then filter the valid sections based on the required fields
@@ -300,7 +295,6 @@ export default class InsightFacade implements IInsightFacade {
 			});
 			resolve(result);
 		});
-
 	}
 
 	// public async listDatasets(): Promise<InsightDataset[]> {

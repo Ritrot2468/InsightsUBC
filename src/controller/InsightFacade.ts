@@ -198,18 +198,14 @@ export default class InsightFacade implements IInsightFacade {
 					validSectionsInCourse.forEach((section: any) => {
 						this.addNewSection(id, section);
 						numSections++;
-					})
-					return {name, jsonData};
+					});
+					return { name, jsonData };
 				});
 				allPromises.push(promiseContent);
-
 			}
-
-
 		}
 		const courseDataList = await Promise.all(allPromises);
-		await this.storeCoursesOnDisk
-		(courseDataList, id);
+		await this.storeCoursesOnDisk(courseDataList, id);
 
 		// after iterating through all courses in dataset, if no valid section -> throw error
 		if (numSections === 0) {
@@ -231,15 +227,16 @@ export default class InsightFacade implements IInsightFacade {
 		return validSectionsInCourse;
 	}
 
-	private async storeCoursesOnDisk(courseDataList:
-										Awaited<null | {jsonData: any; name: string}>[], id: string):Promise<void> {
-		const allCoursePromises = []
+	private async storeCoursesOnDisk(
+		courseDataList: Awaited<null | { jsonData: any; name: string }>[],
+		id: string
+	): Promise<void> {
+		const allCoursePromises = [];
 		for (const course of courseDataList) {
 			if (course) {
-				const courseData = fs.outputJson(`./data/${id}/${course.name}.json`, course.jsonData)
-				allCoursePromises.push(courseData)
+				const courseData = fs.outputJson(`./data/${id}/${course.name}.json`, course.jsonData);
+				allCoursePromises.push(courseData);
 			}
-
 		}
 		await Promise.all(allCoursePromises);
 	}
@@ -326,6 +323,4 @@ export default class InsightFacade implements IInsightFacade {
 	// 		throw err; // Handle errors
 	// 	}
 	// }
-
 }
-

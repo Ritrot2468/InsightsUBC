@@ -569,6 +569,8 @@ describe("InsightFacade", function () {
 			"[invalid/reference_too_many_datasets.json] SELECT sections_dept sections_avg WHERE section_avg > 80 AND section_year = 202*",
 			checkQuery
 		);
+
+		it("[invalid/excessKeysInQuery.json] WHERE OPTIONS and HOW keys in Query", checkQuery);
 	});
 
 	describe("ListDataset", function () {

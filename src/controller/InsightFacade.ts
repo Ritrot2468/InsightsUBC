@@ -8,6 +8,7 @@ import Section, {
 	Mfield,
 	NotFoundError,
 	Sfield,
+	ResultTooLargeError,
 } from "./IInsightFacade";
 import JSZip from "jszip";
 import fs from "fs-extra";
@@ -61,6 +62,9 @@ export default class InsightFacade implements IInsightFacade {
 
 	// list of name of current IDs added
 	private currIDs: string[];
+
+	// current dataset being queried
+	//private queryDatset: string;
 
 	// TODO: find out if dataset was the same but diff ID if it can be added
 
@@ -276,8 +280,52 @@ export default class InsightFacade implements IInsightFacade {
 	}
 
 	public async performQuery(query: unknown): Promise<InsightResult[]> {
-		// TODO: Remove this once you implement the methods!
-		throw new Error(`InsightFacadeImpl::performQuery() is unimplemented! - query=${query};`);
+		return new Promise((resolve) => {
+			let filteredSections: Section[] = [];
+			let result: InsightResult[] = [];
+			const numKeys = 2; // number of keys in query object
+			try {
+				const queryObj = Object(query);
+				if (Object.keys(queryObj).length > numKeys) {
+					throw new InsightError("Excess keys in query");
+				}
+
+				// If WHERE key exists, filter all the sections, else throw InsightError
+				if ("WHERE" in queryObj) {
+					filteredSections = this.handleWHERE(Object(query).WHERE);
+				} else {
+					throw new InsightError("Query missing WHERE");
+				}
+
+				// If OPTIONS key exists, collect InsightResults, else throw InsightError
+				if ("OPTIONS" in queryObj) {
+					result = this.handleOPTIONS(Object(query).OPTIONS, filteredSections);
+				} else {
+					throw new InsightError("Query missing OPTIONS");
+				}
+			} catch (err) {
+				if (err instanceof InsightError) {
+					throw err;
+				} else if (err instanceof ResultTooLargeError) {
+					throw err;
+				} else {
+					throw new InsightError("Unexpected error.");
+				}
+			}
+			resolve(result);
+		});
+	}
+
+	private handleWHERE(query: object): Section[] {
+		const filteredSections: Section[] = [];
+		//console.log(query);
+		return filteredSections;
+	}
+
+	private handleOPTIONS(options: object, sections: Section[]): InsightResult[] {
+		const results: InsightResult[] = [];
+		//console.log(options, sections);
+		return results;
 	}
 
 	public async listDatasets(): Promise<InsightDataset[]> {

@@ -51,6 +51,10 @@ export default class InsightFacade implements IInsightFacade {
 
 	public sFields: string[] = ["id", "Course", "Title", "Professor", "Subject"];
 
+	public logicComparator: string[] = ["AND", "OR"];
+
+	public mComparator: string[] = ["LT", "GT", "EQ"];
+
 	// dictionary to map the field found in file to its corresponding field for using query engine
 	private dictionary: FieldsDictionary = {};
 
@@ -64,7 +68,10 @@ export default class InsightFacade implements IInsightFacade {
 	private currIDs: string[];
 
 	// current dataset being queried
-	//private queryDatset: string;
+	private queryingIDString: string;
+
+	// boolean to check if there is a filter
+	private noFilter: boolean;
 
 	// TODO: find out if dataset was the same but diff ID if it can be added
 
@@ -73,6 +80,8 @@ export default class InsightFacade implements IInsightFacade {
 		this.datasets = new Map<string, InsightResult>();
 		this.sectionsDatabase = new Map<string, []>();
 		this.currIDs = [];
+		this.noFilter = true;
+		this.queryingIDString = "";
 		// initialize dictionary for the fields
 		for (let i = 0; i < this.valid_fields.length; i++) {
 			this.dictionary[this.valid_fields[i]] = this.valid_dataset_fields[i];
@@ -284,6 +293,7 @@ export default class InsightFacade implements IInsightFacade {
 			let filteredSections: Section[] = [];
 			let result: InsightResult[] = [];
 			const numKeys = 2; // number of keys in query object
+			this.queryingIDString = "";
 			try {
 				const queryObj = Object(query);
 				if (Object.keys(queryObj).length > numKeys) {
@@ -292,21 +302,19 @@ export default class InsightFacade implements IInsightFacade {
 
 				// If WHERE key exists, filter all the sections, else throw InsightError
 				if ("WHERE" in queryObj) {
-					filteredSections = this.handleWHERE(Object(query).WHERE);
+					filteredSections = this.handleWHERE(queryObj.WHERE);
 				} else {
 					throw new InsightError("Query missing WHERE");
 				}
 
 				// If OPTIONS key exists, collect InsightResults, else throw InsightError
 				if ("OPTIONS" in queryObj) {
-					result = this.handleOPTIONS(Object(query).OPTIONS, filteredSections);
+					result = this.handleOPTIONS(queryObj.OPTIONS, filteredSections);
 				} else {
 					throw new InsightError("Query missing OPTIONS");
 				}
 			} catch (err) {
-				if (err instanceof InsightError) {
-					throw err;
-				} else if (err instanceof ResultTooLargeError) {
+				if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 					throw err;
 				} else {
 					throw new InsightError("Unexpected error.");
@@ -316,10 +324,116 @@ export default class InsightFacade implements IInsightFacade {
 		});
 	}
 
-	private handleWHERE(query: object): Section[] {
-		const filteredSections: Section[] = [];
+	private handleWHERE(where: object): Section[] {
+		let filteredSections: Section[] = [];
+		this.noFilter = true;
 		//console.log(query);
+		try {
+			if (Object.keys(where).length === 0) {
+				return filteredSections;
+			} else if (Object.keys(where).length > 1) {
+				throw new InsightError("WHERE should only have 1 key");
+			} else {
+				filteredSections = this.handleFilter(Object.keys(where)[0], Object.values(where)[0]);
+			}
+		} catch (err) {
+			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
+				throw err;
+			} else {
+				throw new InsightError("Unexpected error.");
+			}
+		}
 		return filteredSections;
+	}
+
+	private handleFilter(filter: string, value: unknown): Section[] {
+		let results: Section[] = [];
+		try {
+			if (this.logicComparator.includes(filter)) {
+				results = this.handleLogicComparison();
+			} else if (this.mComparator.includes(filter)) {
+				results = this.handleMComparison();
+			} else if (filter === "IS") {
+				const valueObj = Object(value);
+				results = this.handleSComparison(Object.keys(valueObj)[0], Object.values(valueObj)[0]);
+			} else if (filter === "NOT") {
+				const valueObj = Object(value);
+				results = this.handleNegation(Object.keys(valueObj)[0], Object.values(valueObj)[0]);
+			} else {
+				throw new InsightError(`Invalid filter key: ${filter}`);
+			}
+		} catch (err) {
+			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
+				throw err;
+			} else {
+				throw new InsightError("Unexpected error.");
+			}
+		}
+		return results;
+	}
+
+	private handleNegation(filter: string, value: unknown): Section[] {
+		try {
+			const nonNegatedResults = this.handleFilter(filter, value);
+			const datasetSections = this.sectionsDatabase.get(this.queryingIDString);
+			if (datasetSections === undefined) {
+				// should not be possible given current implementation of other methods for query
+				throw new InsightError("Can't find querying dataset");
+			} else {
+				return datasetSections.filter((section) => !nonNegatedResults.includes(section));
+			}
+		} catch (err) {
+			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
+				throw err;
+			} else {
+				throw new InsightError("Unexpected error.");
+			}
+		}
+	}
+
+	private handleSComparison(skey: string, input: string): Section[] {
+		try {
+			// split on underscore
+			const idstring = skey.split("_")[0];
+			const sfield = skey.split("_")[1];
+
+			// check if database contains dataset with idstring
+			if (!this.sectionsDatabase.has(idstring)) {
+				throw new InsightError(`Dataset with id: ${idstring} not added.`);
+			}
+
+			// check if a dataset has already been referenced
+			if (this.queryingIDString === "") {
+				this.queryingIDString = idstring;
+			} else if (this.queryingIDString !== idstring) {
+				throw new InsightError("Cannot reference multiple datasets.");
+			}
+
+			// query based on idstring
+			const datasetSections = this.sectionsDatabase.get(idstring);
+			if (datasetSections === undefined) {
+				// should not be possible
+				throw new InsightError("Can't find querying dataset");
+			} else {
+				if (this.sFields.includes(sfield)) {
+					const fieldIndex = this.sFields.indexOf(sfield);
+					const validInputRegex = /[*]?[^*]*[*]?/;
+					if (!validInputRegex.test(input)) {
+						throw new InsightError(" Asterisks (*) can only be the first or last characters of input strings");
+					}
+					// fix this return, figure out what sfield is, how to match it, and how to access
+					return datasetSections.filter((section) => RegExp(input).test(section.sfields[fieldIndex]));
+				} else {
+					throw new InsightError("Invalid sKey");
+				}
+			}
+		} catch (err) {
+			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
+				throw err;
+			} else {
+				throw new InsightError("Unexpected error.");
+			}
+		}
 	}
 
 	private handleOPTIONS(options: object, sections: Section[]): InsightResult[] {

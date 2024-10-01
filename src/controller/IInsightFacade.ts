@@ -57,8 +57,6 @@ export default class Section {
 
 export type InsightResult = Record<string, string | number>;
 
-export type FieldsDictionary = Record<string, string>;
-
 export class InsightError extends Error {
 	constructor(message?: string) {
 		super(message);

@@ -1,5 +1,4 @@
 import Section, {
-	FieldsDictionary,
 	IInsightFacade,
 	InsightDataset,
 	InsightDatasetKind,
@@ -32,19 +31,6 @@ export default class InsightFacade implements IInsightFacade {
 		"Audit",
 	];
 
-	private valid_dataset_fields: string[] = [
-		"uuid",
-		"id",
-		"title",
-		"instructor",
-		"dept",
-		"year",
-		"avg",
-		"pass",
-		"fail",
-		"audit",
-	];
-
 	// Keep order of mFields and sFields according to chart found in Section Specification sheet
 	// for consistency
 	public mFields: string[] = ["Year", "Avg", "Pass", "Fail", "Audit"];
@@ -54,9 +40,6 @@ export default class InsightFacade implements IInsightFacade {
 	public logicComparator: string[] = ["AND", "OR"];
 
 	public mComparator: string[] = ["LT", "GT", "EQ"];
-
-	// dictionary to map the field found in file to its corresponding field for using query engine
-	private dictionary: FieldsDictionary = {};
 
 	// map to track record
 	private readonly datasets: Map<string, InsightResult>;
@@ -83,9 +66,6 @@ export default class InsightFacade implements IInsightFacade {
 		this.noFilter = true;
 		this.queryingIDString = "";
 		// initialize dictionary for the fields
-		for (let i = 0; i < this.valid_fields.length; i++) {
-			this.dictionary[this.valid_fields[i]] = this.valid_dataset_fields[i];
-		}
 	}
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
 		try {
@@ -289,6 +269,12 @@ export default class InsightFacade implements IInsightFacade {
 	}
 
 	public async performQuery(query: unknown): Promise<InsightResult[]> {
+		return Promise.reject("Not implemented.");
+	}
+
+	/*
+	public async performQuery(query: unknown): Promise<InsightResult[]> {
+		return Promise.reject("Not implemented.");
 		return new Promise((resolve) => {
 			let filteredSections: Section[] = [];
 			let result: InsightResult[] = [];
@@ -441,6 +427,7 @@ export default class InsightFacade implements IInsightFacade {
 		//console.log(options, sections);
 		return results;
 	}
+	*/
 
 	public async listDatasets(): Promise<InsightDataset[]> {
 		return new Promise((resolve) => {

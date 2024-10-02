@@ -1,5 +1,4 @@
 import Section, {
-	FieldsDictionary,
 	IInsightFacade,
 	InsightDataset,
 	InsightDatasetKind,
@@ -11,6 +10,7 @@ import Section, {
 import fs from "fs-extra";
 import SectionsValidator from "./SectionsValidator";
 import SectionsParser from "./SectionsParser";
+import DiskReader from "./DiskReader";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -18,40 +18,7 @@ import SectionsParser from "./SectionsParser";
  *
  */
 export default class InsightFacade implements IInsightFacade {
-	private valid_fields: string[] = [
-		"id",
-		"Course",
-		"Title",
-		"Professor",
-		"Subject",
-		"Year",
-		"Avg",
-		"Pass",
-		"Fail",
-		"Audit",
-	];
 
-	private valid_dataset_fields: string[] = [
-		"uuid",
-		"id",
-		"title",
-		"instructor",
-		"dept",
-		"year",
-		"avg",
-		"pass",
-		"fail",
-		"audit",
-	];
-
-	// Keep order of mFields and sFields according to chart found in Section Specification sheet
-	// for consistency
-	public mFields: string[] = ["Year", "Avg", "Pass", "Fail", "Audit"];
-
-	public sFields: string[] = ["id", "Course", "Title", "Professor", "Subject"];
-
-	// dictionary to map the field found in file to its corresponding field for using query engine
-	private dictionary: FieldsDictionary = {};
 
 	// map to track record
 	private readonly datasets: Map<string, InsightResult>;
@@ -63,6 +30,7 @@ export default class InsightFacade implements IInsightFacade {
 	private currIDs: string[];
 	private sv: SectionsValidator;
 	private sp: SectionsParser;
+	private dr: DiskReader
 
 	// TODO: find out if dataset was the same but diff ID if it can be added
 
@@ -73,10 +41,9 @@ export default class InsightFacade implements IInsightFacade {
 		this.currIDs = [];
 		this.sv = new SectionsValidator()
 		this.sp = new SectionsParser()
+		this.dr = new DiskReader()
 		// initialize dictionary for the fields
-		for (let i = 0; i < this.valid_fields.length; i++) {
-			this.dictionary[this.valid_fields[i]] = this.valid_dataset_fields[i];
-		}
+
 	}
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
 		try {
@@ -144,9 +111,14 @@ export default class InsightFacade implements IInsightFacade {
 	public async performQuery(query: unknown): Promise<InsightResult[]> {
 		// TODO: Remove this once you implement the methods!
 		throw new Error(`InsightFacadeImpl::performQuery() is unimplemented! - query=${query};`);
+
 	}
 
 	public async listDatasets(): Promise<InsightDataset[]> {
+		const dataset = await this.dr.mapMissingSections(this.currIDs);
+		dataset.forEach((value, key) => {
+			const section: Section | undefined = value.at(0)
+			console.log(`${key}: ${section}`)})
 		return new Promise((resolve) => {
 			const result: InsightDataset[] = [];
 
@@ -157,6 +129,7 @@ export default class InsightFacade implements IInsightFacade {
 					kind: Object.keys(val)[0] as InsightDatasetKind,
 					numRows: val[Object.keys(val)[0]] as number,
 				};
+
 				result.push(newInsightDataset);
 			});
 			resolve(result);

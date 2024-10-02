@@ -9,6 +9,8 @@ export enum InsightDatasetKind {
 	Rooms = "rooms",
 }
 
+
+
 export interface InsightDataset {
 	id: string;
 	kind: InsightDatasetKind;
@@ -31,21 +33,22 @@ export interface Mfield {
 	audit: number;
 }
 export default class Section {
-	public get mfields(): Mfield {
+	public getMfields(): Mfield {
 		return this._mfields;
 	}
 
-	public set mfields(value: Mfield) {
+	public setMfields(value: Mfield): void {
 		this._mfields = value;
 	}
 
-	public get sfields(): Sfield {
+	public getSfields(): Sfield {
 		return this._sfields;
 	}
 
-	public set sfields(value: Sfield) {
+	public setSfields(value: Sfield): void {
 		this._sfields = value;
 	}
+
 	private _mfields: Mfield;
 	private _sfields: Sfield;
 

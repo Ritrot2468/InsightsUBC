@@ -115,10 +115,10 @@ export default class InsightFacade implements IInsightFacade {
 	}
 
 	public async listDatasets(): Promise<InsightDataset[]> {
-		const dataset = await this.dr.mapMissingSections(this.currIDs);
-		dataset.forEach((value, key) => {
-			const section: Section | undefined = value.at(0)
-			console.log(`${key}: ${section}`)})
+		// const dataset = await this.dr.mapMissingSections(this.currIDs);
+		// dataset.forEach((value, key) => {
+		// 	const section: Section | undefined = value.at(0)
+		// 	console.log(`${key}: ${section}`)})
 		return new Promise((resolve) => {
 			const result: InsightDataset[] = [];
 

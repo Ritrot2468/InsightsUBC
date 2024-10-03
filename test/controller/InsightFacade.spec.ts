@@ -596,9 +596,9 @@ describe("InsightFacade", function () {
 		it("list one dataset", async function () {
 			sections = await getContentFromArchives("test3.zip");
 			await facade.addDataset("test3", sections, InsightDatasetKind.Sections);
-			const facade2 = new InsightFacade()
-			await facade2.addDataset("test2", sections, InsightDatasetKind.Sections)
-			await facade2.addDataset("test1", sections, InsightDatasetKind.Sections)
+			// const facade2 = new InsightFacade()
+			// await facade2.addDataset("test2", sections, InsightDatasetKind.Sections)
+			// await facade2.addDataset("test1", sections, InsightDatasetKind.Sections)
 			const datasets = await facade.listDatasets();
 
 			expect(datasets).to.deep.equal([

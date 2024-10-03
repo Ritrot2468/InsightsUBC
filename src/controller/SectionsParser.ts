@@ -23,8 +23,13 @@ export default class SectionsParser {
 
 	public sFields: string[] = ["id", "Course", "Title", "Professor", "Subject"];
 
-	//  Unzips the content of a dataset into a JSZIP, then logs all valid sections to the associated dataset id and
-	//  returns the number of rows in an added dataset
+	//  REQUIRES: content: dataset content in base64 string, f
+	//  		  id:  name of current dataset about to be counted
+	//            datasets: map containing all datasets and associated sections added to InsightFacade instance so far
+	//  EFFECTS: Unzips the content of a dataset into a JSZIP
+	//  		then logs all valid sections to the associated dataset id to 'datasets' and
+	//  		returns the number of rows in an added dataset
+	// OUTPUT: returns number of rows in that dataset that is added.
 	public async countRows(content: string, id: string, datasets: Map<string, Section[]>): Promise<number> {
 		const buffer = Buffer.from(content, "base64");
 		const zip = await JSZip.loadAsync(buffer);
@@ -39,8 +44,16 @@ export default class SectionsParser {
 		return numSections;
 	}
 
-	// returns the number of valid sections in a file and logs the valid sections to the Facade member variable
-	// sectionsDatabase with the associated dataset ID
+	// REQUIRES: zip - current dataset content as a JSZIP
+	// 			  id - name of dataset
+	//            datasets - map containing all datasets and associated sections added to InsightFacade instance so far
+	// EFFECTS: parses the JSZIP files in the dataset and sorts through each JSON file containing each course, then
+	// 			parses the JSON object to obtain the 'result' object and finds all sections,
+	//          filters only valid sections, tracks number of valid sections,
+	//          then turns each valid section into a Section object.
+	//			Sums the number of valid sections per course for all courses in the dataset and returns value.
+	// OUTPUT: returns the number of valid sections in a dataset and logs the valid sections to the 'datasets' map
+
 	private async logAndCountValidSections(zip: JSZip, id: string, datasets: Map<string, Section[]>): Promise<number> {
 		let numSections = 0;
 		const allPromises = [];
@@ -76,7 +89,12 @@ export default class SectionsParser {
 	}
 
 
-	// takes a JSONFile object and returns only the valid sections as a list
+	// REQUIRES: jsonData - parsed JSON Object of the result key in a given course file
+	//
+	// EFFECTS: Iterate through each section in a given course file and for each section obtain all the sfields and mfields
+	// 			and checks that each section contains all the fields in the variable valid_fields, else filter out.
+	//
+	// OUTPUT: returns all the valid sections as a JSONObject.
 	private filterValidSections(jsonData: any): any {
 		const hasAllValidFields = (section: any, validFields: string[]): boolean => {
 			const fieldKeys = Object.keys(section);
@@ -150,75 +168,6 @@ export default class SectionsParser {
 		const courseDataList = await Promise.all(allPromises);
 		await this.storeCoursesOnDisk(courseDataList, id);
 	}
-
-
-
-
-	// Counts the number of rows in a given dataset content and adds
-	// public async countRows(content: string, id: string, datasets: Map<string, Section[]>): Promise<number> {
-	// 	// Decode base64 string into buffer
-	// 	const buffer = Buffer.from(content, "base64");
-	//
-	// 	// load buffer in JSZip -> zip file
-	// 	const zip = await JSZip.loadAsync(buffer);
-	//
-	// 	// tracks number of sections in a given dataset and is initialized to 0
-	// 	let numSections = 0;
-	//
-	// 	// where each promise is appended to for each course object
-	// 	const allPromises = [];
-	//
-	// 	// iterates through each course
-	// 	for (const key in zip.files) {
-	// 		const name = key;
-	//
-	// 		// check that the file name contains courses at start AND is followed by at least one alpha-numeric char
-	// 		// and that it doesn't an ending with a .(...)  (ex .png or .json or etc) indicative of an unwanted file type
-	// 		if (name.match(/^courses\/\w/) && name.match(/^[^.]+$/)) {
-	// 			const promiseContent = zip.files[key].async("string").then(async (content0) => {
-	// 				//console.log('File Content:', content0);
-	// 				// Parse JSON file in content
-	// 				const jsonData = JSON.parse(content0);
-	// 				//console.log('JSON FILE:', jsonData);
-	//
-	// 				// for cases where result:[] with no sections inside
-	// 				if (jsonData.result.length === 0) {
-	// 					return null;
-	// 				}
-	//
-	// 				// 1) first create a list strings of our SFields and MFields string form to index into JSON object
-	// 				// 2) retrieve value associated with field and store into appropriate Sfield variable
-	// 				// 3) repeat steps with mfields
-	// 				// 4) instantiate new section with mfields and sfields collected
-	// 				// 5) store dataset info into our this.sectionsDataset
-	//
-	// 				// iterate through the sections of each course in the dataset
-	// 				// Then filter the valid sections based on the required fields
-	//
-	// 				const validSectionsInCourse = this.filterValidSections(jsonData);
-	//
-	// 				jsonData.result = validSectionsInCourse;
-	//
-	// 				// turn all valid sections to Sections objects
-	// 				validSectionsInCourse.forEach((section: any) => {
-	// 					this.addNewSectionToDatabase(id, section, datasets);
-	// 					numSections++;
-	// 				});
-	// 				return {name, jsonData};
-	// 			});
-	// 			allPromises.push(promiseContent);
-	// 		}
-	// 	}
-	// 	const courseDataList = await Promise.all(allPromises);
-	// 	await this.storeCoursesOnDisk(courseDataList, id);
-	//
-	// 	// after iterating through all courses in dataset, if no valid section -> throw error
-	// 	if (numSections === 0) {
-	// 		throw new InsightError("No valid section");
-	// 	}
-	//
-	// 	return numSections;
-	// }
 
 
 	// A helper function that can be used by performQuery to turn a dataset written in the disk into a
@@ -306,5 +255,74 @@ export default class SectionsParser {
 		}
 		await Promise.all(allCoursePromises);
 	}
+
+
+
+	// Counts the number of rows in a given dataset content and adds
+	// public async countRows(content: string, id: string, datasets: Map<string, Section[]>): Promise<number> {
+	// 	// Decode base64 string into buffer
+	// 	const buffer = Buffer.from(content, "base64");
+	//
+	// 	// load buffer in JSZip -> zip file
+	// 	const zip = await JSZip.loadAsync(buffer);
+	//
+	// 	// tracks number of sections in a given dataset and is initialized to 0
+	// 	let numSections = 0;
+	//
+	// 	// where each promise is appended to for each course object
+	// 	const allPromises = [];
+	//
+	// 	// iterates through each course
+	// 	for (const key in zip.files) {
+	// 		const name = key;
+	//
+	// 		// check that the file name contains courses at start AND is followed by at least one alpha-numeric char
+	// 		// and that it doesn't an ending with a .(...)  (ex .png or .json or etc) indicative of an unwanted file type
+	// 		if (name.match(/^courses\/\w/) && name.match(/^[^.]+$/)) {
+	// 			const promiseContent = zip.files[key].async("string").then(async (content0) => {
+	// 				//console.log('File Content:', content0);
+	// 				// Parse JSON file in content
+	// 				const jsonData = JSON.parse(content0);
+	// 				//console.log('JSON FILE:', jsonData);
+	//
+	// 				// for cases where result:[] with no sections inside
+	// 				if (jsonData.result.length === 0) {
+	// 					return null;
+	// 				}
+	//
+	// 				// 1) first create a list strings of our SFields and MFields string form to index into JSON object
+	// 				// 2) retrieve value associated with field and store into appropriate Sfield variable
+	// 				// 3) repeat steps with mfields
+	// 				// 4) instantiate new section with mfields and sfields collected
+	// 				// 5) store dataset info into our this.sectionsDataset
+	//
+	// 				// iterate through the sections of each course in the dataset
+	// 				// Then filter the valid sections based on the required fields
+	//
+	// 				const validSectionsInCourse = this.filterValidSections(jsonData);
+	//
+	// 				jsonData.result = validSectionsInCourse;
+	//
+	// 				// turn all valid sections to Sections objects
+	// 				validSectionsInCourse.forEach((section: any) => {
+	// 					this.addNewSectionToDatabase(id, section, datasets);
+	// 					numSections++;
+	// 				});
+	// 				return {name, jsonData};
+	// 			});
+	// 			allPromises.push(promiseContent);
+	// 		}
+	// 	}
+	// 	const courseDataList = await Promise.all(allPromises);
+	// 	await this.storeCoursesOnDisk(courseDataList, id);
+	//
+	// 	// after iterating through all courses in dataset, if no valid section -> throw error
+	// 	if (numSections === 0) {
+	// 		throw new InsightError("No valid section");
+	// 	}
+	//
+	// 	return numSections;
+	// }
+
 
 }

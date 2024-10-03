@@ -1,7 +1,7 @@
 import JSZip from "jszip";
-import Section, {InsightError, Mfield, Sfield} from "./IInsightFacade";
+import Section, { InsightError, Mfield, Sfield } from "./IInsightFacade";
 import fs from "fs-extra";
-import {DatasetRecord} from "./DiskReader";
+import { DatasetRecord } from "./DiskReader";
 
 export default class SectionsParser {
 	private valid_fields: string[] = [
@@ -88,7 +88,6 @@ export default class SectionsParser {
 		return numSections;
 	}
 
-
 	// REQUIRES: jsonData - parsed JSON Object of the result key in a given course file
 	//
 	// EFFECTS: Iterate through each section in a given course file and for each section obtain all the sfields and mfields
@@ -114,7 +113,7 @@ export default class SectionsParser {
 	// 			then add the new section to the section list of 'dataset' map with the associated dataset id.
 	//
 	// OUTPUT: void
-	private addNewSectionToDatabase(dataset_id: string, jsonData: any, datasets:  Map<string, Section[]>): void {
+	private addNewSectionToDatabase(dataset_id: string, jsonData: any, datasets: Map<string, Section[]>): void {
 		const result = jsonData;
 
 		const [uuid, id, title, instructor, dept] = this.sFields.map((sfield) => result[sfield]);
@@ -181,20 +180,23 @@ export default class SectionsParser {
 		await this.storeCoursesOnDisk(courseDataList, id);
 	}
 
+	// REQUIRES: id - name of dataset
+	// EFFECTS: A helper function that can be used by performQuery to turn a dataset written in the disk into a
+	// 			DatasetRecord  -> a key value pair of the all the valid sections associated with the given dataset id.
+	// OUTPUT:  DatasetRecord, mapping the list of Sections to its associated dataset id
 
-	// A helper function that can be used by performQuery to turn a dataset written in the disk into a
-	// DatasetRecord  -> a key value pair of the all the valid sections associated with the given dataset id.
-	public async turnDatasetToSection(id:string): Promise<DatasetRecord> {
+	public async turnDatasetToSection(id: string): Promise<DatasetRecord> {
 		// tracks number of sections in a given dataset and is initialized to 0
 
 		// where each promise is appended to for each course object
-		const allPromises : any[] = [];
-		const sections: Section[] = []
+		const allPromises: any[] = [];
+		const sections: Section[] = [];
 
 		// list of all courses under the dataset file
-		const path = await fs.readdir(`./data/${id}/courses/`)
+		const path = await fs.readdir(`./data/${id}/courses/`);
 		for (const course of path) {
-			const promise = fs.readJson(`./data/${id}/courses/${course}`)
+			const promise = fs
+				.readJson(`./data/${id}/courses/${course}`)
 				.then(async (file) => {
 					if (file.result.length === 0) {
 						return null;
@@ -205,28 +207,26 @@ export default class SectionsParser {
 					// turn all valid sections to Sections objects
 					validSectionsInCourse.forEach((section: any) => {
 						sections.push(this.createSection(section));
-
 					});
 
-					console.log(sections)
-					return {id, file};
-				}).catch((err) => {
-					throw err
+					return { id, file };
 				})
+				.catch((err) => {
+					throw err;
+				});
 
-			allPromises.push(promise)
-
+			allPromises.push(promise);
 		}
 
-			await Promise.all(allPromises)
-			//console.log(sections)
-			const datasetRecord : DatasetRecord = {id: id, sections: sections};
-			return datasetRecord;
-
+		await Promise.all(allPromises);
+		//console.log(sections)
+		const datasetRecord: DatasetRecord = { id: id, sections: sections };
+		return datasetRecord;
 	}
 
-	// helper function to create new Section object and populate all the sfields and mfields from a valid section
-	// given the JSON object of the result sections in the JSON file
+	// REQUIRES: jsonData - parsed JSON Object of a valid section from the result key in a given course file
+	// EFFECTS: Retrieves the fields of the section and populate the values of the sfields and mfields into a Section object
+	// OUTPUT: newly populated and created Section object
 	private createSection(jsonData: any): Section {
 		const result = jsonData;
 		const [uuid, id, title, instructor, dept] = this.sFields.map((sfield) => result[sfield]);
@@ -253,6 +253,12 @@ export default class SectionsParser {
 		return newSection;
 	}
 
+	// REQUIRES: courseDataList: list of JSON files associated with course files and their accompanied name in a dataset
+	// 							ex - dataset 'test3' containing the courses CPSC 110 --> {jSON FILE CPSC110, "CPSC 110"}
+	//			 id: dataset id name
+	// EFFECTS: takes the list of courses and writes them as a JSON file to be stored on to disk with the following directory:
+	//			"./data/${id}/${ course name}.json"
+	// OUTPUT: void
 
 	private async storeCoursesOnDisk(
 		courseDataList: Awaited<null | { jsonData: any; name: string }>[],
@@ -267,8 +273,6 @@ export default class SectionsParser {
 		}
 		await Promise.all(allCoursePromises);
 	}
-
-
 
 	// Counts the number of rows in a given dataset content and adds
 	// public async countRows(content: string, id: string, datasets: Map<string, Section[]>): Promise<number> {
@@ -335,6 +339,4 @@ export default class SectionsParser {
 	//
 	// 	return numSections;
 	// }
-
-
 }

@@ -5,12 +5,10 @@ import Section, {
 	InsightError,
 	InsightResult,
 	NotFoundError,
-
 } from "./IInsightFacade";
 import fs from "fs-extra";
 import SectionsValidator from "./SectionsValidator";
 import SectionsParser from "./SectionsParser";
-import DiskReader from "./DiskReader";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -18,8 +16,6 @@ import DiskReader from "./DiskReader";
  *
  */
 export default class InsightFacade implements IInsightFacade {
-
-
 	// map to track record
 	private readonly datasets: Map<string, InsightResult>;
 
@@ -30,8 +26,6 @@ export default class InsightFacade implements IInsightFacade {
 	private currIDs: string[];
 	private sv: SectionsValidator;
 	private sp: SectionsParser;
-	private dr: DiskReader
-
 	// TODO: find out if dataset was the same but diff ID if it can be added
 
 	constructor() {
@@ -39,16 +33,13 @@ export default class InsightFacade implements IInsightFacade {
 		this.datasets = new Map<string, InsightResult>();
 		this.sectionsDatabase = new Map<string, []>();
 		this.currIDs = [];
-		this.sv = new SectionsValidator()
-		this.sp = new SectionsParser()
-		this.dr = new DiskReader()
+		this.sv = new SectionsValidator();
+		this.sp = new SectionsParser();
 		// initialize dictionary for the fields
-
 	}
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
 		try {
-
-			this.sv.validateId(id, this.currIDs)
+			this.sv.validateId(id, this.currIDs);
 			// Number of rows found associated with the insightKind
 			const numRows = await this.sp.countRows(content, id, this.sectionsDatabase);
 			//console.log(numRows)
@@ -73,28 +64,18 @@ export default class InsightFacade implements IInsightFacade {
 		}
 	}
 
-
 	public async removeDataset(id: string): Promise<string> {
 		try {
-			// Validate ID follows proper format
-			if (id.includes("_") || id.trim().length === 0) {
-				throw new InsightError("Invalid ID structure");
-			}
+			this.sv.validateIdRemoval(id, this.currIDs);
 
-			// check that ID already exists
-			if (this.datasets.has(id)) {
-				this.currIDs = this.currIDs.filter((currentId) => currentId !== id);
+			this.currIDs = this.currIDs.filter((currentId) => currentId !== id);
+			this.datasets.delete(id);
+			this.sectionsDatabase.delete(id);
 
-				this.datasets.delete(id);
-				this.sectionsDatabase.delete(id);
+			await fs.remove(`./data/${id}`);
 
-				await fs.remove(`./data/${id}`);
-
-				// return id name of set currently removed
-				return id;
-			} else {
-				throw new NotFoundError("Dataset not found");
-			}
+			// return id name of set currently removed
+			return id;
 		} catch (err) {
 			if (err instanceof InsightError) {
 				throw new InsightError("");
@@ -111,14 +92,9 @@ export default class InsightFacade implements IInsightFacade {
 	public async performQuery(query: unknown): Promise<InsightResult[]> {
 		// TODO: Remove this once you implement the methods!
 		throw new Error(`InsightFacadeImpl::performQuery() is unimplemented! - query=${query};`);
-
 	}
 
 	public async listDatasets(): Promise<InsightDataset[]> {
-		// const dataset = await this.dr.mapMissingSections(this.currIDs);
-		// dataset.forEach((value, key) => {
-		// 	const section: Section | undefined = value.at(0)
-		// 	console.log(`${key}: ${section}`)})
 		return new Promise((resolve) => {
 			const result: InsightDataset[] = [];
 
@@ -135,5 +111,4 @@ export default class InsightFacade implements IInsightFacade {
 			resolve(result);
 		});
 	}
-
 }

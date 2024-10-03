@@ -107,8 +107,14 @@ export default class SectionsParser {
 		return validSectionsInCourse;
 	}
 
-	// helper function to create and add new section to memory (our sections database) from a JSON file
-	private addNewSectionToDatabase(section_id: string, jsonData: any, datasets:  Map<string, Section[]>): void {
+	// REQUIRES: dataset_id - name of dataset
+	// 			 jsonData - parsed JSON Object of a valid section from the result key in a given course file
+	//           datasets - map containing all datasets and associated sections added to InsightFacade instance so far
+	// EFFECTS: Retrieves the fields of the section and populate the values of the sfields and mfields into a Section object
+	// 			then add the new section to the section list of 'dataset' map with the associated dataset id.
+	//
+	// OUTPUT: void
+	private addNewSectionToDatabase(dataset_id: string, jsonData: any, datasets:  Map<string, Section[]>): void {
 		const result = jsonData;
 
 		const [uuid, id, title, instructor, dept] = this.sFields.map((sfield) => result[sfield]);
@@ -134,13 +140,19 @@ export default class SectionsParser {
 		// if id has not been logged yet, log it, else append new section to list of sections in dictionary
 		const newSection: Section = new Section(sectionMfields, sectionSfields);
 		if (id in datasets) {
-			datasets.get(section_id)?.push(newSection);
+			datasets.get(dataset_id)?.push(newSection);
 		} else {
-			datasets.set(section_id, [newSection]);
+			datasets.set(dataset_id, [newSection]);
 		}
 	}
 
-	// given a JSZIP file of a dataset content and its id, find all valid sections and write it to Disk
+	// REQUIRES: zip - current dataset content as a JSZIP
+	// 			  id - name of dataset
+	// EFFECTS: parses the JSZIP files in the dataset and sorts through each JSON file containing each course, then
+	// 			parses the JSON object to obtain the 'result' object and finds all sections,
+	//          filters only valid sections,
+	//          write the valid sections with the associated dataset id onto the disk
+	// OUTPUT: void
 	private async logDataset(zip: JSZip, id: string): Promise<void> {
 		const allPromises = [];
 

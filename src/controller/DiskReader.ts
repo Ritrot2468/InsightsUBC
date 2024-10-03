@@ -16,7 +16,7 @@ export default class DiskReader{
         this.sp = new SectionsParser()
     }
 
-    // INPUT: currDatasets- array of all the dataset ids currently added in InsightFacade instance
+    // REQUIRES: currDatasets- array of all the dataset ids currently added in InsightFacade instance
     // EFFECTS: loads the list of dataset ids currently on disk and finds the dataset ids not in currDatasets
     // OUTPUT: returns list of dataset ids on disk not found in currently added datasets
     public async findDatasetsNotAdded(currDatasetIDs: string[]): Promise<string[]> {
@@ -32,7 +32,7 @@ export default class DiskReader{
         return missingData
     }
 
-    // INPUT: currDatasets- array of all the dataset ids currently added in InsightFacade instance
+    // REQUIRES: currDatasets - array of all the dataset ids currently added in InsightFacade instance
     // EFFECTS: finds all datasets in disks not in current datasets and returns a map of the datasets with their id (dataset name)
     // and associated sections
     // datasetsIds = all currently added datasets (refer to currIDs),

@@ -35,7 +35,7 @@ export default class SectionsParser {
 		const zip = await JSZip.loadAsync(buffer);
 
 		const numSections = await this.logAndCountValidSections(zip, id, datasets);
-		await this.logDatasetOnDisk(zip, id);
+		await this.logDataset(zip, id);
 
 		if (numSections === 0) {
 			throw new InsightError("No valid section");
@@ -144,8 +144,6 @@ export default class SectionsParser {
 		}
 	}
 
-
-
 	// REQUIRES: zip - current dataset content as a JSZIP
 	// 			  id - name of dataset
 	// EFFECTS: parses the JSZIP files in the dataset and sorts through each JSON file containing each course, then
@@ -153,7 +151,7 @@ export default class SectionsParser {
 	//          filters only valid sections,
 	//          write the valid sections with the associated dataset id onto the disk
 	// OUTPUT: void
-	private async logDatasetOnDisk(zip: JSZip, id: string): Promise<void> {
+	private async logDataset(zip: JSZip, id: string): Promise<void> {
 		const allPromises = [];
 
 		for (const key in zip.files) {
@@ -222,7 +220,6 @@ export default class SectionsParser {
 		const datasetRecord: DatasetRecord = { id: id, sections: sections };
 		return datasetRecord;
 	}
-
 
 	// REQUIRES: jsonData - parsed JSON Object of a valid section from the result key in a given course file
 	// EFFECTS: Retrieves the fields of the section and populate the values of the sfields and mfields into a Section object
@@ -339,7 +336,6 @@ export default class SectionsParser {
 	// 	return numSections;
 	// }
 
-
 	// REDUNDANT
 	// public async countRowsInDataset(id: string): Promise<number> {
 	// 	// where each promise is appended to for each course object
@@ -368,5 +364,4 @@ export default class SectionsParser {
 	// 	await Promise.all(allPromises);
 	// 	return numSections
 	// }
-
 }

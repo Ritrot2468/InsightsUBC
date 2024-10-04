@@ -80,6 +80,9 @@ export class ResultTooLargeError extends Error {
 }
 
 export interface IInsightFacade {
+
+	sectionsDatabase: Map<string, Section[]>;
+
 	/**
 	 * Add a dataset to insightUBC.
 	 *
@@ -151,4 +154,6 @@ export interface IInsightFacade {
 	 * The promise should fulfill an array of currently added InsightDatasets, and will only fulfill.
 	 */
 	listDatasets(): Promise<InsightDataset[]>;
+
+	logNewDatasetFromDiskToMap(id:string, kind: InsightDatasetKind): Promise<void>;
 }

@@ -9,6 +9,8 @@ import Section, {
 import fs from "fs-extra";
 import SectionsValidator from "./SectionsValidator";
 import SectionsParser from "./SectionsParser";
+import {getContentFromArchives} from "../../test/TestUtil";
+import JSZip from "jszip";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -20,13 +22,12 @@ export default class InsightFacade implements IInsightFacade {
 	private readonly datasets: Map<string, InsightResult>;
 
 	// tracks all sections added from a dataset using their associated id as the key
-	private readonly sectionsDatabase: Map<string, Section[]>;
+	public sectionsDatabase: Map<string, Section[]>;
 
 	// list of name of current IDs added
 	private currIDs: string[];
 	private sv: SectionsValidator;
 	private sp: SectionsParser;
-	// TODO: find out if dataset was the same but diff ID if it can be added
 
 	constructor() {
 		//Log.info("InsightFacadeImpl::init()");
@@ -42,7 +43,6 @@ export default class InsightFacade implements IInsightFacade {
 			this.sv.validateId(id, this.currIDs);
 			// Number of rows found associated with the insightKind
 			const numRows = await this.sp.countRows(content, id, this.sectionsDatabase);
-			//console.log(numRows)
 
 			// Create an InsightResult record
 			const newRecord: InsightResult = {
@@ -62,6 +62,26 @@ export default class InsightFacade implements IInsightFacade {
 				throw new InsightError(`An unexpected error occurred: ${err}`);
 			}
 		}
+	}
+
+	// REQUIRES: id - name of dataset to be retrieved from disk (id IS NOT IN datasets ALREADY!!!!)
+	//           datasets - sets you'll be mapping new DatasetRecord to
+	// EFFECTS: Retrieves the sections associated with the dataset id on disk and turned into Sections objects and maps
+	//          them to datasets with their associated id. Updates the currIDs and database member variables
+	// OUTPUT: VOID
+	public async logNewDatasetFromDiskToMap(id: string, kind: InsightDatasetKind): Promise<void> {
+
+
+		const newDataset = await this.sp.turnDatasetToSection(id);
+		this.sectionsDatabase.set(newDataset.id, newDataset.sections);
+		const numRows = newDataset.sections.length
+		// Create an InsightResult record
+		const newRecord: InsightResult = {
+			[kind]: numRows,
+		};
+		this.currIDs.push(id);
+		this.datasets.set(id, newRecord)
+
 	}
 
 	public async removeDataset(id: string): Promise<string> {
@@ -94,9 +114,10 @@ export default class InsightFacade implements IInsightFacade {
 		throw new Error(`InsightFacadeImpl::performQuery() is unimplemented! - query=${query};`);
 	}
 
+
 	public async listDatasets(): Promise<InsightDataset[]> {
-		return new Promise((resolve) => {
-			const result: InsightDataset[] = [];
+
+			const result: any [] = [];
 
 			this.datasets.forEach((val, key) => {
 				const newInsightDataset: InsightDataset = {
@@ -108,7 +129,8 @@ export default class InsightFacade implements IInsightFacade {
 
 				result.push(newInsightDataset);
 			});
-			resolve(result);
-		});
+			await Promise.all(result);
+			return result;
+
 	}
 }

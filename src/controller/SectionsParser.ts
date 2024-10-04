@@ -35,7 +35,7 @@ export default class SectionsParser {
 		const zip = await JSZip.loadAsync(buffer);
 
 		const numSections = await this.logAndCountValidSections(zip, id, datasets);
-		await this.logDataset(zip, id);
+		await this.logDatasetOnDisk(zip, id);
 
 		if (numSections === 0) {
 			throw new InsightError("No valid section");
@@ -53,7 +53,6 @@ export default class SectionsParser {
 	//          then turns each valid section into a Section object.
 	//			Sums the number of valid sections per course for all courses in the dataset and returns value.
 	// OUTPUT: returns the number of valid sections in a dataset and logs the valid sections to the 'datasets' map
-
 	private async logAndCountValidSections(zip: JSZip, id: string, datasets: Map<string, Section[]>): Promise<number> {
 		let numSections = 0;
 		const allPromises = [];
@@ -145,6 +144,8 @@ export default class SectionsParser {
 		}
 	}
 
+
+
 	// REQUIRES: zip - current dataset content as a JSZIP
 	// 			  id - name of dataset
 	// EFFECTS: parses the JSZIP files in the dataset and sorts through each JSON file containing each course, then
@@ -152,7 +153,7 @@ export default class SectionsParser {
 	//          filters only valid sections,
 	//          write the valid sections with the associated dataset id onto the disk
 	// OUTPUT: void
-	private async logDataset(zip: JSZip, id: string): Promise<void> {
+	private async logDatasetOnDisk(zip: JSZip, id: string): Promise<void> {
 		const allPromises = [];
 
 		for (const key in zip.files) {
@@ -184,7 +185,6 @@ export default class SectionsParser {
 	// EFFECTS: A helper function that can be used by performQuery to turn a dataset written in the disk into a
 	// 			DatasetRecord  -> a key value pair of the all the valid sections associated with the given dataset id.
 	// OUTPUT:  DatasetRecord, mapping the list of Sections to its associated dataset id
-
 	public async turnDatasetToSection(id: string): Promise<DatasetRecord> {
 		// tracks number of sections in a given dataset and is initialized to 0
 
@@ -201,7 +201,6 @@ export default class SectionsParser {
 					if (file.result.length === 0) {
 						return null;
 					}
-
 					const validSectionsInCourse = this.filterValidSections(file);
 					file.result = validSectionsInCourse;
 					// turn all valid sections to Sections objects
@@ -223,6 +222,7 @@ export default class SectionsParser {
 		const datasetRecord: DatasetRecord = { id: id, sections: sections };
 		return datasetRecord;
 	}
+
 
 	// REQUIRES: jsonData - parsed JSON Object of a valid section from the result key in a given course file
 	// EFFECTS: Retrieves the fields of the section and populate the values of the sfields and mfields into a Section object
@@ -259,7 +259,6 @@ export default class SectionsParser {
 	// EFFECTS: takes the list of courses and writes them as a JSON file to be stored on to disk with the following directory:
 	//			"./data/${id}/${ course name}.json"
 	// OUTPUT: void
-
 	private async storeCoursesOnDisk(
 		courseDataList: Awaited<null | { jsonData: any; name: string }>[],
 		id: string
@@ -339,4 +338,35 @@ export default class SectionsParser {
 	//
 	// 	return numSections;
 	// }
+
+
+	// REDUNDANT
+	// public async countRowsInDataset(id: string): Promise<number> {
+	// 	// where each promise is appended to for each course object
+	// 	const allPromises: any[] = [];
+	// 	const sections: Section[] = [];
+	// 	let numSections: number = 0
+	//
+	// 	// list of all courses under the dataset file
+	// 	const path = await fs.readdir(`./data/${id}/courses/`);
+	// 	for (const course of path) {
+	// 		const promise = fs
+	// 			.readJson(`./data/${id}/courses/${course}`)
+	// 			.then(async (file) => {
+	// 				if (file.result.length === 0) {
+	// 					return null;
+	// 				}
+	// 				const validSectionsInCourse = this.filterValidSections(file);
+	// 				numSections += validSectionsInCourse.length
+	// 			})
+	// 			.catch((err) => {
+	// 				throw err;
+	// 			});
+	//
+	// 		allPromises.push(promise);
+	// 	}
+	// 	await Promise.all(allPromises);
+	// 	return numSections
+	// }
+
 }

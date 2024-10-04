@@ -47,6 +47,22 @@ export default class Section {
 		this._sfields = value;
 	}
 
+	public getMFieldByIndex(index: number): number {
+		const keys: (keyof Mfield)[] = ['year', 'avg', 'pass', 'fail', 'audit'];
+		if ((index < 0) || (index > keys.length)) {
+			throw new Error("Out of bounds")
+		}
+		return this._mfields[keys[index]];
+	}
+
+	public getSFieldByIndex(index: number): string {
+		const keys: (keyof Sfield)[] = ['uuid', 'id', 'title', 'instructor', 'dept'];
+		if ((index < 0) || (index > keys.length)) {
+			throw new Error("Out of bounds")
+		}
+		return this._sfields[keys[index]];
+	}
+
 	private _mfields: Mfield;
 	private _sfields: Sfield;
 
@@ -80,7 +96,6 @@ export class ResultTooLargeError extends Error {
 }
 
 export interface IInsightFacade {
-
 	sectionsDatabase: Map<string, Section[]>;
 
 	/**
@@ -155,5 +170,5 @@ export interface IInsightFacade {
 	 */
 	listDatasets(): Promise<InsightDataset[]>;
 
-	logNewDatasetFromDiskToMap(id:string, kind: InsightDatasetKind): Promise<void>;
+	logNewDatasetFromDiskToMap(id: string, kind: InsightDatasetKind): Promise<void>;
 }

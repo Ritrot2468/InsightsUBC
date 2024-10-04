@@ -611,7 +611,7 @@ describe("InsightFacade", function () {
 					numRows: 2,
 				},
 			]);
-		 });
+		});
 
 		it("list 2 datasets", async function () {
 			try {

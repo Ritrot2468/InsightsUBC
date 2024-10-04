@@ -9,7 +9,7 @@ import Section, {
 import fs from "fs-extra";
 import SectionsValidator from "./SectionsValidator";
 import SectionsParser from "./SectionsParser";
-import {getContentFromArchives} from "../../test/TestUtil";
+import { getContentFromArchives } from "../../test/TestUtil";
 import JSZip from "jszip";
 
 /**
@@ -58,30 +58,26 @@ export default class InsightFacade implements IInsightFacade {
 		} catch (err) {
 			if (err instanceof InsightError) {
 				throw err;
-			} else {
-				throw new InsightError(`An unexpected error occurred: ${err}`);
 			}
+			throw new InsightError(`An unexpected error occurred: ${err}`);
 		}
 	}
 
 	// REQUIRES: id - name of dataset to be retrieved from disk (id IS NOT IN datasets ALREADY!!!!)
 	//           datasets - sets you'll be mapping new DatasetRecord to
 	// EFFECTS: Retrieves the sections associated with the dataset id on disk and turned into Sections objects and maps
-	//          them to datasets with their associated id. Updates the currIDs and database member variables
+	//          them to sectionsDatabase with their associated id. Updates the currIDs and database member variables
 	// OUTPUT: VOID
 	public async logNewDatasetFromDiskToMap(id: string, kind: InsightDatasetKind): Promise<void> {
-
-
 		const newDataset = await this.sp.turnDatasetToSection(id);
 		this.sectionsDatabase.set(newDataset.id, newDataset.sections);
-		const numRows = newDataset.sections.length
+		const numRows = newDataset.sections.length;
 		// Create an InsightResult record
 		const newRecord: InsightResult = {
 			[kind]: numRows,
 		};
 		this.currIDs.push(id);
-		this.datasets.set(id, newRecord)
-
+		this.datasets.set(id, newRecord);
 	}
 
 	public async removeDataset(id: string): Promise<string> {
@@ -114,23 +110,20 @@ export default class InsightFacade implements IInsightFacade {
 		throw new Error(`InsightFacadeImpl::performQuery() is unimplemented! - query=${query};`);
 	}
 
-
 	public async listDatasets(): Promise<InsightDataset[]> {
+		const result: any[] = [];
 
-			const result: any [] = [];
+		this.datasets.forEach((val, key) => {
+			const newInsightDataset: InsightDataset = {
+				id: key,
+				// So far since adding dataset with the same ID twice is not allowed ******
+				kind: Object.keys(val)[0] as InsightDatasetKind,
+				numRows: val[Object.keys(val)[0]] as number,
+			};
 
-			this.datasets.forEach((val, key) => {
-				const newInsightDataset: InsightDataset = {
-					id: key,
-					// So far since adding dataset with the same ID twice is not allowed ******
-					kind: Object.keys(val)[0] as InsightDatasetKind,
-					numRows: val[Object.keys(val)[0]] as number,
-				};
-
-				result.push(newInsightDataset);
-			});
-			await Promise.all(result);
-			return result;
-
+			result.push(newInsightDataset);
+		});
+		await Promise.all(result);
+		return result;
 	}
 }

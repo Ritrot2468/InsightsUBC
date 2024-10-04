@@ -9,8 +9,6 @@ import Section, {
 import fs from "fs-extra";
 import SectionsValidator from "./SectionsValidator";
 import SectionsParser from "./SectionsParser";
-import { getContentFromArchives } from "../../test/TestUtil";
-import JSZip from "jszip";
 
 /**
  * This is the main programmatic entry point for the project.

@@ -31,21 +31,38 @@ export interface Mfield {
 	audit: number;
 }
 export default class Section {
-	public get mfields(): Mfield {
+	public getMfields(): Mfield {
 		return this._mfields;
 	}
 
-	public set mfields(value: Mfield) {
+	public setMfields(value: Mfield): void {
 		this._mfields = value;
 	}
 
-	public get sfields(): Sfield {
+	public getSfields(): Sfield {
 		return this._sfields;
 	}
 
-	public set sfields(value: Sfield) {
+	public setSfields(value: Sfield): void {
 		this._sfields = value;
 	}
+
+	public getMFieldByIndex(index: number): number {
+		const keys: (keyof Mfield)[] = ["year", "avg", "pass", "fail", "audit"];
+		if (index < 0 || index > keys.length) {
+			throw new Error("Out of bounds");
+		}
+		return this._mfields[keys[index]];
+	}
+
+	public getSFieldByIndex(index: number): string {
+		const keys: (keyof Sfield)[] = ["uuid", "id", "title", "instructor", "dept"];
+		if (index < 0 || index > keys.length) {
+			throw new Error("Out of bounds");
+		}
+		return this._sfields[keys[index]];
+	}
+
 	private _mfields: Mfield;
 	private _sfields: Sfield;
 
@@ -56,8 +73,6 @@ export default class Section {
 }
 
 export type InsightResult = Record<string, string | number>;
-
-export type FieldsDictionary = Record<string, string>;
 
 export class InsightError extends Error {
 	constructor(message?: string) {
@@ -152,4 +167,6 @@ export interface IInsightFacade {
 	 * The promise should fulfill an array of currently added InsightDatasets, and will only fulfill.
 	 */
 	listDatasets(): Promise<InsightDataset[]>;
+
+	logNewDatasetFromDiskToMap(id: string, kind: InsightDatasetKind): Promise<void>;
 }

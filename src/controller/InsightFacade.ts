@@ -20,7 +20,7 @@ export default class InsightFacade implements IInsightFacade {
 	private readonly datasets: Map<string, InsightResult>;
 
 	// tracks all sections added from a dataset using their associated id as the key
-	public sectionsDatabase: Map<string, Section[]>;
+	private readonly sectionsDatabase: Map<string, Section[]>;
 
 	// list of name of current IDs added
 	private currIDs: string[];
@@ -68,12 +68,14 @@ export default class InsightFacade implements IInsightFacade {
 	// OUTPUT: VOID
 	public async logNewDatasetFromDiskToMap(id: string, kind: InsightDatasetKind): Promise<void> {
 		const newDataset = await this.sp.turnDatasetToSection(id);
-		this.sectionsDatabase.set(newDataset.id, newDataset.sections);
 		const numRows = newDataset.sections.length;
 		// Create an InsightResult record
 		const newRecord: InsightResult = {
 			[kind]: numRows,
 		};
+
+		// update member variables
+		this.sectionsDatabase.set(newDataset.id, newDataset.sections);
 		this.currIDs.push(id);
 		this.datasets.set(id, newRecord);
 	}

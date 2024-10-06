@@ -39,6 +39,7 @@ export default class InsightFacade implements IInsightFacade {
 		this.currIDs = [];
 		this.sv = new SectionsValidator();
 		this.sp = new SectionsParser();
+		this.qe = new QueryEngine(this.sectionsDatabase);
 		// initialize dictionary for the fields
 	}
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {

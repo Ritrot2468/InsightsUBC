@@ -88,8 +88,10 @@ export default class QueryEngine {
 				results = this.handleMComparison(filter, key, input);
 			} else if (filter === "IS") {
 				// property to value pairing
+
 				const entry = Object.entries(value as Record<string, string>);
 				const [key, input] = entry[0];
+				console.log(key, input)
 				results = this.handleSComparison(key, input);
 			} else if (filter === "NOT") {
 				const valueObj = Object(value);

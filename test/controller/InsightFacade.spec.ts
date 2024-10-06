@@ -349,13 +349,18 @@ describe("InsightFacade", function () {
 			let result: InsightResult[];
 			try {
 				result = await facade.performQuery(input);
-
+				// facade.sectionsDatabase.forEach((key, value) => {
+				// 	console.log(key, value)
+				// })
 				if (errorExpected) {
 					expect.fail(`performQuery resolved when it should have rejected with ${expected}`);
 				}
 				expect(result).to.deep.equal(expected);
 			} catch (err) {
 				if (!errorExpected) {
+					// facade.sectionsDatabase.forEach((key, value) => {
+					// 	console.log(key, value)
+					// })
 					expect.fail(`performQuery threw unexpected error: ${err}`);
 				}
 
@@ -409,10 +414,12 @@ describe("InsightFacade", function () {
 
 			try {
 				await Promise.all(loadDatasetPromises);
+				//console.log(loadDatasetPromises.length)
 			} catch (err) {
 				throw new Error(`In PerformQuery Before hook, dataset(s) failed to be added. \n${err}`);
 			}
 		});
+
 
 		after(async function () {
 			await clearDisk();
@@ -423,7 +430,10 @@ describe("InsightFacade", function () {
 		// it("[valid/simple.json] SELECT dept, avg WHERE avg > 97", checkQuery);
 		// it("[invalid/invalid.json] Query missing WHERE", checkQuery);
 		//
-
+		it("test title", function() {
+			const section = facade.sectionsDatabase.get("sections");
+			console.log(section);
+		});
 		it("[valid/simple.json] SELECT dept, avg WHERE avg > 97", checkQuery);
 		it("[valid/simple1.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = cps*", checkQuery);
 		it("[valid/simple2.json] SELECT pass, audit, dept, avg WHERE avg == 97", checkQuery);

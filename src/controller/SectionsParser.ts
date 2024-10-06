@@ -35,6 +35,7 @@ export default class SectionsParser {
 		const zip = await JSZip.loadAsync(buffer);
 
 		const numSections = await this.logAndCountValidSections(zip, id, datasets);
+
 		await this.logDataset(zip, id);
 
 		if (numSections === 0) {
@@ -42,6 +43,12 @@ export default class SectionsParser {
 		}
 
 		return numSections;
+	}
+
+	public async logDatasetOnDisk(content: string, id: string): Promise<void> {
+		const buffer = Buffer.from(content, "base64");
+		const zip = await JSZip.loadAsync(buffer);
+		await this.logDataset(zip, id);
 	}
 
 	// REQUIRES: zip - current dataset content as a JSZIP
@@ -71,10 +78,11 @@ export default class SectionsParser {
 					const validSectionsInCourse = this.filterValidSections(jsonData);
 					jsonData.result = validSectionsInCourse;
 
-					validSectionsInCourse.forEach((section: any) => {
-						this.addNewSectionToDatabase(id, section, datasets);
-						numSections++;
-					});
+					// validSectionsInCourse.forEach((section: any) => {
+					// 	this.addNewSectionToDatabase(id, section, datasets);
+					// 	numSections++;
+					// });
+					numSections = validSectionsInCourse.size
 
 					return { name, jsonData };
 				});
@@ -142,6 +150,7 @@ export default class SectionsParser {
 		} else {
 			datasets.set(dataset_id, [newSection]);
 		}
+
 	}
 
 	// REQUIRES: zip - current dataset content as a JSZIP

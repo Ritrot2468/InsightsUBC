@@ -97,7 +97,7 @@ export class ResultTooLargeError extends Error {
 
 export interface IInsightFacade {
 	// TODO: remove
-	sectionsDatabase: Map<string, Section[]> ;
+	sectionsDatabase: Map<string, Section[]>;
 	/**
 	 * Add a dataset to insightUBC.
 	 *

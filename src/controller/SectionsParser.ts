@@ -82,7 +82,7 @@ export default class SectionsParser {
 					// 	this.addNewSectionToDatabase(id, section, datasets);
 					// 	numSections++;
 					// });
-					numSections = validSectionsInCourse.size
+					numSections = validSectionsInCourse.size;
 
 					return { name, jsonData };
 				});
@@ -150,7 +150,6 @@ export default class SectionsParser {
 		} else {
 			datasets.set(dataset_id, [newSection]);
 		}
-
 	}
 
 	// REQUIRES: zip - current dataset content as a JSZIP

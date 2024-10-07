@@ -1,4 +1,4 @@
-import Section, {InsightError, InsightResult, Mfield, ResultTooLargeError, Sfield} from "./IInsightFacade";
+import Section, { InsightError, InsightResult, ResultTooLargeError } from "./IInsightFacade";
 import QueryUtils from "./QueryUtils";
 
 export default class QueryEngine {
@@ -154,8 +154,8 @@ export default class QueryEngine {
 						throw new InsightError(" Asterisks (*) can only be the first or last characters of input strings");
 					}
 					// fix this return, figure out what sfield is, how to match it, and how to access
-					const processedInput = input.replace(/\*/g, '.*');
-					const inputRegex = new RegExp(`^${processedInput}$`);  // Use case-insensitive matching
+					const processedInput = input.replace(/\*/g, ".*");
+					const inputRegex = new RegExp(`^${processedInput}$`); // Use case-insensitive matching
 
 					return datasetSections.filter((section) => inputRegex.test(section.getSFieldByIndex(fieldIndex)));
 				} else {
@@ -221,29 +221,6 @@ export default class QueryEngine {
 		}
 	}
 
-	private isEqual(section1: Section, section2: Section): boolean {
-		// Compare Sfield
-		const sfield1 = section1.getSfields();
-		const sfield2 = section2.getSfields();
-		for (const key of Object.keys(sfield1) as (keyof Sfield)[]) {
-			if (sfield1[key] !== sfield2[key]) {
-				return false;
-			}
-		}
-
-		// Compare Mfield
-		const mfield1 = section1.getMfields();
-		const mfield2 = section2.getMfields();
-		for (const key of Object.keys(mfield1) as (keyof Mfield)[]) {
-			if (mfield1[key] !== mfield2[key]) {
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-
 	private handleAND(value: unknown[]): Section[] {
 		const andList = [];
 		if (value.length === 0) {
@@ -251,37 +228,20 @@ export default class QueryEngine {
 		}
 		for (const obj of value) {
 			if (typeof obj === "object" && obj !== null) {
-				const filterKey: string = Object.keys(obj)[0];
-				const filterVal: unknown = Object.values(obj)[0];
-				const key = this.handleFilter(filterKey, filterVal);
+				const key = this.handleFilter(Object.keys(obj)[0] as string, Object.values(obj)[0] as unknown);
 				andList.push(key);
 			}
 		}
 
 		// only one filter applied
-			if (andList.length === 1) {
-				return andList[0];
-			}
-
-		let shortestList = andList.reduce((shortest, currArray) => {
-			return currArray.length < shortest.length ? currArray : shortest;
-		}, andList[0]);
-
-		for (const currArray of andList) {
-			if (currArray === shortestList) {
-				continue;}  // Skip comparing the shortest list with itself
-
-			// Filter the shortest list to keep only sections that exist in the current array
-			shortestList = shortestList.filter((section) =>
-				currArray.some((currSection) => this.isEqual(section, currSection))
-			);
+		if (andList.length === 1) {
+			return andList[0];
 		}
 
-		return shortestList;
+		return this.utils.mergeAndList(andList);
 
 		//return andList.reduce((acc, currArray) => acc.filter((section) => currArray.includes(section)));
 	}
-
 
 	private handleOR(value: unknown[]): Section[] {
 		const orList = [];
@@ -291,9 +251,7 @@ export default class QueryEngine {
 
 		for (const obj of value) {
 			if (typeof obj === "object" && obj !== null) {
-				const filterKey: string = Object.keys(obj)[0];
-				const filterVal: unknown = Object.values(obj)[0];
-				const key = this.handleFilter(filterKey, filterVal);
+				const key = this.handleFilter(Object.keys(obj)[0] as string, Object.values(obj)[0] as unknown);
 				orList.push(key);
 			}
 		}
@@ -337,7 +295,6 @@ export default class QueryEngine {
 			}
 			orderKey = orderKey.split("_")[1];
 			results = this.completeQuery(sections, columns, orderKey);
-			//console.log(results);
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;

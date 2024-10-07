@@ -119,8 +119,7 @@ export default class SectionsParser {
 	private addNewSectionToDatabase(dataset_id: string, jsonData: any, datasets: Map<string, Section[]>): void {
 		const result = jsonData;
 
-		const [uuid, id, title, instructor, dept] = this.sFields.map((sfield) =>
-			result[sfield]);
+		const [uuid, id, title, instructor, dept] = this.sFields.map((sfield) => result[sfield]);
 
 		const sectionSfields: Sfield = {
 			uuid,
@@ -232,13 +231,13 @@ export default class SectionsParser {
 	private createSection(jsonData: any): Section {
 		const result = jsonData;
 
-		const [uuid, id, title, instructor, dept] : string[] = this.sFields.map((sfield) => {
+		const [uuid, id, title, instructor, dept]: string[] = this.sFields.map((sfield) => {
 			const value = result[sfield] as string;
 			return value;
 		});
 
 		const sectionSfields: Sfield = {
-			uuid:  String(uuid),
+			uuid: String(uuid),
 			id: String(id),
 			title: String(title),
 			instructor: String(instructor),

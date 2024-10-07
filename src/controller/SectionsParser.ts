@@ -245,16 +245,16 @@ export default class SectionsParser {
 			dept: String(dept),
 		};
 
-		console.log(typeof sectionSfields.uuid)
+		//console.log(typeof sectionSfields.uuid)
 
 		const [year, avg, pass, fail, audit] = this.mFields.map((mfield) => result[mfield]);
 
 		const sectionMfields: Mfield = {
-			year,
-			avg,
-			pass,
-			fail,
-			audit,
+			year: Number(year),
+			avg: Number(avg),
+			pass: Number(pass),
+			fail: Number(fail),
+			audit: Number(audit),
 		};
 
 		const newSection: Section = new Section(sectionMfields, sectionSfields);

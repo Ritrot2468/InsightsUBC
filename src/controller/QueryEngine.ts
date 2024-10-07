@@ -1,4 +1,5 @@
 import Section, { InsightError, InsightResult, ResultTooLargeError } from "./IInsightFacade";
+import QueryUtils from "./QueryUtils";
 
 export default class QueryEngine {
 	private queryingIDString: string;
@@ -10,11 +11,13 @@ export default class QueryEngine {
 	private mFields: string[] = ["year", "avg", "pass", "fail", "audit"];
 	private validOptions: string[] = ["COLUMNS", "ORDER"];
 	private validQueryKeys: string[] = ["WHERE", "OPTIONS"];
+	private utils: QueryUtils;
 
 	constructor(sectionsDatabase: Map<string, Section[]>) {
 		this.queryingIDString = "";
 		this.sectionsDatabase = sectionsDatabase;
 		this.noFilter = false;
+		this.utils = new QueryUtils();
 	}
 
 	public async query(query: unknown): Promise<InsightResult[]> {
@@ -183,9 +186,9 @@ export default class QueryEngine {
 			} else {
 				if (this.mFields.includes(mfield)) {
 					const fieldIndex = this.mFields.indexOf(mfield);
-					return this.filterMComparison(datasetSections, filter, fieldIndex, input);
+					return this.utils.filterMComparison(datasetSections, filter, fieldIndex, input);
 				} else {
-					throw new InsightError("Invalid sKey");
+					throw new InsightError("Invalid mKey");
 				}
 			}
 		} catch (err) {
@@ -199,7 +202,7 @@ export default class QueryEngine {
 
 	private handleLogicComparison(filter: string, value: unknown): Section[] {
 		try {
-			const comparisonArray: unknown[] = this.coerceToArray(value);
+			const comparisonArray: unknown[] = this.utils.coerceToArray(value);
 			if (filter === "AND") {
 				return this.handleAND(comparisonArray);
 			} else if (filter === "OR") {
@@ -238,29 +241,6 @@ export default class QueryEngine {
 		return orList.flat();
 	}
 
-	private coerceToArray(value: unknown): unknown[] {
-		if (Array.isArray(value)) {
-			return value;
-		} else {
-			throw new InsightError("Not an array.");
-		}
-	}
-
-	private filterMComparison(dataset: Section[], filter: string, index: number, input: number): Section[] {
-		let results: Section[];
-		//console.log("FILTER MCOMPARISON WORKING");
-		if (filter === "LT") {
-			results = dataset.filter((section) => section.getMFieldByIndex(index) < input);
-		} else if (filter === "GT") {
-			results = dataset.filter((section) => section.getMFieldByIndex(index) > input);
-		} else if (filter === "EQ") {
-			results = dataset.filter((section) => section.getMFieldByIndex(index) === input);
-		} else {
-			throw new InsightError("Invalid MComparator");
-		}
-		return results;
-	}
-
 	// check if an id string is already being referenced, if not, return true
 	private checkIDString(idstring: string): boolean {
 		if (!this.sectionsDatabase.has(idstring)) {
@@ -294,7 +274,7 @@ export default class QueryEngine {
 			}
 			//console.log(columns);
 			if ("ORDER" in options) {
-				orderKey = this.handleORDER(options.ORDER, this.coerceToArray(options.COLUMNS) as string[]);
+				orderKey = this.handleORDER(options.ORDER, this.utils.coerceToArray(options.COLUMNS) as string[]);
 			}
 			orderKey = orderKey.split("_")[1];
 			results = this.completeQuery(sections, columns, orderKey);
@@ -323,58 +303,15 @@ export default class QueryEngine {
 				sections = datasetSections;
 			}
 		}
-
-		this.checkSize(sections);
-
-		for (const section of sections) {
-			const currRecord: InsightResult = {};
-			for (const column of columns) {
-				const field = column.split("_")[1];
-				if (this.mFields.includes(field)) {
-					const mIndex = this.mFields.indexOf(field);
-					currRecord[column] = section.getMFieldByIndex(mIndex);
-				} else {
-					const sIndex = this.sFields.indexOf(field);
-					currRecord[column] = section.getSFieldByIndex(sIndex);
-				}
-			}
-			results.push(currRecord);
-		}
-		results = this.sortByOrder(results, orderKey);
+		this.utils.checkSize(sections);
+		results = this.utils.selectCOLUMNS(sections, columns);
+		results = this.utils.sortByOrder(results, orderKey);
 		return results;
-	}
-
-	private sortByOrder(results: InsightResult[], orderKey: string): InsightResult[] {
-		if (orderKey === "") {
-			return results;
-		} else {
-			if (this.mFields.includes(orderKey)) {
-				results.sort((recordA, recordB) => {
-					return (recordA[orderKey] as number) - (recordB[orderKey] as number);
-				});
-			} else {
-				results.sort((recordA, recordB) => {
-					return (recordA[orderKey] as string).localeCompare(recordB[orderKey] as string);
-				});
-			}
-		}
-		return results;
-	}
-
-	private checkSize(sections: Section[]): boolean {
-		const maxQuerySize = 5000;
-		if (sections.length > maxQuerySize) {
-			throw new ResultTooLargeError(
-				"The result is too big. Only queries with a maximum of 5000 results are supported."
-			);
-		} else {
-			return true;
-		}
 	}
 
 	// returns the columns as an array of strings (WORKING)
 	private handleCOLUMNS(value: unknown): string[] {
-		const columns = this.coerceToArray(value);
+		const columns = this.utils.coerceToArray(value);
 		const results: string[] = [];
 		for (const key of columns) {
 			const keyStr = String(key);

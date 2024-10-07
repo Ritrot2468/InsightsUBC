@@ -225,8 +225,14 @@ export default class QueryEngine {
 			throw new InsightError("AND must be a non-empty array");
 		}
 		for (const obj of value) {
-			andList.push(this.handleFilter(Object(obj).keys[0], Object(obj).values[0]));
+			if (typeof obj === "object" && obj !== null) {
+				const filterKey: string = Object.keys(obj)[0];
+				const filterVal: unknown = Object.values(obj)[0];
+				const key = this.handleFilter(filterKey, filterVal);
+				andList.push(key);
+			}
 		}
+
 		return andList.reduce((acc, currArray) => acc.filter((section) => currArray.includes(section)));
 	}
 

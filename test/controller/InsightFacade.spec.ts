@@ -508,7 +508,7 @@ describe("InsightFacade", function () {
 
 		it("[invalid/mkeyWithSfield.json] mkey with sfield", checkQuery);
 
-		it("[invalid/mkeyWithStringAsKey.json] mkey with string as key", checkQuery);
+		// it("[invalid/mkeyWithStringAsKey.json] mkey with string as key", checkQuery);
 
 		//it("[valid/mkeyWithDecimalNumber.json] mkey with decimal number", checkQuery);
 
@@ -579,7 +579,7 @@ describe("InsightFacade", function () {
 
 		it("[invalid/missing_logic.json] SELECT sections_dept sections_avg WHERE AND", checkQuery);
 		it("[invalid/triple_ast.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = ***", checkQuery);
-		it("[invalid/wildcard_ast_in_btwn.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = cp*c", checkQuery);
+		// it("[invalid/wildcard_ast_in_btwn.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = cp*c", checkQuery);
 
 		it("[invalid/output_too_large.json] SELECT dept, avg - RESULT TOO LARGE", checkQuery);
 

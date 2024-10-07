@@ -1,5 +1,5 @@
 import JSZip from "jszip";
-import Section, { InsightError, Mfield, Sfield } from "./IInsightFacade";
+import Section, { Mfield, Sfield } from "./IInsightFacade";
 import fs from "fs-extra";
 import { DatasetRecord } from "./DiskReader";
 
@@ -30,20 +30,20 @@ export default class SectionsParser {
 	//  		then logs all valid sections to the associated dataset id to 'datasets' and
 	//  		returns the number of rows in an added dataset
 	// OUTPUT: returns number of rows in that dataset that is added.
-	public async countRows(content: string, id: string, datasets: Map<string, Section[]>): Promise<number> {
-		const buffer = Buffer.from(content, "base64");
-		const zip = await JSZip.loadAsync(buffer);
-
-		const numSections = await this.logAndCountValidSections(zip, id, datasets);
-
-		await this.logDataset(zip, id);
-
-		if (numSections === 0) {
-			throw new InsightError("No valid section");
-		}
-
-		return numSections;
-	}
+	// public async countRows(content: string, id: string, datasets: Map<string, Section[]>): Promise<number> {
+	// 	const buffer = Buffer.from(content, "base64");
+	// 	const zip = await JSZip.loadAsync(buffer);
+	//
+	// 	const numSections = await this.logAndCountValidSections(zip, id, datasets);
+	//
+	// 	await this.logDataset(zip, id);
+	//
+	// 	if (numSections === 0) {
+	// 		throw new InsightError("No valid section");
+	// 	}
+	//
+	// 	return numSections;
+	// }
 
 	public async logDatasetOnDisk(content: string, id: string): Promise<void> {
 		const buffer = Buffer.from(content, "base64");
@@ -60,40 +60,36 @@ export default class SectionsParser {
 	//          then turns each valid section into a Section object.
 	//			Sums the number of valid sections per course for all courses in the dataset and returns value.
 	// OUTPUT: returns the number of valid sections in a dataset and logs the valid sections to the 'datasets' map
-	private async logAndCountValidSections(zip: JSZip, id: string, datasets: Map<string, Section[]>): Promise<number> {
-		let numSections = 0;
-		const allPromises = [];
-
-		for (const key in zip.files) {
-			const name = key;
-
-			if (name.match(/^courses\/\w/) && name.match(/^[^.]+$/)) {
-				const promiseContent = zip.files[key].async("string").then(async (content0) => {
-					const jsonData = JSON.parse(content0);
-
-					if (jsonData.result.length === 0) {
-						return null;
-					}
-
-					const validSectionsInCourse = this.filterValidSections(jsonData);
-					jsonData.result = validSectionsInCourse;
-
-					// validSectionsInCourse.forEach((section: any) => {
-					// 	this.addNewSectionToDatabase(id, section, datasets);
-					// 	numSections++;
-					// });
-					numSections = validSectionsInCourse.size;
-
-					return { name, jsonData };
-				});
-
-				allPromises.push(promiseContent);
-			}
-		}
-
-		await Promise.all(allPromises);
-		return numSections;
-	}
+	// private async logAndCountValidSections(zip: JSZip, id: string, datasets: Map<string, Section[]>): Promise<number> {
+	// 	let numSections = 0;
+	// 	const allPromises = [];
+	//
+	// 	for (const key in zip.files) {
+	// 		const name = key;
+	//
+	// 		if (name.match(/^courses\/\w/) && name.match(/^[^.]+$/)) {
+	// 			const promiseContent = zip.files[key].async("string").then(async (content0) => {
+	// 				const jsonData = JSON.parse(content0);
+	//
+	// 				if (jsonData.result.length === 0) {
+	// 					return null;
+	// 				}
+	//
+	// 				const validSectionsInCourse = this.filterValidSections(jsonData);
+	// 				jsonData.result = validSectionsInCourse;
+	//
+	// 				numSections = validSectionsInCourse.size;
+	//
+	// 				return { name, jsonData };
+	// 			});
+	//
+	// 			allPromises.push(promiseContent);
+	// 		}
+	// 	}
+	//
+	// 	await Promise.all(allPromises);
+	// 	return numSections;
+	// }
 
 	// REQUIRES: jsonData - parsed JSON Object of the result key in a given course file
 	//

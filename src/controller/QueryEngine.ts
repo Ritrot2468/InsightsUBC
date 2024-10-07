@@ -18,7 +18,7 @@ export default class QueryEngine {
 	}
 
 	public async query(query: unknown): Promise<InsightResult[]> {
-		console.log("QUERY method");
+		//console.log("QUERY method");
 		return new Promise((resolve) => {
 			let filteredSections: Section[] = [];
 			let result: InsightResult[] = [];
@@ -38,7 +38,6 @@ export default class QueryEngine {
 					throw new InsightError("Query missing WHERE");
 				}
 
-				console.log(filteredSections);
 				// If OPTIONS key exists, collect InsightResults, else throw InsightError
 				if ("OPTIONS" in queryObj) {
 					result = this.handleOPTIONS(queryObj.OPTIONS, filteredSections);
@@ -59,7 +58,7 @@ export default class QueryEngine {
 	private handleWHERE(where: object): Section[] {
 		let filteredSections: Section[] = [];
 		this.noFilter = false;
-		console.log("WHERE WORKING");
+		//console.log("WHERE WORKING");
 		try {
 			if (Object.keys(where).length === 0) {
 				this.noFilter = true;
@@ -81,8 +80,8 @@ export default class QueryEngine {
 
 	private handleFilter(filter: string, value: unknown): Section[] {
 		let results: Section[] = [];
-		console.log("HANDLING FILTER");
-		console.log(filter);
+		//console.log("HANDLING FILTER");
+		//console.log(filter);
 		try {
 			if (this.logicComparator.includes(filter)) {
 				results = this.handleLogicComparison(filter, value);
@@ -92,10 +91,8 @@ export default class QueryEngine {
 				results = this.handleMComparison(filter, key, input);
 			} else if (filter === "IS") {
 				// property to value pairing
-
 				const entry = Object.entries(value as Record<string, string>);
 				const [key, input] = entry[0];
-				console.log(key, input)
 				results = this.handleSComparison(key, input);
 			} else if (filter === "NOT") {
 				const valueObj = Object(value);
@@ -170,9 +167,9 @@ export default class QueryEngine {
 	}
 
 	private handleMComparison(filter: string, mkey: string, input: number): Section[] {
-		console.log("HANDLING MCOMPARISON");
-		console.log("mkey: " + mkey);
-		console.log("input: " + input);
+		//console.log("HANDLING MCOMPARISON");
+		//console.log("mkey: " + mkey);
+		//console.log("input: " + input);
 		try {
 			const idstring = mkey.split("_")[0];
 			const mfield = mkey.split("_")[1];
@@ -180,7 +177,6 @@ export default class QueryEngine {
 			// check if database contains dataset with idstring
 			this.checkIDString(idstring);
 			const datasetSections = this.sectionsDatabase.get(idstring);
-			console.log(this.sectionsDatabase.size);
 			if (datasetSections === undefined) {
 				// should not be possible
 				throw new InsightError("Can't find querying dataset");
@@ -252,13 +248,9 @@ export default class QueryEngine {
 
 	private filterMComparison(dataset: Section[], filter: string, index: number, input: number): Section[] {
 		let results: Section[];
-		console.log("FILTER MCOMPARISON WORKING");
-		console.log(dataset);
+		//console.log("FILTER MCOMPARISON WORKING");
 		if (filter === "LT") {
-			results = dataset.filter((section) => {
-				//console.log(section.getMFieldByIndex(index), input);
-				return section.getMFieldByIndex(index) < input;
-			});
+			results = dataset.filter((section) => section.getMFieldByIndex(index) < input);
 		} else if (filter === "GT") {
 			results = dataset.filter((section) => section.getMFieldByIndex(index) > input);
 		} else if (filter === "EQ") {
@@ -284,6 +276,7 @@ export default class QueryEngine {
 	}
 
 	private handleOPTIONS(options: object, sections: Section[]): InsightResult[] {
+		//console.log("OPTIONS WORKING");
 		let results: InsightResult[] = [];
 		let columns: string[] = [];
 		let orderKey = "";
@@ -297,15 +290,15 @@ export default class QueryEngine {
 			if ("COLUMNS" in options) {
 				columns = this.handleCOLUMNS(options.COLUMNS);
 			} else {
-				throw new InsightError("Query missing WHERE");
+				throw new InsightError("Query missing COLUMNS");
 			}
-
+			//console.log(columns);
 			if ("ORDER" in options) {
 				orderKey = this.handleORDER(options.ORDER, this.coerceToArray(options.COLUMNS) as string[]);
 			}
 			orderKey = orderKey.split("_")[1];
 			results = this.completeQuery(sections, columns, orderKey);
-
+			//console.log(results);
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;
@@ -319,6 +312,7 @@ export default class QueryEngine {
 	// REQUIRES: columns are valid columns, sections are filtered sections, orderKey is valid
 	private completeQuery(sections: Section[], columns: string[], orderKey: string): InsightResult[] {
 		let results: InsightResult[] = [];
+		//console.log("COMPLETE QUERY WORKING");
 		// if no filters have been applied
 		if (this.noFilter) {
 			const datasetSections = this.sectionsDatabase.get(this.queryingIDString);
@@ -330,20 +324,22 @@ export default class QueryEngine {
 			}
 		}
 
+		this.checkSize(sections);
+
 		for (const section of sections) {
 			const currRecord: InsightResult = {};
 			for (const column of columns) {
-				if (this.mFields.includes(column)) {
-					const mIndex = this.mFields.indexOf(column);
-					currRecord[`${this.queryingIDString}_${column}`] = section.getMFieldByIndex(mIndex);
+				const field = column.split("_")[1];
+				if (this.mFields.includes(field)) {
+					const mIndex = this.mFields.indexOf(field);
+					currRecord[column] = section.getMFieldByIndex(mIndex);
 				} else {
-					const sIndex = this.sFields.indexOf(column);
-					currRecord[`${this.queryingIDString}_${column}`] = section.getSFieldByIndex(sIndex);
+					const sIndex = this.sFields.indexOf(field);
+					currRecord[column] = section.getSFieldByIndex(sIndex);
 				}
 			}
 			results.push(currRecord);
 		}
-
 		results = this.sortByOrder(results, orderKey);
 		return results;
 	}
@@ -365,7 +361,18 @@ export default class QueryEngine {
 		return results;
 	}
 
-	// returns the columns as an array of strings
+	private checkSize(sections: Section[]): boolean {
+		const maxQuerySize = 5000;
+		if (sections.length > maxQuerySize) {
+			throw new ResultTooLargeError(
+				"The result is too big. Only queries with a maximum of 5000 results are supported."
+			);
+		} else {
+			return true;
+		}
+	}
+
+	// returns the columns as an array of strings (WORKING)
 	private handleCOLUMNS(value: unknown): string[] {
 		const columns = this.coerceToArray(value);
 		const results: string[] = [];
@@ -384,7 +391,7 @@ export default class QueryEngine {
 		return results;
 	}
 
-	// returns the order key as a string
+	// returns the order key as a string (WORKING)
 	private handleORDER(value: unknown, columns: string[]): string {
 		const valueStr = String(value);
 		if (columns.includes(valueStr)) {

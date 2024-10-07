@@ -1,0 +1,22 @@
+{
+	"title": "Excess keys in Query",
+	"input": {
+		"WHERE": {
+			"GT": {
+				"sections_avg": 97
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"sections_dept",
+				"sections_avg"
+			],
+			"ORDER": "sections_avg"
+		},
+		"HOW": {
+			"sections_avg": 97
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

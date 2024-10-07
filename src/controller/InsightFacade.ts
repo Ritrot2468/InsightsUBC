@@ -5,10 +5,12 @@ import Section, {
 	InsightError,
 	InsightResult,
 	NotFoundError,
+	ResultTooLargeError,
 } from "./IInsightFacade";
 import fs from "fs-extra";
 import SectionsValidator from "./SectionsValidator";
 import SectionsParser from "./SectionsParser";
+import QueryEngine from "./QueryEngine";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -17,15 +19,18 @@ import SectionsParser from "./SectionsParser";
  */
 export default class InsightFacade implements IInsightFacade {
 	// map to track record
-	private readonly datasets: Map<string, InsightResult>;
+	private datasets: Map<string, InsightResult>;
 
 	// tracks all sections added from a dataset using their associated id as the key
-	private readonly sectionsDatabase: Map<string, Section[]>;
+	public sectionsDatabase: Map<string, Section[]>;
 
 	// list of name of current IDs added
 	private currIDs: string[];
+
+	// service classes
 	private sv: SectionsValidator;
 	private sp: SectionsParser;
+	private qe: QueryEngine;
 
 	constructor() {
 		//Log.info("InsightFacadeImpl::init()");
@@ -34,22 +39,17 @@ export default class InsightFacade implements IInsightFacade {
 		this.currIDs = [];
 		this.sv = new SectionsValidator();
 		this.sp = new SectionsParser();
+		this.qe = new QueryEngine(this.sectionsDatabase);
 		// initialize dictionary for the fields
 	}
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
 		try {
 			this.sv.validateId(id, this.currIDs);
 			// Number of rows found associated with the insightKind
-			const numRows = await this.sp.countRows(content, id, this.sectionsDatabase);
+			//const numRows = await this.sp.countRows(content, id, this.sectionsDatabase);
 
-			// Create an InsightResult record
-			const newRecord: InsightResult = {
-				[kind]: numRows,
-			};
-
-			// Store the dataset
-			this.datasets.set(id, newRecord);
-			this.currIDs.push(id);
+			await this.sp.logDatasetOnDisk(content, id);
+			await this.logNewDatasetFromDiskToMap(id, kind);
 
 			// Resolve with the dataset ID
 			return this.currIDs;
@@ -69,6 +69,10 @@ export default class InsightFacade implements IInsightFacade {
 	public async logNewDatasetFromDiskToMap(id: string, kind: InsightDatasetKind): Promise<void> {
 		const newDataset = await this.sp.turnDatasetToSection(id);
 		const numRows = newDataset.sections.length;
+
+		if (numRows === 0) {
+			throw new InsightError("No valid Section");
+		}
 		// Create an InsightResult record
 		const newRecord: InsightResult = {
 			[kind]: numRows,
@@ -105,9 +109,31 @@ export default class InsightFacade implements IInsightFacade {
 		}
 	}
 
+	/*
 	public async performQuery(query: unknown): Promise<InsightResult[]> {
-		// TODO: Remove this once you implement the methods!
-		throw new Error(`InsightFacadeImpl::performQuery() is unimplemented! - query=${query};`);
+		return Promise.reject("Not implemented.");
+	}
+	*/
+
+	public async performQuery(query: unknown): Promise<InsightResult[]> {
+		let result: InsightResult[] = [];
+		// console.log(this.datasets.size)
+		// this.sectionsDatabase.forEach((key, value) => {
+		// 	console.log(key, value)
+		// })
+		try {
+			result = await this.qe.query(query);
+		} catch (err) {
+			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
+				// this.sectionsDatabase.forEach((key, value) => {
+				// 	console.log(key, value)
+				// })
+				throw err;
+			} else {
+				throw new InsightError("Unexpected error.");
+			}
+		}
+		return result;
 	}
 
 	public async listDatasets(): Promise<InsightDataset[]> {

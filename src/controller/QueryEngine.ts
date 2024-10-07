@@ -18,6 +18,7 @@ export default class QueryEngine {
 	}
 
 	public async query(query: unknown): Promise<InsightResult[]> {
+		console.log("QUERY method");
 		return new Promise((resolve) => {
 			let filteredSections: Section[] = [];
 			let result: InsightResult[] = [];
@@ -37,6 +38,7 @@ export default class QueryEngine {
 					throw new InsightError("Query missing WHERE");
 				}
 
+				console.log(filteredSections);
 				// If OPTIONS key exists, collect InsightResults, else throw InsightError
 				if ("OPTIONS" in queryObj) {
 					result = this.handleOPTIONS(queryObj.OPTIONS, filteredSections);
@@ -57,7 +59,7 @@ export default class QueryEngine {
 	private handleWHERE(where: object): Section[] {
 		let filteredSections: Section[] = [];
 		this.noFilter = false;
-		//console.log(query);
+		console.log("WHERE WORKING");
 		try {
 			if (Object.keys(where).length === 0) {
 				this.noFilter = true;
@@ -79,6 +81,8 @@ export default class QueryEngine {
 
 	private handleFilter(filter: string, value: unknown): Section[] {
 		let results: Section[] = [];
+		console.log("HANDLING FILTER");
+		console.log(filter);
 		try {
 			if (this.logicComparator.includes(filter)) {
 				results = this.handleLogicComparison(filter, value);
@@ -164,6 +168,9 @@ export default class QueryEngine {
 	}
 
 	private handleMComparison(filter: string, mkey: string, input: number): Section[] {
+		console.log("HANDLING MCOMPARISON");
+		console.log("mkey: " + mkey);
+		console.log("input: " + input);
 		try {
 			const idstring = mkey.split("_")[0];
 			const mfield = mkey.split("_")[1];
@@ -171,6 +178,7 @@ export default class QueryEngine {
 			// check if database contains dataset with idstring
 			this.checkIDString(idstring);
 			const datasetSections = this.sectionsDatabase.get(idstring);
+			console.log(this.sectionsDatabase.size);
 			if (datasetSections === undefined) {
 				// should not be possible
 				throw new InsightError("Can't find querying dataset");
@@ -241,15 +249,22 @@ export default class QueryEngine {
 	}
 
 	private filterMComparison(dataset: Section[], filter: string, index: number, input: number): Section[] {
+		let results: Section[];
+		console.log("FILTER MCOMPARISON WORKING");
+		console.log(dataset);
 		if (filter === "LT") {
-			return dataset.filter((section) => section.getMFieldByIndex(index) < input);
+			results = dataset.filter((section) => {
+				//console.log(section.getMFieldByIndex(index), input);
+				return section.getMFieldByIndex(index) < input;
+			});
 		} else if (filter === "GT") {
-			return dataset.filter((section) => section.getMFieldByIndex(index) > input);
+			results = dataset.filter((section) => section.getMFieldByIndex(index) > input);
 		} else if (filter === "EQ") {
-			return dataset.filter((section) => section.getMFieldByIndex(index) === input);
+			results = dataset.filter((section) => section.getMFieldByIndex(index) === input);
 		} else {
 			throw new InsightError("Invalid MComparator");
 		}
+		return results;
 	}
 
 	// check if an id string is already being referenced, if not, return true
@@ -300,7 +315,6 @@ export default class QueryEngine {
 	// REQUIRES: columns are valid columns, sections are filtered sections, orderKey is valid
 	private completeQuery(sections: Section[], columns: string[], orderKey: string): InsightResult[] {
 		let results: InsightResult[] = [];
-
 		// if no filters have been applied
 		if (this.noFilter) {
 			const datasetSections = this.sectionsDatabase.get(this.queryingIDString);
@@ -358,7 +372,7 @@ export default class QueryEngine {
 
 			this.checkIDString(idstring);
 			if (this.mFields.includes(field) || this.sFields.includes(field)) {
-				results.push(field);
+				results.push(keyStr);
 			} else {
 				throw new InsightError(`Invalid key ${keyStr} in COLUMNS`);
 			}

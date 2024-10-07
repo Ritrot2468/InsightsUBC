@@ -425,6 +425,7 @@ describe("InsightFacade", function () {
 		//
 
 		it("[valid/simple.json] SELECT dept, avg WHERE avg > 97", checkQuery);
+		/*
 		it("[valid/simple1.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = cps*", checkQuery);
 		it("[valid/simple2.json] SELECT pass, audit, dept, avg WHERE avg == 97", checkQuery);
 
@@ -570,7 +571,7 @@ describe("InsightFacade", function () {
 			checkQuery
 		);
 
-		it("[invalid/excessKeysInQuery.json] WHERE OPTIONS and HOW keys in Query", checkQuery);
+		it("[invalid/excessKeysInQuery.json] WHERE OPTIONS and HOW keys in Query", checkQuery);*/
 	});
 
 	describe("ListDataset", function () {

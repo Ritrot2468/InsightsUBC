@@ -286,7 +286,7 @@ export default class QueryEngine {
 			}
 
 			if ("ORDER" in options) {
-				orderKey = this.handleORDER(options.ORDER, columns);
+				orderKey = this.handleORDER(options.ORDER, this.coerceToArray(options.COLUMNS) as string[]);
 			}
 			results = this.completeQuery(sections, columns, orderKey);
 		} catch (err) {

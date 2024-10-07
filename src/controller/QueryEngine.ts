@@ -1,4 +1,4 @@
-import Section, { InsightError, InsightResult, ResultTooLargeError } from "./IInsightFacade";
+import Section, {InsightError, InsightResult, Mfield, ResultTooLargeError, Sfield} from "./IInsightFacade";
 import QueryUtils from "./QueryUtils";
 
 export default class QueryEngine {
@@ -149,12 +149,14 @@ export default class QueryEngine {
 			} else {
 				if (this.sFields.includes(sfield)) {
 					const fieldIndex = this.sFields.indexOf(sfield);
-					const validInputRegex = /[*]?[^*]*[*]?/;
+					const validInputRegex = /^[*]?[^*]*[*]?$/;
 					if (!validInputRegex.test(input)) {
 						throw new InsightError(" Asterisks (*) can only be the first or last characters of input strings");
 					}
 					// fix this return, figure out what sfield is, how to match it, and how to access
-					const inputRegex = RegExp(input);
+					const processedInput = input.replace(/\*/g, '.*');
+					const inputRegex = new RegExp(`^${processedInput}$`);  // Use case-insensitive matching
+
 					return datasetSections.filter((section) => inputRegex.test(section.getSFieldByIndex(fieldIndex)));
 				} else {
 					throw new InsightError("Invalid sKey");
@@ -219,6 +221,29 @@ export default class QueryEngine {
 		}
 	}
 
+	private isEqual(section1: Section, section2: Section): boolean {
+		// Compare Sfield
+		const sfield1 = section1.getSfields();
+		const sfield2 = section2.getSfields();
+		for (const key of Object.keys(sfield1) as (keyof Sfield)[]) {
+			if (sfield1[key] !== sfield2[key]) {
+				return false;
+			}
+		}
+
+		// Compare Mfield
+		const mfield1 = section1.getMfields();
+		const mfield2 = section2.getMfields();
+		for (const key of Object.keys(mfield1) as (keyof Mfield)[]) {
+			if (mfield1[key] !== mfield2[key]) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+
 	private handleAND(value: unknown[]): Section[] {
 		const andList = [];
 		if (value.length === 0) {
@@ -233,16 +258,44 @@ export default class QueryEngine {
 			}
 		}
 
-		return andList.reduce((acc, currArray) => acc.filter((section) => currArray.includes(section)));
+		// only one filter applied
+			if (andList.length === 1) {
+				return andList[0];
+			}
+
+		let shortestList = andList.reduce((shortest, currArray) => {
+			return currArray.length < shortest.length ? currArray : shortest;
+		}, andList[0]);
+
+		for (const currArray of andList) {
+			if (currArray === shortestList) {
+				continue;}  // Skip comparing the shortest list with itself
+
+			// Filter the shortest list to keep only sections that exist in the current array
+			shortestList = shortestList.filter((section) =>
+				currArray.some((currSection) => this.isEqual(section, currSection))
+			);
+		}
+
+		return shortestList;
+
+		//return andList.reduce((acc, currArray) => acc.filter((section) => currArray.includes(section)));
 	}
+
 
 	private handleOR(value: unknown[]): Section[] {
 		const orList = [];
 		if (value.length === 0) {
 			throw new InsightError("OR must be a non-empty array");
 		}
+
 		for (const obj of value) {
-			orList.push(this.handleFilter(Object(obj).keys[0], Object(obj).values[0]));
+			if (typeof obj === "object" && obj !== null) {
+				const filterKey: string = Object.keys(obj)[0];
+				const filterVal: unknown = Object.values(obj)[0];
+				const key = this.handleFilter(filterKey, filterVal);
+				orList.push(key);
+			}
 		}
 		return orList.flat();
 	}

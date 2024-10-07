@@ -24,7 +24,7 @@ export interface Sfield {
 }
 
 export interface Mfield {
-	year: number;
+	year: number
 	avg: number;
 	pass: number;
 	fail: number;

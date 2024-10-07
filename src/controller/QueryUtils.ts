@@ -1,8 +1,8 @@
 import Section, { InsightError, InsightResult, ResultTooLargeError } from "./IInsightFacade";
 
 export default class QueryUtils {
-	private sFields: string[] = ["uuid", "id", "title", "instructor", "dept"];
-	private mFields: string[] = ["year", "avg", "pass", "fail", "audit"];
+	private sFields: string[] =  ["uuid", "id", "title", "instructor", "dept"];
+	private mFields: string[] =  ["year", "avg", "pass", "fail", "audit"];
 
 	public coerceToArray(value: unknown): unknown[] {
 		if (Array.isArray(value)) {

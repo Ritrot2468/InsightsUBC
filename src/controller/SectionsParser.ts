@@ -5,12 +5,12 @@ import { DatasetRecord } from "./DiskReader";
 
 export default class SectionsParser {
 	private valid_fields: string[] = [
-		"id",
+		"Year",
 		"Course",
 		"Title",
 		"Professor",
 		"Subject",
-		"Year",
+		"id",
 		"Avg",
 		"Pass",
 		"Fail",
@@ -119,7 +119,8 @@ export default class SectionsParser {
 	private addNewSectionToDatabase(dataset_id: string, jsonData: any, datasets: Map<string, Section[]>): void {
 		const result = jsonData;
 
-		const [uuid, id, title, instructor, dept] = this.sFields.map((sfield) => result[sfield]);
+		const [uuid, id, title, instructor, dept] = this.sFields.map((sfield) =>
+			result[sfield]);
 
 		const sectionSfields: Sfield = {
 			uuid,
@@ -230,15 +231,21 @@ export default class SectionsParser {
 	// OUTPUT: newly populated and created Section object
 	private createSection(jsonData: any): Section {
 		const result = jsonData;
-		const [uuid, id, title, instructor, dept] = this.sFields.map((sfield) => result[sfield]);
+
+		const [uuid, id, title, instructor, dept] : string[] = this.sFields.map((sfield) => {
+			const value = result[sfield] as string;
+			return value;
+		});
 
 		const sectionSfields: Sfield = {
-			uuid,
-			id,
-			title,
-			instructor,
-			dept,
+			uuid:  String(uuid),
+			id: String(id),
+			title: String(title),
+			instructor: String(instructor),
+			dept: String(dept),
 		};
+
+		console.log(typeof sectionSfields.uuid)
 
 		const [year, avg, pass, fail, audit] = this.mFields.map((mfield) => result[mfield]);
 
@@ -251,6 +258,7 @@ export default class SectionsParser {
 		};
 
 		const newSection: Section = new Section(sectionMfields, sectionSfields);
+		//console.log(typeof newSection.getSfields().id)
 		return newSection;
 	}
 

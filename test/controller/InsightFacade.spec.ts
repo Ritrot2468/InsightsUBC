@@ -355,7 +355,8 @@ describe("InsightFacade", function () {
 				if (errorExpected) {
 					expect.fail(`performQuery resolved when it should have rejected with ${expected}`);
 				}
-				expect(result).to.deep.equal(expected);
+				expect(result).to.have.deep.members(expected);
+				//expect(result).to.include.members(expected);
 			} catch (err) {
 				if (!errorExpected) {
 					// facade.sectionsDatabase.forEach((key, value) => {

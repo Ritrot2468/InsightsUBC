@@ -288,7 +288,9 @@ export default class QueryEngine {
 			if ("ORDER" in options) {
 				orderKey = this.handleORDER(options.ORDER, this.coerceToArray(options.COLUMNS) as string[]);
 			}
+			orderKey = orderKey.split("_")[1];
 			results = this.completeQuery(sections, columns, orderKey);
+
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;
@@ -319,10 +321,10 @@ export default class QueryEngine {
 			for (const column of columns) {
 				if (this.mFields.includes(column)) {
 					const mIndex = this.mFields.indexOf(column);
-					currRecord[column] = section.getMFieldByIndex(mIndex);
+					currRecord[`${this.queryingIDString}_${column}`] = section.getMFieldByIndex(mIndex);
 				} else {
 					const sIndex = this.sFields.indexOf(column);
-					currRecord[column] = section.getSFieldByIndex(sIndex);
+					currRecord[`${this.queryingIDString}_${column}`] = section.getSFieldByIndex(sIndex);
 				}
 			}
 			results.push(currRecord);

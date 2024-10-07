@@ -23,6 +23,7 @@ export default class SectionsParser {
 
 	public sFields: string[] = ["id", "Course", "Title", "Professor", "Subject"];
 
+	private static OVERALL_SECTION_YEAR = 1900;
 	//  REQUIRES: content: dataset content in base64 string, f
 	//  		  id:  name of current dataset about to be counted
 	//            datasets: map containing all datasets and associated sections added to InsightFacade instance so far
@@ -207,7 +208,14 @@ export default class SectionsParser {
 					file.result = validSectionsInCourse;
 					// turn all valid sections to Sections objects
 					validSectionsInCourse.forEach((section: any) => {
-						sections.push(this.createSection(section));
+						if (section.Section === "overall") {
+							const newSection = this.createSection(section);
+							newSection.setMfield(newSection.getMFieldIndex("year"), SectionsParser.OVERALL_SECTION_YEAR);
+							sections.push(newSection);
+							//console.log(newSection.getMfields().year)
+						} else {
+							sections.push(this.createSection(section));
+						}
 					});
 
 					return { id, file };

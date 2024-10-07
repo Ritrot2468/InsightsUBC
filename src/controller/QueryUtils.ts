@@ -27,15 +27,28 @@ export default class QueryUtils {
 		if (orderKey === "") {
 			return results;
 		} else {
-			if (this.mFields.includes(orderKey)) {
-				results.sort((recordA, recordB) => {
-					return (recordA[orderKey] as number) - (recordB[orderKey] as number);
-				});
-			} else {
-				results.sort((recordA, recordB) => {
-					return (recordA[orderKey] as string).localeCompare(recordB[orderKey] as string);
-				});
-			}
+			// in the case of numbers stored as string
+			results.sort((recordA, recordB) => {
+				const valueA = recordA[orderKey];
+				const valueB = recordB[orderKey];
+
+				// Handle string comparisons
+				if (typeof valueA === "string" && typeof valueB === "string") {
+					return valueA.localeCompare(valueB);
+				}
+
+				// Handle number comparisons
+				if (typeof valueA === "number" && typeof valueB === "number") {
+					return valueA - valueB;
+				}
+
+				// Handle mixed types (string vs number)
+				// You can choose how to handle this; here we convert numbers to strings for comparison
+				return String(valueA).localeCompare(String(valueB));
+			});
+			// results.sort((recordA, recordB) => {
+			// 	return (recordA[orderKey] as string).localeCompare(recordB[orderKey] as string);
+			// });
 		}
 		return results;
 	}

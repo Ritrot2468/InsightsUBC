@@ -10,9 +10,11 @@ export interface DatasetRecord {
 
 export default class DiskReader {
 	private sp: SectionsParser;
+	private secDatabase: Map<string, Section[]>;
 
-	constructor() {
+	constructor(sectionDatabase: Map<string, Section[]>) {
 		this.sp = new SectionsParser();
+		this.secDatabase = sectionDatabase;
 	}
 
 	// REQUIRES: currDatasets- array of all the dataset ids currently added in InsightFacade instance
@@ -36,7 +38,7 @@ export default class DiskReader {
 	// and associated sections
 	// datasetsIds = all currently added datasets (refer to currIDs),
 	public async mapMissingSections(currDatasetsIDs: string[]): Promise<Map<string, Section[]>> {
-		const missingDatasets = new Map<string, Section[]>();
+		//const missingDatasets = new Map<string, Section[]>();
 		const allPromises: Promise<DatasetRecord>[] = [];
 		// the id of all datasets not currently added
 		const missingDatasetsID = await this.findDatasetsNotAdded(currDatasetsIDs);
@@ -51,9 +53,9 @@ export default class DiskReader {
 
 		// add all records collected to Map
 		records.forEach((record) => {
-			missingDatasets.set(record.id, record.sections);
+			this.secDatabase.set(record.id, record.sections);
 		});
 
-		return missingDatasets;
+		return this.secDatabase;
 	}
 }

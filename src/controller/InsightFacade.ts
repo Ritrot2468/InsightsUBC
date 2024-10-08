@@ -48,8 +48,9 @@ export default class InsightFacade implements IInsightFacade {
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
 		try {
 			await fs.ensureDir("./data");
-			this.sv.validateId(id, this.currIDs);
 			this.sectionsDatabase = await this.dr.mapMissingSections()
+			this.sv.validateId(id, this.currIDs);
+
 			// Number of rows found associated with the insightKind
 			//const numRows = await this.sp.countRows(content, id, this.sectionsDatabase);\
 			await this.sp.logDatasetOnDisk(content, id);

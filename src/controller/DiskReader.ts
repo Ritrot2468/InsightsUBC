@@ -56,6 +56,10 @@ export default class DiskReader {
 			allPromises.push(promise);
 		});
 		const records = await Promise.all(allPromises);
+		// add all records collected to Map
+		records.forEach((record) => {
+			this.secDatabase.set(record.id, record.sections);
+		});
 
 		missingDatasetsID.forEach((setID) => {
 				const newRecord: InsightResult = {
@@ -64,10 +68,7 @@ export default class DiskReader {
 				this.datasets.set(setID, newRecord);
 			}
 		)
-		// add all records collected to Map
-		records.forEach((record) => {
-			this.secDatabase.set(record.id, record.sections);
-		});
+
 
 		return this.secDatabase;
 	}

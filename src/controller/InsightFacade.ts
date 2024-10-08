@@ -42,15 +42,17 @@ export default class InsightFacade implements IInsightFacade {
 		this.sv = new SectionsValidator();
 		this.sp = new SectionsParser();
 		this.qe = new QueryEngine(this.sectionsDatabase);
-		this.dr = new DiskReader(this.sectionsDatabase);
+		this.dr = new DiskReader(this.sectionsDatabase, this.currIDs, this.datasets);
 		// initialize dictionary for the fields
 	}
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
 		try {
+			//await fs.ensureDir("./data");
+			//this.sectionsDatabase = await this.dr.mapMissingSections();
 			this.sv.validateId(id, this.currIDs);
-			// Number of rows found associated with the insightKind
-			//const numRows = await this.sp.countRows(content, id, this.sectionsDatabase);
 
+			// Number of rows found associated with the insightKind
+			//const numRows = await this.sp.countRows(content, id, this.sectionsDatabase);\
 			await this.sp.logDatasetOnDisk(content, id);
 			await this.logNewDatasetFromDiskToMap(id, kind);
 
@@ -125,7 +127,8 @@ export default class InsightFacade implements IInsightFacade {
 		// 	console.log(key, value)
 		// })
 		try {
-			this.sectionsDatabase = await this.dr.mapMissingSections(this.currIDs);
+			await fs.ensureDir("./data");
+			this.sectionsDatabase = await this.dr.mapMissingSections();
 			result = await this.qe.query(query);
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
@@ -142,7 +145,8 @@ export default class InsightFacade implements IInsightFacade {
 
 	public async listDatasets(): Promise<InsightDataset[]> {
 		const result: any[] = [];
-
+		await fs.ensureDir("./data");
+		this.sectionsDatabase = await this.dr.mapMissingSections();
 		this.datasets.forEach((val, key) => {
 			const newInsightDataset: InsightDataset = {
 				id: key,

@@ -23,6 +23,7 @@ export interface ITestQuery {
 
 describe("InsightFacade", function () {
 	let facade: IInsightFacade;
+	//let facade2: IInsightFacade;
 
 	// Declare datasets used in tests. You should add more datasets like this!
 	let sections: string;
@@ -165,10 +166,8 @@ describe("InsightFacade", function () {
 
 		it("should add valid data properly (valid id - one char)", async function () {
 			// const result = await
-			// // TODO:
-			// await expect(
-			// 	facade.addDataset("s", sections, InsightDatasetKind.Sections)
-			// ).to.eventually.have.members(["s"]);
+			// const facade2 = new InsightFacade()
+			// await facade2.addDataset("tanny", sections2, InsightDatasetKind.Sections)
 			const result = await facade.addDataset("s", sections, InsightDatasetKind.Sections);
 
 			return expect(result).to.have.members(["s"]);
@@ -336,6 +335,7 @@ describe("InsightFacade", function () {
 		 *
 		 * Note: the 'this' parameter is automatically set by Mocha and contains information about the test.
 		 */
+
 		async function checkQuery(this: Mocha.Context): Promise<void> {
 			if (!this.test) {
 				throw new Error(
@@ -348,6 +348,7 @@ describe("InsightFacade", function () {
 			const { input, expected, errorExpected } = await loadTestQuery(this.test.title);
 			let result: InsightResult[];
 			try {
+				// result = await facade2.performQuery(input);
 				result = await facade.performQuery(input);
 				// facade.sectionsDatabase.forEach((key, value) => {
 				// 	console.log(key, value)
@@ -406,6 +407,7 @@ describe("InsightFacade", function () {
 
 		before(async function () {
 			facade = new InsightFacade();
+			//facade2 = new InsightFacade()
 			sections = await getContentFromArchives("pair.zip");
 			// Add the datasets to InsightFacade once.
 			// Will *fail* if there is a problem reading ANY dataset.
@@ -472,7 +474,7 @@ describe("InsightFacade", function () {
 		it("[valid/order1.json] order by instructor", checkQuery);
 		it("[valid/order2.json] order by audit", checkQuery);
 		it("[valid/order3.json] order by pass", checkQuery);
-		//it("[valid/order4.json] order by uuid", checkQuery);
+		it("[valid/order4.json] order by uuid", checkQuery);
 		it("[valid/filter_by_id.json] filter by id", checkQuery);
 		it("[valid/double_ast.json] double ast", checkQuery);
 
@@ -504,11 +506,11 @@ describe("InsightFacade", function () {
 
 		it("[invalid/mkeyWithSfield.json] mkey with sfield", checkQuery);
 
-		//it("[invalid/mkeyWithStringAsKey.json] mkey with string as key", checkQuery);
+		it("[invalid/mkeyWithStringAsKey.json] mkey with string as key", checkQuery);
 
 		it("[valid/mkeyWithDecimalNumber.json] mkey with decimal number", checkQuery);
 
-		//it("[invalid/andIsInvalidObject.json] and is invalid object", checkQuery);
+		//	it("[invalid/andIsInvalidObject.json] and is invalid object", checkQuery);
 
 		it("[invalid/andEmptyKeylist.json] and empty keylist", checkQuery);
 
@@ -558,7 +560,7 @@ describe("InsightFacade", function () {
 		it("[invalid/invalid5.json] SELECT pass, audit, dept, avg WHERE dept == apbl", checkQuery);
 		it("[invalid/invalid4.json] SELECT pass, audit, dept, avg WHERE avg == 97", checkQuery);
 		it("[invalid/invalid3.json] SELECT pass, audit, dept, avg WHERE avg == 97", checkQuery);
-		//it("[invalid/invalid2.json] SELECT pass, audit, dept, avg WHERE avg == 97", checkQuery);
+		it("[invalid/invalid2.json] SELECT pass, audit, dept, avg WHERE avg == 97", checkQuery);
 		it("[invalid/invalid1.json] Query missing OPTIONS", checkQuery);
 
 		it("[invalid/invalid.json] Query missing WHERE", checkQuery);
@@ -634,6 +636,35 @@ describe("InsightFacade", function () {
 
 				const sections1 = await getContentFromArchives("test5.zip");
 				await facade.addDataset("test5", sections1, InsightDatasetKind.Sections);
+
+				const datasets = await facade.listDatasets();
+				const EXPECTED_LENGTH = 2;
+				expect(datasets.length).to.equal(EXPECTED_LENGTH);
+				expect(datasets).to.include.deep.members([
+					{
+						id: "test3",
+						kind: InsightDatasetKind.Sections,
+						numRows: 2,
+					},
+					{
+						id: "test5",
+						kind: InsightDatasetKind.Sections,
+						numRows: 2,
+					},
+				]);
+			} catch (err) {
+				expect.fail(`you failed to load the right sets ${err}`);
+			}
+		});
+
+		it("list 2 datasets from different facades", async function () {
+			try {
+				sections = await getContentFromArchives("test3.zip");
+				await facade.addDataset("test3", sections, InsightDatasetKind.Sections);
+
+				const facade1 = new InsightFacade();
+				const sections1 = await getContentFromArchives("test5.zip");
+				await facade1.addDataset("test5", sections1, InsightDatasetKind.Sections);
 
 				const datasets = await facade.listDatasets();
 				const EXPECTED_LENGTH = 2;

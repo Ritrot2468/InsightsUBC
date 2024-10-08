@@ -23,42 +23,43 @@ export default class QueryUtils {
 		}
 	}
 
-	public sortByOrder(results: InsightResult[], orderKey: string): InsightResult[] {
+	public async sortByOrder(results: InsightResult[], orderKey: string): Promise<InsightResult[]> {
 		if (orderKey === "") {
 			return results;
 		} else {
-			// in the case of numbers stored as string
-			results.sort((recordA, recordB) => {
-				const valueA = recordA[orderKey];
-				const valueB = recordB[orderKey];
+			// Perform the sorting asynchronously
+			return new Promise((resolve) => {
+				setTimeout(() => {
+					results.sort((recordA, recordB) => {
+						const valueA = recordA[orderKey];
+						const valueB = recordB[orderKey];
 
-				// Handle string comparisons
-				if (typeof valueA === "string" && typeof valueB === "string") {
-					return valueA.localeCompare(valueB);
-				}
+						if (typeof valueA === "string" && typeof valueB === "string") {
+							return valueA.localeCompare(valueB);
+						}
 
-				// Handle number comparisons
-				if (typeof valueA === "number" && typeof valueB === "number") {
-					return valueA - valueB;
-				}
+						if (typeof valueA === "number" && typeof valueB === "number") {
+							return valueA - valueB;
+						}
 
-				// Handle mixed types (string vs number)
-				// You can choose how to handle this; here we convert numbers to strings for comparison
-				return String(valueA).localeCompare(String(valueB));
+						// Handle mixed types (e.g., string vs number)
+						return String(valueA).localeCompare(String(valueB));
+					});
+
+					// Resolve the promise with the sorted results
+					resolve(results);
+				}, 0);
 			});
-			// results.sort((recordA, recordB) => {
-			// 	return (recordA[orderKey] as string).localeCompare(recordB[orderKey] as string);
-			// });
 		}
-		return results;
 	}
 
-	public selectCOLUMNS(sections: Section[], columns: string[]): InsightResult[] {
-		const results: InsightResult[] = [];
-		for (const section of sections) {
+	public async selectCOLUMNS(sections: Section[], columns: string[]): Promise<InsightResult[]> {
+		const results = sections.map((section) => {
 			const currRecord: InsightResult = {};
-			for (const column of columns) {
+
+			columns.forEach((column) => {
 				const field = column.split("_")[1];
+
 				if (this.mFields.includes(field)) {
 					const mIndex = this.mFields.indexOf(field);
 					currRecord[column] = section.getMFieldByIndex(mIndex);
@@ -66,15 +67,20 @@ export default class QueryUtils {
 					const sIndex = this.sFields.indexOf(field);
 					currRecord[column] = section.getSFieldByIndex(sIndex);
 				}
-			}
-			results.push(currRecord);
-		}
+			});
+
+			return currRecord;
+		});
 		return results;
 	}
 
-	public filterMComparison(dataset: Section[], filter: string, index: number, input: number): Section[] {
+	//TODO: I had to change the name because lint and prettier would not let me push unless I shortened line
+	public async filterMCompare(dataset: Section[], filter: string, index: number, input: number): Promise<Section[]> {
 		let results: Section[];
 		//console.log("FILTER MCOMPARISON WORKING");
+		if (typeof input === "string") {
+			throw new InsightError("Invalid mkey type");
+		}
 		if (filter === "LT") {
 			results = dataset.filter((section) => section.getMFieldByIndex(index) < input);
 		} else if (filter === "GT") {
@@ -87,7 +93,7 @@ export default class QueryUtils {
 		return results;
 	}
 
-	public mergeAndList(andList: Section[][]): Section[] {
+	public async mergeAndList(andList: Section[][]): Promise<Section[]> {
 		let shortestList = andList.reduce((shortest, currArray) => {
 			return currArray.length < shortest.length ? currArray : shortest;
 		}, andList[0]);
@@ -98,14 +104,24 @@ export default class QueryUtils {
 			} // Skip comparing the shortest list with itself
 
 			// Filter the shortest list to keep only sections that exist in the current array
-			shortestList = shortestList.filter((section) =>
-				currArray.some((currSection) => this.isEqual(section, currSection))
+			shortestList = shortestList.filter(async (section) =>
+				currArray.some(async (currSection) => this.isEqual(section, currSection))
 			);
 		}
 		return shortestList;
 	}
 
-	public isEqual(section1: Section, section2: Section): boolean {
+	public testRegex(input: string): RegExp {
+		const validInputRegex = /^[*]?[^*]*[*]?$/;
+		if (!validInputRegex.test(input)) {
+			throw new InsightError(" Asterisks (*) can only be the first or last characters of input strings");
+		}
+		// fix this return, figure out what sfield is, how to match it, and how to access
+		const processedInput = input.replace(/\*/g, ".*");
+		return new RegExp(`^${processedInput}$`); // Use case-insensitive matching
+	}
+
+	public async isEqual(section1: Section, section2: Section): Promise<boolean> {
 		// Compare Sfield
 		const sfield1 = section1.getSfields();
 		const sfield2 = section2.getSfields();

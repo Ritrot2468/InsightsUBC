@@ -29,25 +29,26 @@ export default class QueryUtils {
 		} else {
 			// Perform the sorting asynchronously
 			return new Promise((resolve) => {
-				// Perform the sorting asynchronously
-				results.sort((recordA, recordB) => {
-					const valueA = recordA[orderKey];
-					const valueB = recordB[orderKey];
+				setTimeout(() => {
+					results.sort((recordA, recordB) => {
+						const valueA = recordA[orderKey];
+						const valueB = recordB[orderKey];
 
+						if (typeof valueA === "string" && typeof valueB === "string") {
+							return valueA.localeCompare(valueB);
+						}
 
-					if (typeof valueA === "string" && typeof valueB === "string") {
-						return valueA.localeCompare(valueB);
-					}
+						if (typeof valueA === "number" && typeof valueB === "number") {
+							return valueA - valueB;
+						}
 
-					if (typeof valueA === "number" && typeof valueB === "number") {
-						return valueA - valueB;
-					}
+						// Handle mixed types (e.g., string vs number)
+						return String(valueA).localeCompare(String(valueB));
+					});
 
-					// Handle mixed types (string vs number)
-					return String(valueA).localeCompare(String(valueB));
-				});
-
-				resolve(results);
+					// Resolve the promise with the sorted results
+					resolve(results);
+				}, 0);
 			});
 		}
 	}

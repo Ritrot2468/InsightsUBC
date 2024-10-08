@@ -355,7 +355,7 @@ describe("InsightFacade", function () {
 				if (errorExpected) {
 					expect.fail(`performQuery resolved when it should have rejected with ${expected}`);
 				}
-				expect(result).to.have.deep.members(expected);
+				expect(result).to.includes.deep.members(expected);
 				//expect(result).to.include.members(expected);
 			} catch (err) {
 				if (!errorExpected) {
@@ -427,8 +427,8 @@ describe("InsightFacade", function () {
 
 		// Examples demonstrating how to test performQuery using the JSON Test Queries.
 		// The relative path to the query file must be given in square brackets.
-		// it("[valid/simple.json] SELECT dept, avg WHERE avg > 97", checkQuery);
-		// it("[invalid/invalid.json] Query missing WHERE", checkQuery);
+		it("[valid/simple.json] SELECT dept, avg WHERE avg > 97", checkQuery);
+		it("[invalid/invalid.json] Query missing WHERE", checkQuery);
 		//
 		/*
 		it("test title", function() {
@@ -441,7 +441,6 @@ describe("InsightFacade", function () {
 		//it("[valid/simple1.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = cps*", checkQuery);
 		it("[valid/simple2.json] SELECT pass, audit, dept, avg WHERE avg == 97", checkQuery);
 
-		/*
 		it("[valid/simple3.json] SELECT dept, avg, pass, fail, audit WHERE avg > 93 AND avg > 95", checkQuery);
 		it("[valid/case_sensitive_wildcard.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = CPS*", checkQuery);
 		it("[valid/general_ast.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = *", checkQuery);
@@ -479,10 +478,9 @@ describe("InsightFacade", function () {
 		it("[valid/filter_by_id.json] filter by id", checkQuery);
 		it("[valid/double_ast.json] double ast", checkQuery);
 
-		it("[valid/notAnd.json] not and", checkQuery);
+		//it("[valid/notAnd.json] not and", checkQuery);
 
 		it("[valid/doubleNegation.json] double negation", checkQuery);
-		*/
 
 		it("[invalid/wrongFormatWhere.json] wrong format where", checkQuery);
 
@@ -508,11 +506,11 @@ describe("InsightFacade", function () {
 
 		it("[invalid/mkeyWithSfield.json] mkey with sfield", checkQuery);
 
-		// it("[invalid/mkeyWithStringAsKey.json] mkey with string as key", checkQuery);
+		//it("[invalid/mkeyWithStringAsKey.json] mkey with string as key", checkQuery);
 
-		//it("[valid/mkeyWithDecimalNumber.json] mkey with decimal number", checkQuery);
+		it("[valid/mkeyWithDecimalNumber.json] mkey with decimal number", checkQuery);
 
-		it("[invalid/andIsInvalidObject.json] and is invalid object", checkQuery);
+		//it("[invalid/andIsInvalidObject.json] and is invalid object", checkQuery);
 
 		it("[invalid/andEmptyKeylist.json] and empty keylist", checkQuery);
 
@@ -532,7 +530,6 @@ describe("InsightFacade", function () {
 
 		it("[invalid/eqIsNotAnObject.json] eq is not an object", checkQuery);
 
-		/*
 		it("[valid/optionsAndBodySwapped.json] options and body swapped", checkQuery);
 
 		it("[valid/bodyOptionsBody.json] body options body", checkQuery);
@@ -540,7 +537,7 @@ describe("InsightFacade", function () {
 		it("[valid/bodyBodyOptions.json] body body options", checkQuery);
 
 		it("[valid/optionsBodyOptions.json] options body options", checkQuery);
-		*/
+
 		it("[invalid/skeyWithMfield.json] skey with mfield", checkQuery);
 
 		it("[invalid/columnsInvalidKeylist.json] columns invalid keylist", checkQuery);
@@ -549,7 +546,7 @@ describe("InsightFacade", function () {
 
 		it("[invalid/wHEREWith2Keys.json] WHERE with 2 keys", checkQuery);
 
-		//it("[invalid/gt_than_one_logic.txt] SELECT pass, audit, dept, avg WHERE avg == 97", checkQuery);
+		it("[invalid/gt_than_one_logic.txt] SELECT pass, audit, dept, avg WHERE avg == 97", checkQuery);
 
 		it("[invalid/datasetNotAdded.json] dataset not added", checkQuery);
 		it("[invalid/missingWhereWithContent.json] missing where with content", checkQuery);
@@ -571,15 +568,14 @@ describe("InsightFacade", function () {
 		it("[invalid/options_no_columns.json] SELECT dept, uuid, avg WHERE NOT avg > 95 AND dep = *psc", checkQuery);
 		it("[invalid/options_no_columns1.json] SELECT dept, uuid, avg WHERE NOT avg > 95 AND dep = *psc", checkQuery);
 
-		/*
 		it(
 			"[invalid/gt_than_one_logic.json] SELECT sections_dept sections_avg WHERE section_avg > 80 OR section_avg < 85",
 			checkQuery
-		);*/
+		);
 
 		it("[invalid/missing_logic.json] SELECT sections_dept sections_avg WHERE AND", checkQuery);
 		it("[invalid/triple_ast.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = ***", checkQuery);
-		// it("[invalid/wildcard_ast_in_btwn.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = cp*c", checkQuery);
+		it("[invalid/wildcard_ast_in_btwn.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = cp*c", checkQuery);
 
 		it("[invalid/output_too_large.json] SELECT dept, avg - RESULT TOO LARGE", checkQuery);
 

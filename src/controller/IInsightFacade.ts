@@ -39,6 +39,22 @@ export default class Section {
 		this._mfields = value;
 	}
 
+	public setMfield(index: number, newVal: number): void {
+		const keys: (keyof Mfield)[] = ["year", "avg", "pass", "fail", "audit"];
+		if (index < 0 || index > keys.length) {
+			throw new Error("Out of bounds");
+		}
+		this._mfields[keys[index]] = newVal;
+	}
+
+	public setSField(index: number, newVal: string): void {
+		const keys: (keyof Sfield)[] = ["uuid", "id", "title", "instructor", "dept"];
+		if (index < 0 || index > keys.length) {
+			throw new Error("Out of bounds");
+		}
+		this._sfields[keys[index]] = newVal;
+	}
+
 	public getSfields(): Sfield {
 		return this._sfields;
 	}
@@ -61,6 +77,18 @@ export default class Section {
 			throw new Error("Out of bounds");
 		}
 		return this._sfields[keys[index]];
+	}
+
+	public getSFieldIndex(sfield: string): number {
+		const keys: (keyof Sfield)[] = ["uuid", "id", "title", "instructor", "dept"];
+		return keys.indexOf(sfield as keyof Sfield);
+		// -1 if index is not found
+	}
+
+	public getMFieldIndex(mfield: string): number {
+		const keys: (keyof Mfield)[] = ["year", "avg", "pass", "fail", "audit"];
+		return keys.indexOf(mfield as keyof Mfield);
+		// -1 if index is not found
 	}
 
 	private _mfields: Mfield;

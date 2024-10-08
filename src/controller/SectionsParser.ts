@@ -5,12 +5,12 @@ import { DatasetRecord } from "./DiskReader";
 
 export default class SectionsParser {
 	private valid_fields: string[] = [
-		"id",
+		"Year",
 		"Course",
 		"Title",
 		"Professor",
 		"Subject",
-		"Year",
+		"id",
 		"Avg",
 		"Pass",
 		"Fail",
@@ -23,6 +23,7 @@ export default class SectionsParser {
 
 	public sFields: string[] = ["id", "Course", "Title", "Professor", "Subject"];
 
+	private static OVERALL_SECTION_YEAR = 1900;
 	//  REQUIRES: content: dataset content in base64 string, f
 	//  		  id:  name of current dataset about to be counted
 	//            datasets: map containing all datasets and associated sections added to InsightFacade instance so far
@@ -207,7 +208,14 @@ export default class SectionsParser {
 					file.result = validSectionsInCourse;
 					// turn all valid sections to Sections objects
 					validSectionsInCourse.forEach((section: any) => {
-						sections.push(this.createSection(section));
+						if (section.Section === "overall") {
+							const newSection = this.createSection(section);
+							newSection.setMfield(newSection.getMFieldIndex("year"), SectionsParser.OVERALL_SECTION_YEAR);
+							sections.push(newSection);
+							//console.log(newSection.getMfields().year)
+						} else {
+							sections.push(this.createSection(section));
+						}
 					});
 
 					return { id, file };
@@ -230,27 +238,34 @@ export default class SectionsParser {
 	// OUTPUT: newly populated and created Section object
 	private createSection(jsonData: any): Section {
 		const result = jsonData;
-		const [uuid, id, title, instructor, dept] = this.sFields.map((sfield) => result[sfield]);
+
+		const [uuid, id, title, instructor, dept]: string[] = this.sFields.map((sfield) => {
+			const value = result[sfield] as string;
+			return value;
+		});
 
 		const sectionSfields: Sfield = {
-			uuid,
-			id,
-			title,
-			instructor,
-			dept,
+			uuid: String(uuid),
+			id: String(id),
+			title: String(title),
+			instructor: String(instructor),
+			dept: String(dept),
 		};
+
+		//console.log(typeof sectionSfields.uuid)
 
 		const [year, avg, pass, fail, audit] = this.mFields.map((mfield) => result[mfield]);
 
 		const sectionMfields: Mfield = {
-			year,
-			avg,
-			pass,
-			fail,
-			audit,
+			year: Number(year),
+			avg: Number(avg),
+			pass: Number(pass),
+			fail: Number(fail),
+			audit: Number(audit),
 		};
 
 		const newSection: Section = new Section(sectionMfields, sectionSfields);
+		//console.log(typeof newSection.getSfields().id)
 		return newSection;
 	}
 

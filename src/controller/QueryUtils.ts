@@ -1,4 +1,4 @@
-import Section, { InsightError, InsightResult, ResultTooLargeError } from "./IInsightFacade";
+import Section, { InsightError, InsightResult, Mfield, ResultTooLargeError, Sfield } from "./IInsightFacade";
 
 export default class QueryUtils {
 	private sFields: string[] = ["uuid", "id", "title", "instructor", "dept"];
@@ -27,15 +27,28 @@ export default class QueryUtils {
 		if (orderKey === "") {
 			return results;
 		} else {
-			if (this.mFields.includes(orderKey)) {
-				results.sort((recordA, recordB) => {
-					return (recordA[orderKey] as number) - (recordB[orderKey] as number);
-				});
-			} else {
-				results.sort((recordA, recordB) => {
-					return (recordA[orderKey] as string).localeCompare(recordB[orderKey] as string);
-				});
-			}
+			// in the case of numbers stored as string
+			results.sort((recordA, recordB) => {
+				const valueA = recordA[orderKey];
+				const valueB = recordB[orderKey];
+
+				// Handle string comparisons
+				if (typeof valueA === "string" && typeof valueB === "string") {
+					return valueA.localeCompare(valueB);
+				}
+
+				// Handle number comparisons
+				if (typeof valueA === "number" && typeof valueB === "number") {
+					return valueA - valueB;
+				}
+
+				// Handle mixed types (string vs number)
+				// You can choose how to handle this; here we convert numbers to strings for comparison
+				return String(valueA).localeCompare(String(valueB));
+			});
+			// results.sort((recordA, recordB) => {
+			// 	return (recordA[orderKey] as string).localeCompare(recordB[orderKey] as string);
+			// });
 		}
 		return results;
 	}
@@ -72,5 +85,45 @@ export default class QueryUtils {
 			throw new InsightError("Invalid MComparator");
 		}
 		return results;
+	}
+
+	public mergeAndList(andList: Section[][]): Section[] {
+		let shortestList = andList.reduce((shortest, currArray) => {
+			return currArray.length < shortest.length ? currArray : shortest;
+		}, andList[0]);
+
+		for (const currArray of andList) {
+			if (currArray === shortestList) {
+				continue;
+			} // Skip comparing the shortest list with itself
+
+			// Filter the shortest list to keep only sections that exist in the current array
+			shortestList = shortestList.filter((section) =>
+				currArray.some((currSection) => this.isEqual(section, currSection))
+			);
+		}
+		return shortestList;
+	}
+
+	public isEqual(section1: Section, section2: Section): boolean {
+		// Compare Sfield
+		const sfield1 = section1.getSfields();
+		const sfield2 = section2.getSfields();
+		for (const key of Object.keys(sfield1) as (keyof Sfield)[]) {
+			if (sfield1[key] !== sfield2[key]) {
+				return false;
+			}
+		}
+
+		// Compare Mfield
+		const mfield1 = section1.getMfields();
+		const mfield2 = section2.getMfields();
+		for (const key of Object.keys(mfield1) as (keyof Mfield)[]) {
+			if (mfield1[key] !== mfield2[key]) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 }

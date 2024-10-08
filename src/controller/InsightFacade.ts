@@ -11,6 +11,7 @@ import fs from "fs-extra";
 import SectionsValidator from "./SectionsValidator";
 import SectionsParser from "./SectionsParser";
 import QueryEngine from "./QueryEngine";
+import DiskReader from "./DiskReader";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -31,6 +32,7 @@ export default class InsightFacade implements IInsightFacade {
 	private sv: SectionsValidator;
 	private sp: SectionsParser;
 	private qe: QueryEngine;
+	private dr: DiskReader;
 
 	constructor() {
 		//Log.info("InsightFacadeImpl::init()");
@@ -40,6 +42,7 @@ export default class InsightFacade implements IInsightFacade {
 		this.sv = new SectionsValidator();
 		this.sp = new SectionsParser();
 		this.qe = new QueryEngine(this.sectionsDatabase);
+		this.dr = new DiskReader(this.sectionsDatabase);
 		// initialize dictionary for the fields
 	}
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
@@ -122,6 +125,7 @@ export default class InsightFacade implements IInsightFacade {
 		// 	console.log(key, value)
 		// })
 		try {
+			this.sectionsDatabase = await this.dr.mapMissingSections(this.currIDs);
 			result = await this.qe.query(query);
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {

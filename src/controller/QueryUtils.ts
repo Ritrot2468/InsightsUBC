@@ -23,42 +23,70 @@ export default class QueryUtils {
 		}
 	}
 
-	public sortByOrder(results: InsightResult[], orderKey: string): InsightResult[] {
+	public async sortByOrder(results: InsightResult[], orderKey: string): Promise<InsightResult[]> {
 		if (orderKey === "") {
 			return results;
 		} else {
-			// in the case of numbers stored as string
-			results.sort((recordA, recordB) => {
-				const valueA = recordA[orderKey];
-				const valueB = recordB[orderKey];
+			// Perform the sorting asynchronously
+				results.sort((recordA, recordB) => {
+					const valueA = recordA[orderKey];
+					const valueB = recordB[orderKey];
 
-				// Handle string comparisons
-				if (typeof valueA === "string" && typeof valueB === "string") {
-					return valueA.localeCompare(valueB);
-				}
+					// Handle string comparisons
+					if (typeof valueA === "string" && typeof valueB === "string") {
+						return valueA.localeCompare(valueB);
+					}
 
-				// Handle number comparisons
-				if (typeof valueA === "number" && typeof valueB === "number") {
-					return valueA - valueB;
-				}
+					// Handle number comparisons
+					if (typeof valueA === "number" && typeof valueB === "number") {
+						return valueA - valueB;
+					}
 
-				// Handle mixed types (string vs number)
-				// You can choose how to handle this; here we convert numbers to strings for comparison
-				return String(valueA).localeCompare(String(valueB));
-			});
-			// results.sort((recordA, recordB) => {
-			// 	return (recordA[orderKey] as string).localeCompare(recordB[orderKey] as string);
-			// });
+					// Handle mixed types (string vs number)
+					return String(valueA).localeCompare(String(valueB));
+				});
+
+				return results;
+
 		}
-		return results;
 	}
+	// public sortByOrder(results: InsightResult[], orderKey: string): InsightResult[] {
+	// 	if (orderKey === "") {
+	// 		return results;
+	// 	} else {
+	// 		// in the case of numbers stored as string
+	// 		results.sort((recordA, recordB) => {
+	// 			const valueA = recordA[orderKey];
+	// 			const valueB = recordB[orderKey];
+	//
+	// 			// Handle string comparisons
+	// 			if (typeof valueA === "string" && typeof valueB === "string") {
+	// 				return valueA.localeCompare(valueB);
+	// 			}
+	//
+	// 			// Handle number comparisons
+	// 			if (typeof valueA === "number" && typeof valueB === "number") {
+	// 				return valueA - valueB;
+	// 			}
+	//
+	// 			// Handle mixed types (string vs number)
+	// 			// You can choose how to handle this; here we convert numbers to strings for comparison
+	// 			return String(valueA).localeCompare(String(valueB));
+	// 		});
+	// 		// results.sort((recordA, recordB) => {
+	// 		// 	return (recordA[orderKey] as string).localeCompare(recordB[orderKey] as string);
+	// 		// });
+	// 	}
+	// 	return results;
+	// }
 
-	public selectCOLUMNS(sections: Section[], columns: string[]): InsightResult[] {
-		const results: InsightResult[] = [];
-		for (const section of sections) {
+	public async selectCOLUMNS(sections: Section[], columns: string[]): Promise<InsightResult[]> {
+		const resultsPromises = sections.map(async (section) => {
 			const currRecord: InsightResult = {};
-			for (const column of columns) {
+
+			const fieldPromises = columns.map(async (column) => {
 				const field = column.split("_")[1];
+
 				if (this.mFields.includes(field)) {
 					const mIndex = this.mFields.indexOf(field);
 					currRecord[column] = section.getMFieldByIndex(mIndex);
@@ -66,11 +94,35 @@ export default class QueryUtils {
 					const sIndex = this.sFields.indexOf(field);
 					currRecord[column] = section.getSFieldByIndex(sIndex);
 				}
-			}
-			results.push(currRecord);
-		}
+			});
+
+			await Promise.all(fieldPromises); // Wait for all column-related field fetches
+			return currRecord;
+		});
+
+		const results = await Promise.all(resultsPromises);
+		// Wait for all section-related records to be processed
 		return results;
 	}
+
+	// public selectCOLUMNS(sections: Section[], columns: string[]): InsightResult[] {
+	// 	const results: InsightResult[] = [];
+	// 	for (const section of sections) {
+	// 		const currRecord: InsightResult = {};
+	// 		for (const column of columns) {
+	// 			const field = column.split("_")[1];
+	// 			if (this.mFields.includes(field)) {
+	// 				const mIndex = this.mFields.indexOf(field);
+	// 				currRecord[column] = section.getMFieldByIndex(mIndex);
+	// 			} else {
+	// 				const sIndex = this.sFields.indexOf(field);
+	// 				currRecord[column] = section.getSFieldByIndex(sIndex);
+	// 			}
+	// 		}
+	// 		results.push(currRecord);
+	// 	}
+	// 	return results;
+	// }
 
 	public filterMComparison(dataset: Section[], filter: string, index: number, input: number): Section[] {
 		let results: Section[];
@@ -87,7 +139,7 @@ export default class QueryUtils {
 		return results;
 	}
 
-	public mergeAndList(andList: Section[][]): Section[] {
+	public async mergeAndList(andList: Section[][]): Promise<Section[]> {
 		let shortestList = andList.reduce((shortest, currArray) => {
 			return currArray.length < shortest.length ? currArray : shortest;
 		}, andList[0]);

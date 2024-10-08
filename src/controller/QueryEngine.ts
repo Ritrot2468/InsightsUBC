@@ -22,7 +22,7 @@ export default class QueryEngine {
 
 	public async query(query: unknown): Promise<InsightResult[]> {
 		//console.log("QUERY method");
-		return new Promise((resolve) => {
+
 			let filteredSections: Section[] = [];
 			let result: InsightResult[] = [];
 			this.queryingIDString = ""; // restart on every query;
@@ -36,14 +36,14 @@ export default class QueryEngine {
 
 				// If WHERE key exists, filter all the sections, else throw InsightError
 				if ("WHERE" in queryObj) {
-					filteredSections = this.handleWHERE(queryObj.WHERE);
+					filteredSections = await this.handleWHERE(queryObj.WHERE);
 				} else {
 					throw new InsightError("Query missing WHERE");
 				}
 
 				// If OPTIONS key exists, collect InsightResults, else throw InsightError
 				if ("OPTIONS" in queryObj) {
-					result = this.handleOPTIONS(queryObj.OPTIONS, filteredSections);
+					result = await this.handleOPTIONS(queryObj.OPTIONS, filteredSections);
 				} else {
 					throw new InsightError("Query missing OPTIONS");
 				}
@@ -54,11 +54,11 @@ export default class QueryEngine {
 					throw new InsightError("Unexpected error.");
 				}
 			}
-			resolve(result);
-		});
+			return result;
+
 	}
 
-	private handleWHERE(where: object): Section[] {
+	private async handleWHERE(where: object): Promise<Section[]> {
 		let filteredSections: Section[] = [];
 		this.noFilter = false;
 		//console.log("WHERE WORKING");
@@ -69,7 +69,7 @@ export default class QueryEngine {
 			} else if (Object.keys(where).length > 1) {
 				throw new InsightError("WHERE should only have 1 key");
 			} else {
-				filteredSections = this.handleFilter(Object.keys(where)[0], Object.values(where)[0]);
+				filteredSections = await this.handleFilter(Object.keys(where)[0], Object.values(where)[0]);
 			}
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
@@ -81,28 +81,31 @@ export default class QueryEngine {
 		return filteredSections;
 	}
 
-	private handleFilter(filter: string, value: unknown): Section[] {
-		let results: Section[] = [];
+	private async handleFilter(filter: string, value: unknown): Promise<Section[]> {
+
 		//console.log("HANDLING FILTER");
 		//console.log(filter);
+		let promise: Promise<Section[]>;
 		try {
+
 			if (this.logicComparator.includes(filter)) {
-				results = this.handleLogicComparison(filter, value);
+				promise = this.handleLogicComparison(filter, value);
 			} else if (this.mComparator.includes(filter)) {
 				const entry = Object.entries(value as Record<string, number>);
 				const [key, input] = entry[0];
-				results = this.handleMComparison(filter, key, input);
+				promise = this.handleMComparison(filter, key, input);
 			} else if (filter === "IS") {
 				// property to value pairing
 				const entry = Object.entries(value as Record<string, string>);
 				const [key, input] = entry[0];
-				results = this.handleSComparison(key, input);
+				promise = this.handleSComparison(key, input);
 			} else if (filter === "NOT") {
 				const valueObj = Object(value);
-				results = this.handleNegation(Object.keys(valueObj)[0], Object.values(valueObj)[0]);
+				promise = this.handleNegation(Object.keys(valueObj)[0], Object.values(valueObj)[0]);
 			} else {
 				throw new InsightError(`Invalid filter key: ${filter}`);
 			}
+
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;
@@ -110,10 +113,13 @@ export default class QueryEngine {
 				throw new InsightError("Unexpected error.");
 			}
 		}
+
+		const results: Section[] = await promise;
 		return results;
+
 	}
 
-	private handleNegation(filter: string, value: unknown): Section[] {
+	private async handleNegation(filter: string, value: unknown): Promise<Section[]> {
 		try {
 			const nonNegatedResults = this.handleFilter(filter, value);
 			const datasetSections = this.sectionsDatabase.get(this.queryingIDString);
@@ -121,7 +127,8 @@ export default class QueryEngine {
 				// should not be possible given current implementation of other methods for query
 				throw new InsightError("Can't find querying dataset");
 			} else {
-				return datasetSections.filter((section) => !nonNegatedResults.includes(section));
+				const resolvedNonNegatedResults = await nonNegatedResults;
+				return datasetSections.filter((section) => !resolvedNonNegatedResults.includes(section));
 			}
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
@@ -132,7 +139,7 @@ export default class QueryEngine {
 		}
 	}
 
-	private handleSComparison(skey: string, input: string): Section[] {
+	private async handleSComparison(skey: string, input: string): Promise<Section[]> {
 		try {
 			// split on underscore
 			const idstring = skey.split("_")[0];
@@ -171,7 +178,7 @@ export default class QueryEngine {
 		}
 	}
 
-	private handleMComparison(filter: string, mkey: string, input: number): Section[] {
+	private async handleMComparison(filter: string, mkey: string, input: number): Promise<Section[]> {
 		//console.log("HANDLING MCOMPARISON");
 		//console.log("mkey: " + mkey);
 		//console.log("input: " + input);
@@ -202,7 +209,7 @@ export default class QueryEngine {
 		}
 	}
 
-	private handleLogicComparison(filter: string, value: unknown): Section[] {
+	private async handleLogicComparison(filter: string, value: unknown): Promise<Section[]> {
 		try {
 			const comparisonArray: unknown[] = this.utils.coerceToArray(value);
 			if (filter === "AND") {
@@ -221,18 +228,18 @@ export default class QueryEngine {
 		}
 	}
 
-	private handleAND(value: unknown[]): Section[] {
-		const andList = [];
+	private async handleAND(value: unknown[]): Promise<Section[]> {
+		const andListPromises: Promise<Section[]>[] = [];
 		if (value.length === 0) {
 			throw new InsightError("AND must be a non-empty array");
 		}
 		for (const obj of value) {
 			if (typeof obj === "object" && obj !== null) {
-				const key = this.handleFilter(Object.keys(obj)[0] as string, Object.values(obj)[0] as unknown);
-				andList.push(key);
+				const key: Promise<Section[]> = this.handleFilter(Object.keys(obj)[0] as string, Object.values(obj)[0] as unknown);
+				andListPromises.push(key);
 			}
 		}
-
+		const andList = await Promise.all(andListPromises)
 		// only one filter applied
 		if (andList.length === 1) {
 			return andList[0];
@@ -243,7 +250,7 @@ export default class QueryEngine {
 		//return andList.reduce((acc, currArray) => acc.filter((section) => currArray.includes(section)));
 	}
 
-	private handleOR(value: unknown[]): Section[] {
+	private async handleOR(value: unknown[]): Promise<Section[]> {
 		const orList = [];
 		if (value.length === 0) {
 			throw new InsightError("OR must be a non-empty array");
@@ -251,10 +258,11 @@ export default class QueryEngine {
 
 		for (const obj of value) {
 			if (typeof obj === "object" && obj !== null) {
-				const key = this.handleFilter(Object.keys(obj)[0] as string, Object.values(obj)[0] as unknown);
+				const key = await this.handleFilter(Object.keys(obj)[0] as string, Object.values(obj)[0] as unknown);
 				orList.push(key);
 			}
 		}
+
 		return orList.flat();
 	}
 
@@ -272,7 +280,7 @@ export default class QueryEngine {
 		return true;
 	}
 
-	private handleOPTIONS(options: object, sections: Section[]): InsightResult[] {
+	private async handleOPTIONS(options: object, sections: Section[]): Promise<InsightResult[]> {
 		//console.log("OPTIONS WORKING");
 		let results: InsightResult[] = [];
 		let columns: string[] = [];
@@ -294,7 +302,7 @@ export default class QueryEngine {
 				orderKey = this.handleORDER(options.ORDER, this.utils.coerceToArray(options.COLUMNS) as string[]);
 			}
 			orderKey = orderKey.split("_")[1];
-			results = this.completeQuery(sections, columns, orderKey);
+			results = await this.completeQuery(sections, columns, orderKey);
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;
@@ -306,7 +314,26 @@ export default class QueryEngine {
 	}
 
 	// REQUIRES: columns are valid columns, sections are filtered sections, orderKey is valid
-	private completeQuery(sections: Section[], columns: string[], orderKey: string): InsightResult[] {
+	// private completeQuery(sections: Section[], columns: string[], orderKey: string): InsightResult[] {
+	// 	let results: InsightResult[] = [];
+	// 	//console.log("COMPLETE QUERY WORKING");
+	// 	// if no filters have been applied
+	// 	if (this.noFilter) {
+	// 		const datasetSections = this.sectionsDatabase.get(this.queryingIDString);
+	// 		if (datasetSections === undefined) {
+	// 			// should not be possible given current implementation of other methods for query
+	// 			throw new InsightError("Can't find querying dataset");
+	// 		} else {
+	// 			sections = datasetSections;
+	// 		}
+	// 	}
+	// 	this.utils.checkSize(sections);
+	// 	results = this.utils.selectCOLUMNS(sections, columns);
+	// 	results = this.utils.sortByOrder(results, orderKey);
+	// 	return results;
+	// }
+
+	private async completeQuery(sections: Section[], columns: string[], orderKey: string): Promise<InsightResult[]> {
 		let results: InsightResult[] = [];
 		//console.log("COMPLETE QUERY WORKING");
 		// if no filters have been applied
@@ -320,11 +347,10 @@ export default class QueryEngine {
 			}
 		}
 		this.utils.checkSize(sections);
-		results = this.utils.selectCOLUMNS(sections, columns);
-		results = this.utils.sortByOrder(results, orderKey);
+		results = await this.utils.selectCOLUMNS(sections, columns);
+		results = await this.utils.sortByOrder(results, orderKey);
 		return results;
 	}
-
 	// returns the columns as an array of strings (WORKING)
 	private handleCOLUMNS(value: unknown): string[] {
 		const columns = this.utils.coerceToArray(value);

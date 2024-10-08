@@ -149,12 +149,14 @@ export default class QueryEngine {
 			} else {
 				if (this.sFields.includes(sfield)) {
 					const fieldIndex = this.sFields.indexOf(sfield);
-					const validInputRegex = /[*]?[^*]*[*]?/;
+					const validInputRegex = /^[*]?[^*]*[*]?$/;
 					if (!validInputRegex.test(input)) {
 						throw new InsightError(" Asterisks (*) can only be the first or last characters of input strings");
 					}
 					// fix this return, figure out what sfield is, how to match it, and how to access
-					const inputRegex = RegExp(input);
+					const processedInput = input.replace(/\*/g, ".*");
+					const inputRegex = new RegExp(`^${processedInput}$`); // Use case-insensitive matching
+
 					return datasetSections.filter((section) => inputRegex.test(section.getSFieldByIndex(fieldIndex)));
 				} else {
 					throw new InsightError("Invalid sKey");
@@ -226,14 +228,19 @@ export default class QueryEngine {
 		}
 		for (const obj of value) {
 			if (typeof obj === "object" && obj !== null) {
-				const filterKey: string = Object.keys(obj)[0];
-				const filterVal: unknown = Object.values(obj)[0];
-				const key = this.handleFilter(filterKey, filterVal);
+				const key = this.handleFilter(Object.keys(obj)[0] as string, Object.values(obj)[0] as unknown);
 				andList.push(key);
 			}
 		}
 
-		return andList.reduce((acc, currArray) => acc.filter((section) => currArray.includes(section)));
+		// only one filter applied
+		if (andList.length === 1) {
+			return andList[0];
+		}
+
+		return this.utils.mergeAndList(andList);
+
+		//return andList.reduce((acc, currArray) => acc.filter((section) => currArray.includes(section)));
 	}
 
 	private handleOR(value: unknown[]): Section[] {
@@ -241,8 +248,12 @@ export default class QueryEngine {
 		if (value.length === 0) {
 			throw new InsightError("OR must be a non-empty array");
 		}
+
 		for (const obj of value) {
-			orList.push(this.handleFilter(Object(obj).keys[0], Object(obj).values[0]));
+			if (typeof obj === "object" && obj !== null) {
+				const key = this.handleFilter(Object.keys(obj)[0] as string, Object.values(obj)[0] as unknown);
+				orList.push(key);
+			}
 		}
 		return orList.flat();
 	}
@@ -284,7 +295,6 @@ export default class QueryEngine {
 			}
 			orderKey = orderKey.split("_")[1];
 			results = this.completeQuery(sections, columns, orderKey);
-			//console.log(results);
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;

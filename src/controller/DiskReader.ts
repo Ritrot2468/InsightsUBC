@@ -45,6 +45,7 @@ export default class DiskReader {
 		//const missingDatasets = new Map<string, Section[]>();
 		const allPromises: Promise<DatasetRecord>[] = [];
 		// the id of all datasets not currently added
+		//const missingDatasetsID = await fs.readdir("./data");
 		const missingDatasetsID = await this.findDatasetsNotAdded(this.currIDs);
 
 		missingDatasetsID.forEach((setId) => {
@@ -54,6 +55,7 @@ export default class DiskReader {
 			this.currIDs.push(setId);
 			allPromises.push(promise);
 		});
+
 		const records = await Promise.all(allPromises);
 		// add all records collected to Map
 		records.forEach((record) => {

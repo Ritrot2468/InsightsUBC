@@ -145,8 +145,6 @@ export default class InsightFacade implements IInsightFacade {
 
 	public async listDatasets(): Promise<InsightDataset[]> {
 		const result: any[] = [];
-		await fs.ensureDir("./data");
-		this.sectionsDatabase = await this.dr.mapMissingSections();
 		this.datasets.forEach((val, key) => {
 			const newInsightDataset: InsightDataset = {
 				id: key,

@@ -23,6 +23,7 @@ export interface ITestQuery {
 
 describe("InsightFacade", function () {
 	let facade: IInsightFacade;
+	//let facade2: IInsightFacade;
 
 	// Declare datasets used in tests. You should add more datasets like this!
 	let sections: string;
@@ -334,6 +335,7 @@ describe("InsightFacade", function () {
 		 *
 		 * Note: the 'this' parameter is automatically set by Mocha and contains information about the test.
 		 */
+
 		async function checkQuery(this: Mocha.Context): Promise<void> {
 			if (!this.test) {
 				throw new Error(
@@ -346,6 +348,7 @@ describe("InsightFacade", function () {
 			const { input, expected, errorExpected } = await loadTestQuery(this.test.title);
 			let result: InsightResult[];
 			try {
+				// result = await facade2.performQuery(input);
 				result = await facade.performQuery(input);
 				// facade.sectionsDatabase.forEach((key, value) => {
 				// 	console.log(key, value)
@@ -404,6 +407,7 @@ describe("InsightFacade", function () {
 
 		before(async function () {
 			facade = new InsightFacade();
+			//facade2 = new InsightFacade()
 			sections = await getContentFromArchives("pair.zip");
 			// Add the datasets to InsightFacade once.
 			// Will *fail* if there is a problem reading ANY dataset.

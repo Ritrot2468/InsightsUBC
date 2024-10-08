@@ -47,8 +47,8 @@ export default class InsightFacade implements IInsightFacade {
 	}
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
 		try {
-			await fs.ensureDir("./data");
-			this.sectionsDatabase = await this.dr.mapMissingSections();
+			//await fs.ensureDir("./data");
+			//this.sectionsDatabase = await this.dr.mapMissingSections();
 			this.sv.validateId(id, this.currIDs);
 
 			// Number of rows found associated with the insightKind
@@ -127,6 +127,8 @@ export default class InsightFacade implements IInsightFacade {
 		// 	console.log(key, value)
 		// })
 		try {
+			await fs.ensureDir("./data");
+			this.sectionsDatabase = await this.dr.mapMissingSections();
 			result = await this.qe.query(query);
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {

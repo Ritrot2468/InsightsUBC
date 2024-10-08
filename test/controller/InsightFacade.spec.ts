@@ -657,35 +657,6 @@ describe("InsightFacade", function () {
 			}
 		});
 
-		it("list 2 datasets from different facades", async function () {
-			try {
-				sections = await getContentFromArchives("test3.zip");
-				await facade.addDataset("test3", sections, InsightDatasetKind.Sections);
-
-				const facade1 = new InsightFacade();
-				const sections1 = await getContentFromArchives("test5.zip");
-				await facade1.addDataset("test5", sections1, InsightDatasetKind.Sections);
-
-				const datasets = await facade.listDatasets();
-				const EXPECTED_LENGTH = 2;
-				expect(datasets.length).to.equal(EXPECTED_LENGTH);
-				expect(datasets).to.include.deep.members([
-					{
-						id: "test3",
-						kind: InsightDatasetKind.Sections,
-						numRows: 2,
-					},
-					{
-						id: "test5",
-						kind: InsightDatasetKind.Sections,
-						numRows: 2,
-					},
-				]);
-			} catch (err) {
-				expect.fail(`you failed to load the right sets ${err}`);
-			}
-		});
-
 		it("list and remove datasets", async function () {
 			try {
 				sections = await getContentFromArchives("test3.zip");

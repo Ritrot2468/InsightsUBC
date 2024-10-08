@@ -83,10 +83,10 @@ export default class QueryUtils {
 	// }
 
 	public async selectCOLUMNS(sections: Section[], columns: string[]): Promise<InsightResult[]> {
-		const resultsPromises = sections.map(async (section) => {
+		const results = sections.map((section) => {
 			const currRecord: InsightResult = {};
 
-			const fieldPromises = columns.map(async (column) => {
+			columns.forEach((column) => {
 				const field = column.split("_")[1];
 
 				if (this.mFields.includes(field)) {
@@ -98,37 +98,19 @@ export default class QueryUtils {
 				}
 			});
 
-			await Promise.all(fieldPromises); // Wait for all column-related field fetches
+			 // Wait for all column-related field fetches
 			return currRecord;
 		});
 
-		const results = await Promise.all(resultsPromises);
-		// Wait for all section-related records to be processed
 		return results;
 	}
-
-	// public selectCOLUMNS(sections: Section[], columns: string[]): InsightResult[] {
-	// 	const results: InsightResult[] = [];
-	// 	for (const section of sections) {
-	// 		const currRecord: InsightResult = {};
-	// 		for (const column of columns) {
-	// 			const field = column.split("_")[1];
-	// 			if (this.mFields.includes(field)) {
-	// 				const mIndex = this.mFields.indexOf(field);
-	// 				currRecord[column] = section.getMFieldByIndex(mIndex);
-	// 			} else {
-	// 				const sIndex = this.sFields.indexOf(field);
-	// 				currRecord[column] = section.getSFieldByIndex(sIndex);
-	// 			}
-	// 		}
-	// 		results.push(currRecord);
-	// 	}
-	// 	return results;
-	// }
 
 	public async filterMComparison(dataset: Section[], filter: string, index: number, input: number): Promise<Section[]> {
 		let results: Section[];
 		//console.log("FILTER MCOMPARISON WORKING");
+		if (typeof input === "string") {
+			throw new InsightError("Invalid mkey type");
+		}
 		if (filter === "LT") {
 			results = dataset.filter((section) => section.getMFieldByIndex(index) < input);
 		} else if (filter === "GT") {

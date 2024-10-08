@@ -1,5 +1,5 @@
 import JSZip from "jszip";
-import Section, { InsightError, Mfield, Sfield } from "./IInsightFacade";
+import Section, { Mfield, Sfield } from "./IInsightFacade";
 import fs from "fs-extra";
 import { DatasetRecord } from "./DiskReader";
 

@@ -122,8 +122,12 @@ export default class QueryEngine {
 				// should not be possible given current implementation of other methods for query
 				throw new InsightError("Can't find querying dataset");
 			} else {
-				const resolvedNonNegatedResults = await nonNegatedResults;
-				return datasetSections.filter((section) => !resolvedNonNegatedResults.includes(section));
+				// use a set instead -> faster?
+				const resolvedNonNegatedSet = new Set(await nonNegatedResults);
+
+				// Filter using the Set for faster lookups
+				return datasetSections.filter(section => !resolvedNonNegatedSet.has(section));
+
 			}
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
@@ -136,6 +140,9 @@ export default class QueryEngine {
 
 	private async handleSComparison(skey: string, input: string): Promise<Section[]> {
 		try {
+			if (typeof input === "number") {
+				throw new InsightError("Invalid skey type");
+			}
 			// split on underscore
 			const idstring = skey.split("_")[0];
 			const sfield = skey.split("_")[1];

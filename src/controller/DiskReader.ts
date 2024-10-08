@@ -1,4 +1,4 @@
-import Section, {InsightDatasetKind, InsightResult} from "./IInsightFacade";
+import Section, { InsightDatasetKind, InsightResult } from "./IInsightFacade";
 import fs from "fs-extra";
 import SectionsParser from "./SectionsParser";
 
@@ -12,10 +12,9 @@ export default class DiskReader {
 	private sp: SectionsParser;
 	private secDatabase: Map<string, Section[]>;
 	private currIDs: string[];
-	private datasets: Map<string, InsightResult>
+	private datasets: Map<string, InsightResult>;
 
 	constructor(sectionDatabase: Map<string, Section[]>, currIDs: string[], datasets: Map<string, InsightResult>) {
-
 		this.sp = new SectionsParser();
 		this.secDatabase = sectionDatabase;
 		this.currIDs = currIDs;
@@ -62,13 +61,11 @@ export default class DiskReader {
 		});
 
 		missingDatasetsID.forEach((setID) => {
-				const newRecord: InsightResult = {
-					[InsightDatasetKind.Sections]: this.secDatabase.get(setID)?.length as number
-				}
-				this.datasets.set(setID, newRecord);
-			}
-		)
-
+			const newRecord: InsightResult = {
+				[InsightDatasetKind.Sections]: this.secDatabase.get(setID)?.length as number,
+			};
+			this.datasets.set(setID, newRecord);
+		});
 
 		return this.secDatabase;
 	}

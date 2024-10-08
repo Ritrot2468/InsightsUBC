@@ -7,9 +7,9 @@ import {
 	ResultTooLargeError,
 } from "../../src/controller/IInsightFacade";
 import InsightFacade from "../../src/controller/InsightFacade";
-import {clearDisk, getContentFromArchives, loadTestQuery} from "../TestUtil";
+import { clearDisk, getContentFromArchives, loadTestQuery } from "../TestUtil";
 
-import {expect, use} from "chai";
+import { expect, use } from "chai";
 import chaiAsPromised from "chai-as-promised";
 
 use(chaiAsPromised);
@@ -169,7 +169,7 @@ describe("InsightFacade", function () {
 			// await facade2.addDataset("tanny", sections2, InsightDatasetKind.Sections)
 			const result = await facade.addDataset("s", sections, InsightDatasetKind.Sections);
 
-			return expect(result).to.have.members(["s", "tanny"]);
+			return expect(result).to.have.members(["s"]);
 		});
 
 		it("should add valid data properly (valid id - space between)", async function () {
@@ -658,7 +658,7 @@ describe("InsightFacade", function () {
 				sections = await getContentFromArchives("test3.zip");
 				await facade.addDataset("test3", sections, InsightDatasetKind.Sections);
 
-				const facade1 = new InsightFacade()
+				const facade1 = new InsightFacade();
 				const sections1 = await getContentFromArchives("test5.zip");
 				await facade1.addDataset("test5", sections1, InsightDatasetKind.Sections);
 

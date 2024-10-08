@@ -52,35 +52,6 @@ export default class QueryUtils {
 			});
 		}
 	}
-	// public sortByOrder(results: InsightResult[], orderKey: string): InsightResult[] {
-	// 	if (orderKey === "") {
-	// 		return results;
-	// 	} else {
-	// 		// in the case of numbers stored as string
-	// 		results.sort((recordA, recordB) => {
-	// 			const valueA = recordA[orderKey];
-	// 			const valueB = recordB[orderKey];
-	//
-	// 			// Handle string comparisons
-	// 			if (typeof valueA === "string" && typeof valueB === "string") {
-	// 				return valueA.localeCompare(valueB);
-	// 			}
-	//
-	// 			// Handle number comparisons
-	// 			if (typeof valueA === "number" && typeof valueB === "number") {
-	// 				return valueA - valueB;
-	// 			}
-	//
-	// 			// Handle mixed types (string vs number)
-	// 			// You can choose how to handle this; here we convert numbers to strings for comparison
-	// 			return String(valueA).localeCompare(String(valueB));
-	// 		});
-	// 		// results.sort((recordA, recordB) => {
-	// 		// 	return (recordA[orderKey] as string).localeCompare(recordB[orderKey] as string);
-	// 		// });
-	// 	}
-	// 	return results;
-	// }
 
 	public async selectCOLUMNS(sections: Section[], columns: string[]): Promise<InsightResult[]> {
 		const results = sections.map((section) => {
@@ -98,14 +69,13 @@ export default class QueryUtils {
 				}
 			});
 
-			 // Wait for all column-related field fetches
 			return currRecord;
 		});
-
 		return results;
 	}
 
-	public async filterMComparison(dataset: Section[], filter: string, index: number, input: number): Promise<Section[]> {
+	//TODO: I had to change the name because lint and prettier would not let me push unless I shortened line
+	public async filterMCompare(dataset: Section[], filter: string, index: number, input: number): Promise<Section[]> {
 		let results: Section[];
 		//console.log("FILTER MCOMPARISON WORKING");
 		if (typeof input === "string") {
@@ -139,6 +109,16 @@ export default class QueryUtils {
 			);
 		}
 		return shortestList;
+	}
+
+	public testRegex(input: string): RegExp {
+		const validInputRegex = /^[*]?[^*]*[*]?$/;
+		if (!validInputRegex.test(input)) {
+			throw new InsightError(" Asterisks (*) can only be the first or last characters of input strings");
+		}
+		// fix this return, figure out what sfield is, how to match it, and how to access
+		const processedInput = input.replace(/\*/g, ".*");
+		return new RegExp(`^${processedInput}$`); // Use case-insensitive matching
 	}
 
 	public async isEqual(section1: Section, section2: Section): Promise<boolean> {

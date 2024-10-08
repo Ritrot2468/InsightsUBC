@@ -1,4 +1,5 @@
 import Section, { InsightError, InsightResult, ResultTooLargeError } from "./IInsightFacade";
+import { QueryOrderHandler } from "./QueryOrderHandler";
 import QueryUtils from "./QueryUtils";
 
 export default class QueryEngine {
@@ -12,12 +13,14 @@ export default class QueryEngine {
 	private validOptions: string[] = ["COLUMNS", "ORDER"];
 	private validQueryKeys: string[] = ["WHERE", "OPTIONS"];
 	private utils: QueryUtils;
+	private QueryOrderHandler: QueryOrderHandler;
 
 	constructor(sectionsDatabase: Map<string, Section[]>) {
 		this.queryingIDString = "";
 		this.sectionsDatabase = sectionsDatabase;
 		this.noFilter = false;
 		this.utils = new QueryUtils();
+		this.QueryOrderHandler = new QueryOrderHandler();
 	}
 
 	public async query(query: unknown): Promise<InsightResult[]> {
@@ -126,8 +129,7 @@ export default class QueryEngine {
 				const resolvedNonNegatedSet = new Set(await nonNegatedResults);
 
 				// Filter using the Set for faster lookups
-				return datasetSections.filter(section => !resolvedNonNegatedSet.has(section));
-
+				return datasetSections.filter((section) => !resolvedNonNegatedSet.has(section));
 			}
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
@@ -158,14 +160,7 @@ export default class QueryEngine {
 			} else {
 				if (this.sFields.includes(sfield)) {
 					const fieldIndex = this.sFields.indexOf(sfield);
-					const validInputRegex = /^[*]?[^*]*[*]?$/;
-					if (!validInputRegex.test(input)) {
-						throw new InsightError(" Asterisks (*) can only be the first or last characters of input strings");
-					}
-					// fix this return, figure out what sfield is, how to match it, and how to access
-					const processedInput = input.replace(/\*/g, ".*");
-					const inputRegex = new RegExp(`^${processedInput}$`); // Use case-insensitive matching
-
+					const inputRegex = this.utils.testRegex(input); // Use case-insensitive matching
 					return datasetSections.filter((section) => inputRegex.test(section.getSFieldByIndex(fieldIndex)));
 				} else {
 					throw new InsightError("Invalid sKey");
@@ -197,7 +192,7 @@ export default class QueryEngine {
 			} else {
 				if (this.mFields.includes(mfield)) {
 					const fieldIndex = this.mFields.indexOf(mfield);
-					return this.utils.filterMComparison(datasetSections, filter, fieldIndex, input);
+					return this.utils.filterMCompare(datasetSections, filter, fieldIndex, input);
 				} else {
 					throw new InsightError("Invalid mKey");
 				}
@@ -249,26 +244,23 @@ export default class QueryEngine {
 		if (andList.length === 1) {
 			return andList[0];
 		}
-
 		return this.utils.mergeAndList(andList);
-
-		//return andList.reduce((acc, currArray) => acc.filter((section) => currArray.includes(section)));
 	}
 
 	private async handleOR(value: unknown[]): Promise<Section[]> {
-		const orList = [];
+		const orList: Promise<Section[]>[] = [];
 		if (value.length === 0) {
 			throw new InsightError("OR must be a non-empty array");
 		}
 
 		for (const obj of value) {
 			if (typeof obj === "object" && obj !== null) {
-				const key = await this.handleFilter(Object.keys(obj)[0] as string, Object.values(obj)[0] as unknown);
-				orList.push(key);
+				orList.push(this.handleFilter(Object.keys(obj)[0] as string, Object.values(obj)[0] as unknown));
 			}
 		}
+		const resolvedOrList = await Promise.all(orList);
 
-		return orList.flat();
+		return resolvedOrList.flat();
 	}
 
 	// check if an id string is already being referenced, if not, return true
@@ -304,7 +296,10 @@ export default class QueryEngine {
 			}
 			//console.log(columns);
 			if ("ORDER" in options) {
-				orderKey = await this.handleORDER(options.ORDER, this.utils.coerceToArray(options.COLUMNS) as string[]);
+				orderKey = await this.QueryOrderHandler.handleORDER(
+					options.ORDER,
+					this.utils.coerceToArray(options.COLUMNS) as string[]
+				);
 			}
 			orderKey = orderKey.split("_")[1];
 			results = await this.completeQuery(sections, columns, orderKey);
@@ -317,26 +312,6 @@ export default class QueryEngine {
 		}
 		return results;
 	}
-
-	// REQUIRES: columns are valid columns, sections are filtered sections, orderKey is valid
-	// private completeQuery(sections: Section[], columns: string[], orderKey: string): InsightResult[] {
-	// 	let results: InsightResult[] = [];
-	// 	//console.log("COMPLETE QUERY WORKING");
-	// 	// if no filters have been applied
-	// 	if (this.noFilter) {
-	// 		const datasetSections = this.sectionsDatabase.get(this.queryingIDString);
-	// 		if (datasetSections === undefined) {
-	// 			// should not be possible given current implementation of other methods for query
-	// 			throw new InsightError("Can't find querying dataset");
-	// 		} else {
-	// 			sections = datasetSections;
-	// 		}
-	// 	}
-	// 	this.utils.checkSize(sections);
-	// 	results = this.utils.selectCOLUMNS(sections, columns);
-	// 	results = this.utils.sortByOrder(results, orderKey);
-	// 	return results;
-	// }
 
 	private async completeQuery(sections: Section[], columns: string[], orderKey: string): Promise<InsightResult[]> {
 		let results: InsightResult[] = [];
@@ -373,15 +348,5 @@ export default class QueryEngine {
 			}
 		}
 		return results;
-	}
-
-	// returns the order key as a string (WORKING)
-	private async handleORDER(value: unknown, columns: string[]): Promise<string> {
-		const valueStr = String(value);
-		if (columns.includes(valueStr)) {
-			return valueStr;
-		} else {
-			throw new InsightError("ORDER key must be in COLUMNS");
-		}
 	}
 }

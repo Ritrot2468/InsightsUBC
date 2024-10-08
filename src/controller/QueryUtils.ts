@@ -28,16 +28,17 @@ export default class QueryUtils {
 			return results;
 		} else {
 			// Perform the sorting asynchronously
+			return new Promise((resolve) => {
+				// Perform the sorting asynchronously
 				results.sort((recordA, recordB) => {
 					const valueA = recordA[orderKey];
 					const valueB = recordB[orderKey];
 
-					// Handle string comparisons
+
 					if (typeof valueA === "string" && typeof valueB === "string") {
 						return valueA.localeCompare(valueB);
 					}
 
-					// Handle number comparisons
 					if (typeof valueA === "number" && typeof valueB === "number") {
 						return valueA - valueB;
 					}
@@ -46,8 +47,8 @@ export default class QueryUtils {
 					return String(valueA).localeCompare(String(valueB));
 				});
 
-				return results;
-
+				resolve(results);
+			});
 		}
 	}
 	// public sortByOrder(results: InsightResult[], orderKey: string): InsightResult[] {
@@ -124,7 +125,7 @@ export default class QueryUtils {
 	// 	return results;
 	// }
 
-	public filterMComparison(dataset: Section[], filter: string, index: number, input: number): Section[] {
+	public async filterMComparison(dataset: Section[], filter: string, index: number, input: number): Promise<Section[]> {
 		let results: Section[];
 		//console.log("FILTER MCOMPARISON WORKING");
 		if (filter === "LT") {
@@ -150,14 +151,14 @@ export default class QueryUtils {
 			} // Skip comparing the shortest list with itself
 
 			// Filter the shortest list to keep only sections that exist in the current array
-			shortestList = shortestList.filter((section) =>
-				currArray.some((currSection) => this.isEqual(section, currSection))
+			shortestList = shortestList.filter(async (section) =>
+				currArray.some(async (currSection) => this.isEqual(section, currSection))
 			);
 		}
 		return shortestList;
 	}
 
-	public isEqual(section1: Section, section2: Section): boolean {
+	public async isEqual(section1: Section, section2: Section): Promise<boolean> {
 		// Compare Sfield
 		const sfield1 = section1.getSfields();
 		const sfield2 = section2.getSfields();

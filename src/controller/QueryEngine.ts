@@ -293,13 +293,13 @@ export default class QueryEngine {
 			}
 
 			if ("COLUMNS" in options) {
-				columns = this.handleCOLUMNS(options.COLUMNS);
+				columns = await this.handleCOLUMNS(options.COLUMNS);
 			} else {
 				throw new InsightError("Query missing COLUMNS");
 			}
 			//console.log(columns);
 			if ("ORDER" in options) {
-				orderKey = this.handleORDER(options.ORDER, this.utils.coerceToArray(options.COLUMNS) as string[]);
+				orderKey = await this.handleORDER(options.ORDER, this.utils.coerceToArray(options.COLUMNS) as string[]);
 			}
 			orderKey = orderKey.split("_")[1];
 			results = await this.completeQuery(sections, columns, orderKey);
@@ -352,7 +352,7 @@ export default class QueryEngine {
 		return results;
 	}
 	// returns the columns as an array of strings (WORKING)
-	private handleCOLUMNS(value: unknown): string[] {
+	private async handleCOLUMNS(value: unknown): Promise<string[]> {
 		const columns = this.utils.coerceToArray(value);
 		const results: string[] = [];
 		for (const key of columns) {
@@ -371,7 +371,7 @@ export default class QueryEngine {
 	}
 
 	// returns the order key as a string (WORKING)
-	private handleORDER(value: unknown, columns: string[]): string {
+	private async handleORDER(value: unknown, columns: string[]): Promise<string> {
 		const valueStr = String(value);
 		if (columns.includes(valueStr)) {
 			return valueStr;

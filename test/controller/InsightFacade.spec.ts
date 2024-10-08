@@ -472,7 +472,7 @@ describe("InsightFacade", function () {
 		it("[valid/order1.json] order by instructor", checkQuery);
 		it("[valid/order2.json] order by audit", checkQuery);
 		it("[valid/order3.json] order by pass", checkQuery);
-		//it("[valid/order4.json] order by uuid", checkQuery);
+		it("[valid/order4.json] order by uuid", checkQuery);
 		it("[valid/filter_by_id.json] filter by id", checkQuery);
 		it("[valid/double_ast.json] double ast", checkQuery);
 

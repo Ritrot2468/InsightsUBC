@@ -6,6 +6,7 @@ import SectionsParser from "./SectionsParser";
 export interface DatasetRecord {
 	id: string;
 	sections: Section[];
+
 }
 
 export default class DiskReader {

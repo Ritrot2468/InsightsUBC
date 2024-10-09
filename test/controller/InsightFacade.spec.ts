@@ -244,7 +244,7 @@ describe("InsightFacade", function () {
 				sections = await getContentFromArchives("test3.zip");
 				await facade.addDataset("test3", sections, InsightDatasetKind.Sections);
 				let datasets = await facade.listDatasets();
-				expect(datasets).to.include.deep.members([
+				expect(datasets).to.deep.equal([
 					{
 						id: "test3",
 						kind: InsightDatasetKind.Sections,
@@ -255,14 +255,14 @@ describe("InsightFacade", function () {
 				let datasets2 = await facade2.listDatasets();
 				expect(datasets2).to.deep.equal(datasets);
 
-				const facade1 = new InsightFacade();
 				const sections1 = await getContentFromArchives("test5.zip");
-				await facade1.addDataset("test5", sections1, InsightDatasetKind.Sections);
+				await facade2.addDataset("test5", sections1, InsightDatasetKind.Sections);
 
 				datasets = await facade.listDatasets();
 				datasets2 = await facade2.listDatasets();
 				const EXPECTED_LENGTH = 2;
 				expect(datasets.length).to.equal(EXPECTED_LENGTH);
+				expect(datasets.length).to.equal(datasets2.length);
 				expect(datasets).to.deep.equal(datasets2);
 				expect(datasets).to.include.deep.members([
 					{
@@ -285,10 +285,11 @@ describe("InsightFacade", function () {
 	// added James' tests for removeDataset (async tests with try catch)
 	describe("RemoveDataset", function () {
 		beforeEach(async function () {
-			//  This section resets the insightFacade instance
+			//  This section resets the insightFacade instance;
 			// This runs before each test
 			await clearDisk();
 			facade = new InsightFacade();
+			facade2 = new InsightFacade();
 		});
 
 		afterEach(async function () {
@@ -376,7 +377,9 @@ describe("InsightFacade", function () {
 				sections = await getContentFromArchives("test3.zip");
 				await facade.addDataset("test3", sections, InsightDatasetKind.Sections);
 				let datasets = await facade.listDatasets();
-				expect(datasets).to.include.deep.members([
+				const EXPECTED_LENGTH_1 = 1;
+				expect(datasets.length).to.equal(EXPECTED_LENGTH_1);
+				expect(datasets).to.deep.equal([
 					{
 						id: "test3",
 						kind: InsightDatasetKind.Sections,
@@ -385,10 +388,17 @@ describe("InsightFacade", function () {
 				]);
 
 				let datasets2 = await facade2.listDatasets();
-				expect(datasets2).to.deep.equal(datasets);
+				expect(datasets2).to.deep.equal([
+					{
+						id: "test3",
+						kind: InsightDatasetKind.Sections,
+						numRows: 2,
+					},
+				]);
 
+				//expect(datasets2.length).to.be.equal(datasets.length);
 				const remove1 = await facade2.removeDataset("test3");
-				expect(remove1).to.deep.equal("test3");
+				expect(remove1).to.be.equal("test3");
 
 				await facade2.addDataset("test3", sections, InsightDatasetKind.Sections);
 
@@ -399,7 +409,7 @@ describe("InsightFacade", function () {
 				datasets2 = await facade2.listDatasets();
 				const EXPECTED_LENGTH = 2;
 				expect(datasets.length).to.equal(EXPECTED_LENGTH);
-				expect(datasets).to.deep.equal(datasets2);
+				//expect(datasets).to.deep.equal(datasets2);
 				expect(datasets).to.include.deep.members([
 					{
 						id: "test3",

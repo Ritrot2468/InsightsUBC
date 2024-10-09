@@ -84,7 +84,7 @@ export default class QueryUtils {
 		if (filter === "LT") {
 			results = dataset.filter((section) => section.getMFieldByIndex(index) < input);
 		} else if (filter === "GT") {
-			results = dataset.filter((section) => section.getMFieldByIndex(index) > input);
+			results = dataset.filter((section) => section.getMFieldByIndex(index) > (input as number));
 		} else if (filter === "EQ") {
 			results = dataset.filter((section) => section.getMFieldByIndex(index) === input);
 		} else {

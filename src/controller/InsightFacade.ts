@@ -20,13 +20,13 @@ import DiskReader from "./DiskReader";
  */
 export default class InsightFacade implements IInsightFacade {
 	// map to track record
-	private datasets: Map<string, InsightResult>;
+	//private datasets: Map<string, InsightResult>;
 
 	// tracks all sections added from a dataset using their associated id as the key
 	public sectionsDatabase: Map<string, Section[]>;
 
 	// list of name of current IDs added
-	private currIDs: string[];
+	//private currIDs: string[];
 
 	// service classes
 	private sv: SectionsValidator;
@@ -36,28 +36,26 @@ export default class InsightFacade implements IInsightFacade {
 
 	constructor() {
 		//Log.info("InsightFacadeImpl::init()");
-		this.datasets = new Map<string, InsightResult>();
 		this.sectionsDatabase = new Map<string, []>();
-		this.currIDs = [];
+		//this.currIDs = [];
 		this.sv = new SectionsValidator();
 		this.sp = new SectionsParser();
 		this.qe = new QueryEngine(this.sectionsDatabase);
-		this.dr = new DiskReader(this.sectionsDatabase, this.currIDs, this.datasets);
+		this.dr = new DiskReader(this.sectionsDatabase);
 		// initialize dictionary for the fields
 	}
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
 		try {
-			//await fs.ensureDir("./data");
-			//this.sectionsDatabase = await this.dr.mapMissingSections();
-			this.sv.validateId(id, this.currIDs);
+			await Promise.all([
+				this.sv.validateId(id),
+				this.sp.logDatasetOnDisk(content, id),
+			]);
 
-			// Number of rows found associated with the insightKind
-			//const numRows = await this.sp.countRows(content, id, this.sectionsDatabase);\
-			await this.sp.logDatasetOnDisk(content, id);
-			await this.logNewDatasetFromDiskToMap(id, kind);
+			await this.logNewDatasetFromDiskToMap(id);
+			await this.sp.logInsightKindToDisk(id, kind, this.sectionsDatabase.get(id)?.length as number);
 
 			// Resolve with the dataset ID
-			return this.currIDs;
+			return fs.readdir("./data");
 		} catch (err) {
 			if (err instanceof InsightError) {
 				throw err;
@@ -69,32 +67,22 @@ export default class InsightFacade implements IInsightFacade {
 	// REQUIRES: id - name of dataset to be retrieved from disk (id IS NOT IN datasets ALREADY!!!!)
 	//           datasets - sets you'll be mapping new DatasetRecord to
 	// EFFECTS: Retrieves the sections associated with the dataset id on disk and turned into Sections objects and maps
-	//          them to sectionsDatabase with their associated id. Updates the currIDs and database member variables
+	//          them to sectionsDatabase with their associated id.
 	// OUTPUT: VOID
-	public async logNewDatasetFromDiskToMap(id: string, kind: InsightDatasetKind): Promise<void> {
+	public async logNewDatasetFromDiskToMap(id: string): Promise<void> {
 		const newDataset = await this.sp.turnDatasetToSection(id);
 		const numRows = newDataset.sections.length;
 
 		if (numRows === 0) {
 			throw new InsightError("No valid Section");
 		}
-		// Create an InsightResult record
-		const newRecord: InsightResult = {
-			[kind]: numRows,
-		};
-
 		// update member variables
 		this.sectionsDatabase.set(newDataset.id, newDataset.sections);
-		this.currIDs.push(id);
-		this.datasets.set(id, newRecord);
 	}
 
 	public async removeDataset(id: string): Promise<string> {
 		try {
-			this.sv.validateIdRemoval(id, this.currIDs);
-
-			this.currIDs = this.currIDs.filter((currentId) => currentId !== id);
-			this.datasets.delete(id);
+			await this.sv.validateIdRemoval(id);
 			this.sectionsDatabase.delete(id);
 
 			await fs.remove(`./data/${id}`);
@@ -122,19 +110,16 @@ export default class InsightFacade implements IInsightFacade {
 
 	public async performQuery(query: unknown): Promise<InsightResult[]> {
 		let result: InsightResult[] = [];
-		// console.log(this.datasets.size)
-		// this.sectionsDatabase.forEach((key, value) => {
-		// 	console.log(key, value)
-		// })
 		try {
-			await fs.ensureDir("./data");
-			this.sectionsDatabase = await this.dr.mapMissingSections();
+			const currIDs = await fs.readdir("./data");
+
+			if (this.sectionsDatabase.size !== currIDs.length) {
+				this.sectionsDatabase = await this.dr.mapMissingSections(currIDs)
+			}
+
 			result = await this.qe.query(query);
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
-				// this.sectionsDatabase.forEach((key, value) => {
-				// 	console.log(key, value)
-				// })
 				throw err;
 			} else {
 				throw new InsightError("Unexpected error.");
@@ -143,19 +128,12 @@ export default class InsightFacade implements IInsightFacade {
 		return result;
 	}
 
-	public async listDatasets(): Promise<InsightDataset[]> {
-		const result: any[] = [];
-		this.datasets.forEach((val, key) => {
-			const newInsightDataset: InsightDataset = {
-				id: key,
-				// So far since adding dataset with the same ID twice is not allowed ******
-				kind: Object.keys(val)[0] as InsightDatasetKind,
-				numRows: val[Object.keys(val)[0]] as number,
-			};
 
-			result.push(newInsightDataset);
-		});
-		await Promise.all(result);
-		return result;
+	public async listDatasets(): Promise<InsightDataset[]> {
+		// reads the list of dataset ids already on disk
+		const currIDs = await fs.readdir("./data")
+
+		// reads their content info on disk and parses into InsightDataset[]
+		return this.sp.logInsightKindFromDisk(currIDs)
 	}
 }

@@ -1,12 +1,5 @@
 import JSZip from "jszip";
-import Section, {
-	InsightDataset,
-	InsightDatasetKind,
-	InsightError,
-	InsightResult,
-	Mfield,
-	Sfield
-} from "./IInsightFacade";
+import Section, { InsightDataset, InsightDatasetKind, Mfield, Sfield } from "./IInsightFacade";
 import fs from "fs-extra";
 import { DatasetRecord } from "./DiskReader";
 
@@ -33,29 +26,25 @@ export default class SectionsParser {
 	private static OVERALL_SECTION_YEAR = 1900;
 
 	public async logDatasetOnDisk(content: string, id: string): Promise<void> {
-		try {
-			const buffer = Buffer.from(content, "base64");
-			const zip = await JSZip.loadAsync(buffer);
-			await this.logDataset(zip, id);
-		} catch (err) {
-			throw new InsightError("Content is not a valid ZIP file");
-		}
+		const buffer = Buffer.from(content, "base64");
+		const zip = await JSZip.loadAsync(buffer);
+		await this.logDataset(zip, id);
 	}
 
 	// Writes InsightDataset info about a dataset
-	public async logInsightKindToDisk(id: string, kind: InsightDatasetKind, numRows: number) {
+	public async logInsightKindToDisk(id: string, kind: InsightDatasetKind, numRows: number): Promise<void> {
 		const obj = {
-			table: [{ id, kind, numRows }]
+			table: [{ id, kind, numRows }],
 		};
 		//obj.table.push({id: id, kind: kind, numRows: numRows} as never);
-		const json = JSON.stringify(obj)
-		await fs.outputFile(`./data/${id}/kind`,json)
+		const json = JSON.stringify(obj);
+		await fs.outputFile(`./data/${id}/kind`, json);
 	}
 
 	// Writes InsightDataset info about a dataset
 	public async logInsightKindFromDisk(ids: string[]): Promise<InsightDataset[]> {
 		const allPromises = ids.map(async (id) => {
-			const file = await fs.promises.readFile(`./data/${id}/kind`, 'utf8');
+			const file = await fs.promises.readFile(`./data/${id}/kind`, "utf8");
 			const obj = JSON.parse(file);
 
 			const numRows = obj.table[0].numRows as number;
@@ -64,14 +53,14 @@ export default class SectionsParser {
 			const newInsightDataset: InsightDataset = {
 				id: id,
 				kind: kind,
-				numRows: numRows
+				numRows: numRows,
 			};
 
 			return newInsightDataset;
 		});
 
 		const result = await Promise.all(allPromises);
-		return result
+		return result;
 	}
 
 	// REQUIRES: jsonData - parsed JSON Object of the result key in a given course file
@@ -91,7 +80,6 @@ export default class SectionsParser {
 		);
 		return validSectionsInCourse;
 	}
-
 
 	// REQUIRES: zip - current dataset content as a JSZIP
 	// 			  id - name of dataset

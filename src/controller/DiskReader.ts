@@ -1,4 +1,4 @@
-import Section, { InsightDatasetKind, InsightResult } from "./IInsightFacade";
+import Section from "./IInsightFacade";
 import fs from "fs-extra";
 import SectionsParser from "./SectionsParser";
 
@@ -51,7 +51,6 @@ export default class DiskReader {
 		records.forEach((record) => {
 			this.secDatabase.set(record.id, record.sections);
 		});
-
 
 		return this.secDatabase;
 	}

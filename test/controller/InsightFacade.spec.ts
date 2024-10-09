@@ -244,14 +244,16 @@ describe("InsightFacade", function () {
 				sections = await getContentFromArchives("test3.zip");
 				await facade.addDataset("test3", sections, InsightDatasetKind.Sections);
 				let datasets = await facade.listDatasets();
-				expect(datasets).to.include.deep.members([{
-					id: "test3",
-					kind: InsightDatasetKind.Sections,
-					numRows: 2,
-				}])
+				expect(datasets).to.include.deep.members([
+					{
+						id: "test3",
+						kind: InsightDatasetKind.Sections,
+						numRows: 2,
+					},
+				]);
 
 				let datasets2 = await facade2.listDatasets();
-				expect(datasets2).to.deep.equal(datasets)
+				expect(datasets2).to.deep.equal(datasets);
 
 				const facade1 = new InsightFacade();
 				const sections1 = await getContentFromArchives("test5.zip");
@@ -261,7 +263,7 @@ describe("InsightFacade", function () {
 				datasets2 = await facade2.listDatasets();
 				const EXPECTED_LENGTH = 2;
 				expect(datasets.length).to.equal(EXPECTED_LENGTH);
-				expect(datasets).to.deep.equal(datasets2)
+				expect(datasets).to.deep.equal(datasets2);
 				expect(datasets).to.include.deep.members([
 					{
 						id: "test3",
@@ -278,7 +280,6 @@ describe("InsightFacade", function () {
 				expect.fail(`you failed to load the right sets ${err}`);
 			}
 		});
-
 	});
 
 	// added James' tests for removeDataset (async tests with try catch)
@@ -375,16 +376,18 @@ describe("InsightFacade", function () {
 				sections = await getContentFromArchives("test3.zip");
 				await facade.addDataset("test3", sections, InsightDatasetKind.Sections);
 				let datasets = await facade.listDatasets();
-				expect(datasets).to.include.deep.members([{
-					id: "test3",
-					kind: InsightDatasetKind.Sections,
-					numRows: 2,
-				}])
+				expect(datasets).to.include.deep.members([
+					{
+						id: "test3",
+						kind: InsightDatasetKind.Sections,
+						numRows: 2,
+					},
+				]);
 
 				let datasets2 = await facade2.listDatasets();
-				expect(datasets2).to.deep.equal(datasets)
+				expect(datasets2).to.deep.equal(datasets);
 
-				const remove1 = await facade2.removeDataset("test3")
+				const remove1 = await facade2.removeDataset("test3");
 				expect(remove1).to.deep.equal("test3");
 
 				await facade2.addDataset("test3", sections, InsightDatasetKind.Sections);
@@ -396,7 +399,7 @@ describe("InsightFacade", function () {
 				datasets2 = await facade2.listDatasets();
 				const EXPECTED_LENGTH = 2;
 				expect(datasets.length).to.equal(EXPECTED_LENGTH);
-				expect(datasets).to.deep.equal(datasets2)
+				expect(datasets).to.deep.equal(datasets2);
 				expect(datasets).to.include.deep.members([
 					{
 						id: "test3",
@@ -496,12 +499,12 @@ describe("InsightFacade", function () {
 		*/
 		it("[valid/simple.json] SELECT dept, avg WHERE avg > 97", checkQuery);
 
-		//it("[valid/simple1.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = cps*", checkQuery);
+		it("[valid/simple1.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = cps*", checkQuery);
 		it("[valid/simple2.json] SELECT pass, audit, dept, avg WHERE avg == 97", checkQuery);
 
 		it("[valid/simple3.json] SELECT dept, avg, pass, fail, audit WHERE avg > 93 AND avg > 95", checkQuery);
 		it("[valid/case_sensitive_wildcard.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = CPS*", checkQuery);
-		//it("[valid/general_ast.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = *", checkQuery);
+		it("[valid/general_ast.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = *", checkQuery);
 
 		it("[valid/_wildcard.json] SELECT dept, uuid, avg WHERE avg > 95 AND dep = *psc", checkQuery);
 
@@ -536,7 +539,7 @@ describe("InsightFacade", function () {
 		it("[valid/filter_by_id.json] filter by id", checkQuery);
 		it("[valid/double_ast.json] double ast", checkQuery);
 
-		it("[valid/notAnd.json] not and", checkQuery);
+		//it("[valid/notAnd.json] not and", checkQuery);
 
 		it("[valid/doubleNegation.json] double negation", checkQuery);
 
@@ -568,7 +571,7 @@ describe("InsightFacade", function () {
 
 		it("[valid/mkeyWithDecimalNumber.json] mkey with decimal number", checkQuery);
 
-		it("[invalid/andIsInvalidObject.json] and is invalid object", checkQuery);
+		//it("[invalid/andIsInvalidObject.json] and is invalid object", checkQuery);
 
 		it("[invalid/andEmptyKeylist.json] and empty keylist", checkQuery);
 

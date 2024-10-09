@@ -46,10 +46,7 @@ export default class InsightFacade implements IInsightFacade {
 	}
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
 		try {
-			await Promise.all([
-				this.sv.validateId(id),
-				this.sp.logDatasetOnDisk(content, id),
-			]);
+			await Promise.all([this.sv.validateId(id), this.sp.logDatasetOnDisk(content, id)]);
 
 			await this.logNewDatasetFromDiskToMap(id);
 			await this.sp.logInsightKindToDisk(id, kind, this.sectionsDatabase.get(id)?.length as number);
@@ -114,7 +111,7 @@ export default class InsightFacade implements IInsightFacade {
 			const currIDs = await fs.readdir("./data");
 
 			if (this.sectionsDatabase.size !== currIDs.length) {
-				this.sectionsDatabase = await this.dr.mapMissingSections(currIDs)
+				this.sectionsDatabase = await this.dr.mapMissingSections(currIDs);
 			}
 
 			result = await this.qe.query(query);
@@ -128,12 +125,11 @@ export default class InsightFacade implements IInsightFacade {
 		return result;
 	}
 
-
 	public async listDatasets(): Promise<InsightDataset[]> {
 		// reads the list of dataset ids already on disk
-		const currIDs = await fs.readdir("./data")
+		const currIDs = await fs.readdir("./data");
 
 		// reads their content info on disk and parses into InsightDataset[]
-		return this.sp.logInsightKindFromDisk(currIDs)
+		return this.sp.logInsightKindFromDisk(currIDs);
 	}
 }

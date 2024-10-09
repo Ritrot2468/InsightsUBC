@@ -15,17 +15,14 @@ export default class SectionsValidator {
 			throw new InsightError("Invalid id");
 		}
 
-		const bool =  await fs.pathExists("./data")
+		const bool = await fs.pathExists("./data");
 		if (bool) {
-			const ids = await fs.readdir("./data")
+			const ids = await fs.readdir("./data");
 			// Check if ID already exists
 			if (ids.includes(id)) {
 				throw new InsightError("Dataset already in our record");
 			}
 		}
-
-
-
 	}
 
 	// checks if a dataset id is valid to be removed
@@ -42,17 +39,16 @@ export default class SectionsValidator {
 			throw new InsightError("Invalid id");
 		}
 
-		const bool =  await fs.pathExists("./data")
+		const bool = await fs.pathExists("./data");
 		if (bool) {
-			const ids = await fs.readdir("./data")
+			const ids = await fs.readdir("./data");
 			// Check if ID already exists
 			if (!ids.includes(id)) {
 				throw new NotFoundError("Dataset not found");
 			}
 		} else {
-			throw new NotFoundError("Empty Dataset")
+			throw new NotFoundError("Empty Dataset");
 		}
-
 	}
 
 	// async checkPathAndValidateID(id: string): Promise<void> {

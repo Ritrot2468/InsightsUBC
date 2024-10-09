@@ -124,7 +124,6 @@ export class ResultTooLargeError extends Error {
 }
 
 export interface IInsightFacade {
-
 	/**
 	 * Add a dataset to insightUBC.
 	 *

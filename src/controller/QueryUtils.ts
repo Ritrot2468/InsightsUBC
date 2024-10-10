@@ -111,6 +111,11 @@ export default class QueryUtils {
 		return shortestList;
 	}
 
+	public isObject(obj: unknown): void {
+		if (Array.isArray(obj)) {
+			throw new InsightError("Invalid object present");
+		}
+	}
 	public testRegex(input: string): RegExp {
 		const validInputRegex = /^[*]?[^*]*[*]?$/;
 		if (!validInputRegex.test(input)) {

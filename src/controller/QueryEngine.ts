@@ -91,15 +91,21 @@ export default class QueryEngine {
 			if (this.logicComparator.includes(filter)) {
 				promise = this.handleLogicComparison(filter, value);
 			} else if (this.mComparator.includes(filter)) {
+				// checks if it is an array -> object
+				this.utils.isObject(value);
 				const entry = Object.entries(value as Record<string, number>);
 				const [key, input] = entry[0];
 				promise = this.handleMComparison(filter, key, input);
 			} else if (filter === "IS") {
+				// checks if it is an array -> object
+				this.utils.isObject(value);
 				// property to value pairing
 				const entry = Object.entries(value as Record<string, string>);
 				const [key, input] = entry[0];
 				promise = this.handleSComparison(key, input);
 			} else if (filter === "NOT") {
+				// checks if it is an array -> object
+				this.utils.isObject(value);
 				const valueObj = Object(value);
 				promise = this.handleNegation(Object.keys(valueObj)[0], Object.values(valueObj)[0]);
 			} else {
@@ -112,9 +118,7 @@ export default class QueryEngine {
 				throw new InsightError("Unexpected error.");
 			}
 		}
-
-		const results: Section[] = await promise;
-		return results;
+		return promise;
 	}
 
 	private async handleNegation(filter: string, value: unknown): Promise<Section[]> {
@@ -237,6 +241,8 @@ export default class QueryEngine {
 					Object.values(obj)[0] as unknown
 				);
 				andListPromises.push(key);
+			} else {
+				throw new InsightError("Invalid Object");
 			}
 		}
 		const andList = await Promise.all(andListPromises);
@@ -256,10 +262,11 @@ export default class QueryEngine {
 		for (const obj of value) {
 			if (typeof obj === "object" && obj !== null) {
 				orList.push(this.handleFilter(Object.keys(obj)[0] as string, Object.values(obj)[0] as unknown));
+			} else {
+				throw new InsightError("Invalid Object");
 			}
 		}
 		const resolvedOrList = await Promise.all(orList);
-
 		return resolvedOrList.flat();
 	}
 
@@ -339,7 +346,6 @@ export default class QueryEngine {
 			const keyStr = String(key);
 			const idstring = keyStr.split("_")[0];
 			const field = keyStr.split("_")[1];
-
 			this.checkIDString(idstring);
 			if (this.mFields.includes(field) || this.sFields.includes(field)) {
 				results.push(keyStr);

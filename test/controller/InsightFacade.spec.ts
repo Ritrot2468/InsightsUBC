@@ -558,9 +558,9 @@ describe("InsightFacade", function () {
 		it("[valid/filter_by_id.json] filter by id", checkQuery);
 		it("[valid/double_ast.json] double ast", checkQuery);
 
-		//it("[valid/notAnd.json] not and", checkQuery);
-		//it("[valid/notAnd2.json] not and2", checkQuery);
-		//it("[valid/notAnd3.json] not and3", checkQuery);
+		// it("[valid/notAnd.json] not and", checkQuery);
+		// it("[valid/notAnd2.json] not and2", checkQuery);
+		it("[valid/notAnd3.json] not and3", checkQuery);
 
 		it("[valid/doubleNegation.json] double negation", checkQuery);
 
@@ -592,7 +592,7 @@ describe("InsightFacade", function () {
 
 		it("[valid/mkeyWithDecimalNumber.json] mkey with decimal number", checkQuery);
 
-		//it("[invalid/andIsInvalidObject.json] and is invalid object", checkQuery);
+		it("[invalid/andIsInvalidObject.json] and is invalid object", checkQuery);
 
 		it("[valid/andLt_Gt.json] avg > 96 and avg < 97", checkQuery);
 		it("[invalid/andEmptyKeylist.json] and empty keylist", checkQuery);

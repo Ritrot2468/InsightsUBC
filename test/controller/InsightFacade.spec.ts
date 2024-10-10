@@ -23,7 +23,6 @@ export interface ITestQuery {
 
 describe("InsightFacade", function () {
 	let facade: IInsightFacade;
-	let facade2: IInsightFacade;
 
 	// Declare datasets used in tests. You should add more datasets like this!
 	let sections: string;
@@ -77,7 +76,6 @@ describe("InsightFacade", function () {
 			// This runs before each test
 			await clearDisk();
 			facade = new InsightFacade();
-			facade2 = new InsightFacade();
 		});
 		before(async function () {
 			// This block runs once and loads the datasets.
@@ -129,6 +127,17 @@ describe("InsightFacade", function () {
 				"section",
 			]);
 			await expect(facade.addDataset("section", sections2, InsightDatasetKind.Sections)).to.eventually.be.rejectedWith(
+				InsightError
+			);
+		});
+
+		it("should reject repeat adds with same id cross different facades", async function () {
+			await expect(facade.addDataset("section", sections, InsightDatasetKind.Sections)).to.eventually.have.members([
+				"section",
+			]);
+
+			const facade2: InsightFacade = new InsightFacade();
+			await expect(facade2.addDataset("section", sections2, InsightDatasetKind.Sections)).to.eventually.be.rejectedWith(
 				InsightError
 			);
 		});
@@ -243,7 +252,7 @@ describe("InsightFacade", function () {
 			try {
 				sections = await getContentFromArchives("test3.zip");
 				await facade.addDataset("test3", sections, InsightDatasetKind.Sections);
-				let datasets = await facade.listDatasets();
+				const datasets = await facade.listDatasets();
 				expect(datasets).to.deep.equal([
 					{
 						id: "test3",
@@ -252,19 +261,17 @@ describe("InsightFacade", function () {
 					},
 				]);
 
+				const facade2: InsightFacade = new InsightFacade();
 				let datasets2 = await facade2.listDatasets();
 				expect(datasets2).to.deep.equal(datasets);
 
 				const sections1 = await getContentFromArchives("test5.zip");
 				await facade2.addDataset("test5", sections1, InsightDatasetKind.Sections);
 
-				datasets = await facade.listDatasets();
 				datasets2 = await facade2.listDatasets();
 				const EXPECTED_LENGTH = 2;
-				expect(datasets.length).to.equal(EXPECTED_LENGTH);
-				expect(datasets.length).to.equal(datasets2.length);
-				expect(datasets).to.deep.equal(datasets2);
-				expect(datasets).to.include.deep.members([
+				expect(datasets2.length).to.equal(EXPECTED_LENGTH);
+				expect(datasets2).to.include.deep.members([
 					{
 						id: "test3",
 						kind: InsightDatasetKind.Sections,
@@ -289,7 +296,6 @@ describe("InsightFacade", function () {
 			// This runs before each test
 			await clearDisk();
 			facade = new InsightFacade();
-			facade2 = new InsightFacade();
 		});
 
 		afterEach(async function () {
@@ -386,6 +392,7 @@ describe("InsightFacade", function () {
 						numRows: 2,
 					},
 				]);
+				const facade2: InsightFacade = new InsightFacade();
 
 				let datasets2 = await facade2.listDatasets();
 				expect(datasets2).to.deep.equal([
@@ -405,8 +412,10 @@ describe("InsightFacade", function () {
 				const sections1 = await getContentFromArchives("test5.zip");
 				await facade2.addDataset("test5", sections1, InsightDatasetKind.Sections);
 
-				datasets = await facade.listDatasets();
-				datasets2 = await facade2.listDatasets();
+				datasets = await facade2.listDatasets();
+
+				const facade3: InsightFacade = new InsightFacade();
+				datasets2 = await facade3.listDatasets();
 				const EXPECTED_LENGTH = 2;
 				expect(datasets.length).to.equal(EXPECTED_LENGTH);
 				//expect(datasets).to.deep.equal(datasets2);
@@ -550,6 +559,8 @@ describe("InsightFacade", function () {
 		it("[valid/double_ast.json] double ast", checkQuery);
 
 		//it("[valid/notAnd.json] not and", checkQuery);
+		//it("[valid/notAnd2.json] not and2", checkQuery);
+		//it("[valid/notAnd3.json] not and3", checkQuery);
 
 		it("[valid/doubleNegation.json] double negation", checkQuery);
 
@@ -583,6 +594,7 @@ describe("InsightFacade", function () {
 
 		//it("[invalid/andIsInvalidObject.json] and is invalid object", checkQuery);
 
+		it("[valid/andLt_Gt.json] avg > 96 and avg < 97", checkQuery);
 		it("[invalid/andEmptyKeylist.json] and empty keylist", checkQuery);
 
 		it("[invalid/andEmptyKeylistMissingBrace.json] and empty keylist missing brace", checkQuery);

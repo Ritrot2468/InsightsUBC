@@ -290,7 +290,7 @@ export default class QueryEngine {
 			}
 
 			if ("COLUMNS" in options) {
-				columns = await this.handleCOLUMNS(options.COLUMNS);
+				columns = this.handleCOLUMNS(options.COLUMNS);
 			} else {
 				throw new InsightError("Query missing COLUMNS");
 			}
@@ -332,7 +332,7 @@ export default class QueryEngine {
 		return results;
 	}
 	// returns the columns as an array of strings (WORKING)
-	private async handleCOLUMNS(value: unknown): Promise<string[]> {
+	private handleCOLUMNS(value: unknown): string[] {
 		const columns = this.utils.coerceToArray(value);
 		const results: string[] = [];
 		for (const key of columns) {

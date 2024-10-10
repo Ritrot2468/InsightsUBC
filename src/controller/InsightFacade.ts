@@ -26,7 +26,7 @@ export default class InsightFacade implements IInsightFacade {
 	public sectionsDatabase: Map<string, Section[]>;
 
 	// list of name of current IDs added
-	//private currIDs: string[];
+	//private currIDs: string[] = [];
 
 	// service classes
 	private sv: SectionsValidator;
@@ -37,7 +37,6 @@ export default class InsightFacade implements IInsightFacade {
 	constructor() {
 		//Log.info("InsightFacadeImpl::init()");
 		this.sectionsDatabase = new Map<string, []>();
-		//this.currIDs = [];
 		this.sv = new SectionsValidator();
 		this.sp = new SectionsParser();
 		this.qe = new QueryEngine(this.sectionsDatabase);
@@ -46,11 +45,17 @@ export default class InsightFacade implements IInsightFacade {
 	}
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
 		try {
-			await Promise.all([this.sv.validateId(id), this.sp.logDatasetOnDisk(content, id)]);
+			//await Promise.all([this.sv.validateId(id), this.sp.logDatasetOnDisk(content, id)]);
+			await this.sv.validateIdStructure(id);
 
+			if (this.sectionsDatabase.has(id) || (await fs.pathExists(`./data/${id}`))) {
+				throw new InsightError(`Dataset with id ${id} already exists.`);
+			}
+
+			await this.sp.logDatasetOnDisk(content, id);
 			await this.logNewDatasetFromDiskToMap(id);
 			await this.sp.logInsightKindToDisk(id, kind, this.sectionsDatabase.get(id)?.length as number);
-
+			//this.currIDs.push(id)
 			// Resolve with the dataset ID
 			return fs.readdir("./data");
 		} catch (err) {
@@ -79,7 +84,12 @@ export default class InsightFacade implements IInsightFacade {
 
 	public async removeDataset(id: string): Promise<string> {
 		try {
-			await this.sv.validateIdRemoval(id);
+			await this.sv.validateIdStructure(id);
+			const datasetPath = `./data/${id}`;
+			if (!(await fs.pathExists(datasetPath))) {
+				throw new NotFoundError(`Dataset with id ${id} not found.`);
+			}
+
 			this.sectionsDatabase.delete(id);
 
 			await fs.remove(`./data/${id}`);

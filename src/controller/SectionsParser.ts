@@ -141,11 +141,11 @@ export default class SectionsParser {
 					// turn all valid sections to Sections objects
 					validSectionsInCourse.forEach((section: any) => {
 						if (section.Section === "overall") {
-							const newSection = this.createSection(section);
+							const newSection = this.createSection(section, id);
 							newSection.setMfield(newSection.getMFieldIndex("year"), SectionsParser.OVERALL_SECTION_YEAR);
 							sections.push(newSection);
 						} else {
-							sections.push(this.createSection(section));
+							sections.push(this.createSection(section, id));
 						}
 					});
 
@@ -166,7 +166,7 @@ export default class SectionsParser {
 	// REQUIRES: jsonData - parsed JSON Object of a valid section from the result key in a given course file
 	// EFFECTS: Retrieves the fields of the section and populate the values of the sfields and mfields into a Section object
 	// OUTPUT: newly populated and created Section object
-	private createSection(jsonData: any): Section {
+	private createSection(jsonData: any, setId: string): Section {
 		const result = jsonData;
 
 		const [uuid, id, title, instructor, dept]: string[] = this.sFields.map((sfield) => {
@@ -194,7 +194,7 @@ export default class SectionsParser {
 			audit: Number(audit),
 		};
 
-		const newSection: Section = new Section(sectionMfields, sectionSfields);
+		const newSection: Section = new Section(setId, sectionMfields, sectionSfields);
 		//console.log(typeof newSection.getSfields().id)
 		return newSection;
 	}

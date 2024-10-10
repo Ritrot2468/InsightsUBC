@@ -84,7 +84,7 @@ export default class QueryUtils {
 		if (filter === "LT") {
 			results = dataset.filter((section) => section.getMFieldByIndex(index) < input);
 		} else if (filter === "GT") {
-			results = dataset.filter((section) => section.getMFieldByIndex(index) > (input as number));
+			results = dataset.filter((section) => section.getMFieldByIndex(index) > input);
 		} else if (filter === "EQ") {
 			results = dataset.filter((section) => section.getMFieldByIndex(index) === input);
 		} else {
@@ -96,7 +96,7 @@ export default class QueryUtils {
 	public async mergeAndList(andList: Section[][]): Promise<Section[]> {
 		let shortestList = andList.reduce((shortest, currArray) => {
 			return currArray.length < shortest.length ? currArray : shortest;
-		}, andList[0]);
+		});
 
 		for (const currArray of andList) {
 			if (currArray === shortestList) {

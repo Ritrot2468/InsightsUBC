@@ -99,14 +99,17 @@ export default class QueryUtils {
 			return currArray.length < shortest.length ? currArray : shortest;
 		});
 
+		//console.log("Merge and list, shortest list:");
+		//console.log(shortestList.length);
 		for (const currArray of andList) {
 			if (currArray === shortestList) {
 				continue;
 			} // Skip comparing the shortest list with itself
 
 			// Filter the shortest list to keep only sections that exist in the current array
-			shortestList = shortestList.filter(async (section) =>
-				currArray.some(async (currSection) => this.isEqual(section, currSection))
+			shortestList = shortestList.filter((section) =>
+				//currArray.some(async (currSection) => this.isEqual(section, currSection))
+				currArray.includes(section)
 			);
 		}
 		return shortestList;

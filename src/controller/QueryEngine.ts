@@ -42,6 +42,8 @@ export default class QueryEngine {
 			} else {
 				throw new InsightError("Query missing OPTIONS");
 			}
+			//console.log("End result");
+			//console.log(result);
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;
@@ -76,6 +78,8 @@ export default class QueryEngine {
 	private async handleFilter(filter: string, value: unknown): Promise<Section[]> {
 		let promise: Promise<Section[]>;
 		try {
+			//console.log("Filter running");
+			//console.log(filter);
 			if (this.utils.logicComparator.includes(filter)) {
 				promise = this.handleLogicComparison(filter, value);
 			} else if (this.utils.mComparator.includes(filter) || filter === "IS" || filter === "NOT") {
@@ -230,11 +234,17 @@ export default class QueryEngine {
 			}
 		}
 		const andList = await Promise.all(andListPromises);
+		/*console.log(andList.length);
+		for (const list of andList) {
+			console.log(list.length);
+		}*/
 		// only one filter applied
 		if (andList.length === 1) {
 			return andList[0];
 		}
-		return this.utils.mergeAndList(andList);
+		const mergedList = this.utils.mergeAndList(andList);
+		//console.log((await mergedList).length);
+		return mergedList;
 	}
 
 	private async handleOR(value: unknown[]): Promise<Section[]> {

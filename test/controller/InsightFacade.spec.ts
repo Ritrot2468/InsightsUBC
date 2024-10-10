@@ -559,8 +559,6 @@ describe("InsightFacade", function () {
 		it("[valid/filter_by_id.json] filter by id", checkQuery);
 		it("[valid/double_ast.json] double ast", checkQuery);
 
-		// it("[valid/notAnd.json] not and", checkQuery);
-		// it("[valid/notAnd2.json] not and2", checkQuery);
 		it("[valid/notAnd3.json] not and3", checkQuery);
 
 		it("[valid/doubleNegation.json] double negation", checkQuery);
@@ -674,6 +672,9 @@ describe("InsightFacade", function () {
 		it("[valid/orderByUuid.json] order by uuid", checkQuery);
 		it("[valid/yearTest.json] order by year", checkQuery);
 		it("[valid/noOrder.json] no order", checkQuery);
+
+		it("[valid/notAnd.json] not and", checkQuery);
+		it("[valid/notAnd2.json] not and2", checkQuery);
 	});
 
 	describe("ListDataset", function () {

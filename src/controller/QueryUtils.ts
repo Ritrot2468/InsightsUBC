@@ -96,7 +96,7 @@ export default class QueryUtils {
 	public async mergeAndList(andList: Section[][]): Promise<Section[]> {
 		let shortestList = andList.reduce((shortest, currArray) => {
 			return currArray.length < shortest.length ? currArray : shortest;
-		}, andList[0]);
+		});
 
 		for (const currArray of andList) {
 			if (currArray === shortestList) {
@@ -111,6 +111,11 @@ export default class QueryUtils {
 		return shortestList;
 	}
 
+	public isObject(obj: unknown): void {
+		if (Array.isArray(obj)) {
+			throw new InsightError("Invalid object present");
+		}
+	}
 	public testRegex(input: string): RegExp {
 		const validInputRegex = /^[*]?[^*]*[*]?$/;
 		if (!validInputRegex.test(input)) {

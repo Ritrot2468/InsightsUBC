@@ -25,7 +25,6 @@ export default class QueryEngine {
 
 	public async query(query: unknown): Promise<InsightResult[]> {
 		//console.log("QUERY method");
-
 		let filteredSections: Section[] = [];
 		let result: InsightResult[] = [];
 		this.queryingIDString = ""; // restart on every query;
@@ -36,7 +35,6 @@ export default class QueryEngine {
 			if (invalidKeys.length > 0) {
 				throw new InsightError("Excess keys in query");
 			}
-
 			// If WHERE key exists, filter all the sections, else throw InsightError
 			if ("WHERE" in queryObj) {
 				filteredSections = await this.handleWHERE(queryObj.WHERE);
@@ -53,9 +51,8 @@ export default class QueryEngine {
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;
-			} else {
-				throw new InsightError("Unexpected error.");
 			}
+			throw new InsightError("Unexpected error.");
 		}
 		return result;
 	}
@@ -76,45 +73,46 @@ export default class QueryEngine {
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;
-			} else {
-				throw new InsightError("Unexpected error.");
 			}
+			throw new InsightError("Unexpected error.");
 		}
 		return filteredSections;
 	}
 
 	private async handleFilter(filter: string, value: unknown): Promise<Section[]> {
-		//console.log("HANDLING FILTER");
-		//console.log(filter);
 		let promise: Promise<Section[]>;
 		try {
 			if (this.logicComparator.includes(filter)) {
 				promise = this.handleLogicComparison(filter, value);
-			} else if (this.mComparator.includes(filter)) {
-				const entry = Object.entries(value as Record<string, number>);
-				const [key, input] = entry[0];
-				promise = this.handleMComparison(filter, key, input);
-			} else if (filter === "IS") {
-				// property to value pairing
-				const entry = Object.entries(value as Record<string, string>);
-				const [key, input] = entry[0];
-				promise = this.handleSComparison(key, input);
-			} else if (filter === "NOT") {
-				const valueObj = Object(value);
-				promise = this.handleNegation(Object.keys(valueObj)[0], Object.values(valueObj)[0]);
+			} else if (this.mComparator.includes(filter) || filter === "IS" || filter === "NOT") {
+				this.utils.isObject(value);
+				const [key, input] = Object.entries(value as Record<string, any>)[0];
+				switch (filter) {
+					case "IS":
+						if (typeof input !== "string") {
+							throw new InsightError(`Invalid input type for IS`);
+						}
+						promise = this.handleSComparison(key, input);
+						break;
+					case "NOT":
+						promise = this.handleNegation(key, input);
+						break;
+					default:
+						if (typeof input !== "number") {
+							throw new InsightError(`Invalid input type for ${filter}`);
+						}
+						promise = this.handleMComparison(filter, key, input);
+				}
 			} else {
 				throw new InsightError(`Invalid filter key: ${filter}`);
 			}
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;
-			} else {
-				throw new InsightError("Unexpected error.");
 			}
+			throw new InsightError("Unexpected error.");
 		}
-
-		const results: Section[] = await promise;
-		return results;
+		return promise;
 	}
 
 	private async handleNegation(filter: string, value: unknown): Promise<Section[]> {
@@ -134,9 +132,8 @@ export default class QueryEngine {
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;
-			} else {
-				throw new InsightError("Unexpected error.");
 			}
+			throw new InsightError("Unexpected error.");
 		}
 	}
 
@@ -169,9 +166,8 @@ export default class QueryEngine {
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;
-			} else {
-				throw new InsightError("Unexpected error.");
 			}
+			throw new InsightError("Unexpected error.");
 		}
 	}
 
@@ -200,9 +196,8 @@ export default class QueryEngine {
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;
-			} else {
-				throw new InsightError("Unexpected error.");
 			}
+			throw new InsightError("Unexpected error.");
 		}
 	}
 
@@ -219,9 +214,8 @@ export default class QueryEngine {
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;
-			} else {
-				throw new InsightError("Unexpected error.");
 			}
+			throw new InsightError("Unexpected error.");
 		}
 	}
 
@@ -237,6 +231,8 @@ export default class QueryEngine {
 					Object.values(obj)[0] as unknown
 				);
 				andListPromises.push(key);
+			} else {
+				throw new InsightError("Invalid Object");
 			}
 		}
 		const andList = await Promise.all(andListPromises);
@@ -256,10 +252,11 @@ export default class QueryEngine {
 		for (const obj of value) {
 			if (typeof obj === "object" && obj !== null) {
 				orList.push(this.handleFilter(Object.keys(obj)[0] as string, Object.values(obj)[0] as unknown));
+			} else {
+				throw new InsightError("Invalid Object");
 			}
 		}
 		const resolvedOrList = await Promise.all(orList);
-
 		return resolvedOrList.flat();
 	}
 
@@ -290,7 +287,7 @@ export default class QueryEngine {
 			}
 
 			if ("COLUMNS" in options) {
-				columns = await this.handleCOLUMNS(options.COLUMNS);
+				columns = this.handleCOLUMNS(options.COLUMNS);
 			} else {
 				throw new InsightError("Query missing COLUMNS");
 			}
@@ -306,9 +303,8 @@ export default class QueryEngine {
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;
-			} else {
-				throw new InsightError("Unexpected error.");
 			}
+			throw new InsightError("Unexpected error.");
 		}
 		return results;
 	}
@@ -332,15 +328,13 @@ export default class QueryEngine {
 		return results;
 	}
 	// returns the columns as an array of strings (WORKING)
-	private async handleCOLUMNS(value: unknown): Promise<string[]> {
+	private handleCOLUMNS(value: unknown): string[] {
 		const columns = this.utils.coerceToArray(value);
 		const results: string[] = [];
 		for (const key of columns) {
 			const keyStr = String(key);
-			const idstring = keyStr.split("_")[0];
 			const field = keyStr.split("_")[1];
-
-			this.checkIDString(idstring);
+			this.checkIDString(keyStr.split("_")[0]);
 			if (this.mFields.includes(field) || this.sFields.includes(field)) {
 				results.push(keyStr);
 			} else {

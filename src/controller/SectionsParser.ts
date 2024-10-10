@@ -1,5 +1,5 @@
 import JSZip from "jszip";
-import Section, { Mfield, Sfield } from "./IInsightFacade";
+import Section, { InsightDataset, InsightDatasetKind, Mfield, Sfield } from "./IInsightFacade";
 import fs from "fs-extra";
 import { DatasetRecord } from "./DiskReader";
 
@@ -24,27 +24,6 @@ export default class SectionsParser {
 	public sFields: string[] = ["id", "Course", "Title", "Professor", "Subject"];
 
 	private static OVERALL_SECTION_YEAR = 1900;
-	//  REQUIRES: content: dataset content in base64 string, f
-	//  		  id:  name of current dataset about to be counted
-	//            datasets: map containing all datasets and associated sections added to InsightFacade instance so far
-	//  EFFECTS: Unzips the content of a dataset into a JSZIP
-	//  		then logs all valid sections to the associated dataset id to 'datasets' and
-	//  		returns the number of rows in an added dataset
-	// OUTPUT: returns number of rows in that dataset that is added.
-	// public async countRows(content: string, id: string, datasets: Map<string, Section[]>): Promise<number> {
-	// 	const buffer = Buffer.from(content, "base64");
-	// 	const zip = await JSZip.loadAsync(buffer);
-	//
-	// 	const numSections = await this.logAndCountValidSections(zip, id, datasets);
-	//
-	// 	await this.logDataset(zip, id);
-	//
-	// 	if (numSections === 0) {
-	// 		throw new InsightError("No valid section");
-	// 	}
-	//
-	// 	return numSections;
-	// }
 
 	public async logDatasetOnDisk(content: string, id: string): Promise<void> {
 		const buffer = Buffer.from(content, "base64");
@@ -52,45 +31,37 @@ export default class SectionsParser {
 		await this.logDataset(zip, id);
 	}
 
-	// REQUIRES: zip - current dataset content as a JSZIP
-	// 			  id - name of dataset
-	//            datasets - map containing all datasets and associated sections added to InsightFacade instance so far
-	// EFFECTS: parses the JSZIP files in the dataset and sorts through each JSON file containing each course, then
-	// 			parses the JSON object to obtain the 'result' object and finds all sections,
-	//          filters only valid sections, tracks number of valid sections,
-	//          then turns each valid section into a Section object.
-	//			Sums the number of valid sections per course for all courses in the dataset and returns value.
-	// OUTPUT: returns the number of valid sections in a dataset and logs the valid sections to the 'datasets' map
-	// private async logAndCountValidSections(zip: JSZip, id: string, datasets: Map<string, Section[]>): Promise<number> {
-	// 	let numSections = 0;
-	// 	const allPromises = [];
-	//
-	// 	for (const key in zip.files) {
-	// 		const name = key;
-	//
-	// 		if (name.match(/^courses\/\w/) && name.match(/^[^.]+$/)) {
-	// 			const promiseContent = zip.files[key].async("string").then(async (content0) => {
-	// 				const jsonData = JSON.parse(content0);
-	//
-	// 				if (jsonData.result.length === 0) {
-	// 					return null;
-	// 				}
-	//
-	// 				const validSectionsInCourse = this.filterValidSections(jsonData);
-	// 				jsonData.result = validSectionsInCourse;
-	//
-	// 				numSections = validSectionsInCourse.size;
-	//
-	// 				return { name, jsonData };
-	// 			});
-	//
-	// 			allPromises.push(promiseContent);
-	// 		}
-	// 	}
-	//
-	// 	await Promise.all(allPromises);
-	// 	return numSections;
-	// }
+	// Writes InsightDataset info about a dataset
+	public async logInsightKindToDisk(id: string, kind: InsightDatasetKind, numRows: number): Promise<void> {
+		const obj = {
+			table: [{ id, kind, numRows }],
+		};
+		//obj.table.push({id: id, kind: kind, numRows: numRows} as never);
+		const json = JSON.stringify(obj);
+		await fs.outputFile(`./data/${id}/kind`, json);
+	}
+
+	// Writes InsightDataset info about a dataset
+	public async logInsightKindFromDisk(ids: string[]): Promise<InsightDataset[]> {
+		const allPromises = ids.map(async (id) => {
+			const file = await fs.promises.readFile(`./data/${id}/kind`, "utf8");
+			const obj = JSON.parse(file);
+
+			const numRows = obj.table[0].numRows as number;
+			const kind = obj.table[0].kind as InsightDatasetKind;
+
+			const newInsightDataset: InsightDataset = {
+				id: id,
+				kind: kind,
+				numRows: numRows,
+			};
+
+			return newInsightDataset;
+		});
+
+		const result = await Promise.all(allPromises);
+		return result;
+	}
 
 	// REQUIRES: jsonData - parsed JSON Object of the result key in a given course file
 	//
@@ -108,45 +79,6 @@ export default class SectionsParser {
 			hasAllValidFields(section, this.valid_fields)
 		);
 		return validSectionsInCourse;
-	}
-
-	// REQUIRES: dataset_id - name of dataset
-	// 			 jsonData - parsed JSON Object of a valid section from the result key in a given course file
-	//           datasets - map containing all datasets and associated sections added to InsightFacade instance so far
-	// EFFECTS: Retrieves the fields of the section and populate the values of the sfields and mfields into a Section object
-	// 			then add the new section to the section list of 'dataset' map with the associated dataset id.
-	//
-	// OUTPUT: void
-	private addNewSectionToDatabase(dataset_id: string, jsonData: any, datasets: Map<string, Section[]>): void {
-		const result = jsonData;
-
-		const [uuid, id, title, instructor, dept] = this.sFields.map((sfield) => result[sfield]);
-
-		const sectionSfields: Sfield = {
-			uuid,
-			id,
-			title,
-			instructor,
-			dept,
-		};
-
-		const [year, avg, pass, fail, audit] = this.mFields.map((mfield) => result[mfield]);
-
-		const sectionMfields: Mfield = {
-			year,
-			avg,
-			pass,
-			fail,
-			audit,
-		};
-		// log section into database of datasets
-		// if id has not been logged yet, log it, else append new section to list of sections in dictionary
-		const newSection: Section = new Section(sectionMfields, sectionSfields);
-		if (id in datasets) {
-			datasets.get(dataset_id)?.push(newSection);
-		} else {
-			datasets.set(dataset_id, [newSection]);
-		}
 	}
 
 	// REQUIRES: zip - current dataset content as a JSZIP
@@ -209,12 +141,11 @@ export default class SectionsParser {
 					// turn all valid sections to Sections objects
 					validSectionsInCourse.forEach((section: any) => {
 						if (section.Section === "overall") {
-							const newSection = this.createSection(section);
+							const newSection = this.createSection(section, id);
 							newSection.setMfield(newSection.getMFieldIndex("year"), SectionsParser.OVERALL_SECTION_YEAR);
 							sections.push(newSection);
-							//console.log(newSection.getMfields().year)
 						} else {
-							sections.push(this.createSection(section));
+							sections.push(this.createSection(section, id));
 						}
 					});
 
@@ -228,7 +159,6 @@ export default class SectionsParser {
 		}
 
 		await Promise.all(allPromises);
-		//console.log(sections)
 		const datasetRecord: DatasetRecord = { id: id, sections: sections };
 		return datasetRecord;
 	}
@@ -236,7 +166,7 @@ export default class SectionsParser {
 	// REQUIRES: jsonData - parsed JSON Object of a valid section from the result key in a given course file
 	// EFFECTS: Retrieves the fields of the section and populate the values of the sfields and mfields into a Section object
 	// OUTPUT: newly populated and created Section object
-	private createSection(jsonData: any): Section {
+	private createSection(jsonData: any, setId: string): Section {
 		const result = jsonData;
 
 		const [uuid, id, title, instructor, dept]: string[] = this.sFields.map((sfield) => {
@@ -264,7 +194,7 @@ export default class SectionsParser {
 			audit: Number(audit),
 		};
 
-		const newSection: Section = new Section(sectionMfields, sectionSfields);
+		const newSection: Section = new Section(setId, sectionMfields, sectionSfields);
 		//console.log(typeof newSection.getSfields().id)
 		return newSection;
 	}

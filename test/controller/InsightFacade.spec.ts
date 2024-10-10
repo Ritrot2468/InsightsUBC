@@ -23,7 +23,6 @@ export interface ITestQuery {
 
 describe("InsightFacade", function () {
 	let facade: IInsightFacade;
-	//let facade2: IInsightFacade;
 
 	// Declare datasets used in tests. You should add more datasets like this!
 	let sections: string;
@@ -128,6 +127,17 @@ describe("InsightFacade", function () {
 				"section",
 			]);
 			await expect(facade.addDataset("section", sections2, InsightDatasetKind.Sections)).to.eventually.be.rejectedWith(
+				InsightError
+			);
+		});
+
+		it("should reject repeat adds with same id cross different facades", async function () {
+			await expect(facade.addDataset("section", sections, InsightDatasetKind.Sections)).to.eventually.have.members([
+				"section",
+			]);
+
+			const facade2: InsightFacade = new InsightFacade();
+			await expect(facade2.addDataset("section", sections2, InsightDatasetKind.Sections)).to.eventually.be.rejectedWith(
 				InsightError
 			);
 		});
@@ -237,12 +247,52 @@ describe("InsightFacade", function () {
 				expect.fail(`Not valid entry: ${err}`);
 			}
 		});
+
+		it("list 2 datasets from different facades", async function () {
+			try {
+				sections = await getContentFromArchives("test3.zip");
+				await facade.addDataset("test3", sections, InsightDatasetKind.Sections);
+				const datasets = await facade.listDatasets();
+				expect(datasets).to.deep.equal([
+					{
+						id: "test3",
+						kind: InsightDatasetKind.Sections,
+						numRows: 2,
+					},
+				]);
+
+				const facade2: InsightFacade = new InsightFacade();
+				let datasets2 = await facade2.listDatasets();
+				expect(datasets2).to.deep.equal(datasets);
+
+				const sections1 = await getContentFromArchives("test5.zip");
+				await facade2.addDataset("test5", sections1, InsightDatasetKind.Sections);
+
+				datasets2 = await facade2.listDatasets();
+				const EXPECTED_LENGTH = 2;
+				expect(datasets2.length).to.equal(EXPECTED_LENGTH);
+				expect(datasets2).to.include.deep.members([
+					{
+						id: "test3",
+						kind: InsightDatasetKind.Sections,
+						numRows: 2,
+					},
+					{
+						id: "test5",
+						kind: InsightDatasetKind.Sections,
+						numRows: 2,
+					},
+				]);
+			} catch (err) {
+				expect.fail(`you failed to load the right sets ${err}`);
+			}
+		});
 	});
 
 	// added James' tests for removeDataset (async tests with try catch)
 	describe("RemoveDataset", function () {
 		beforeEach(async function () {
-			//  This section resets the insightFacade instance
+			//  This section resets the insightFacade instance;
 			// This runs before each test
 			await clearDisk();
 			facade = new InsightFacade();
@@ -327,6 +377,64 @@ describe("InsightFacade", function () {
 				expect.fail("Error should not have been thrown.");
 			}
 		});
+
+		it("should remove the same datasets from 2 different facades", async function () {
+			try {
+				sections = await getContentFromArchives("test3.zip");
+				await facade.addDataset("test3", sections, InsightDatasetKind.Sections);
+				let datasets = await facade.listDatasets();
+				const EXPECTED_LENGTH_1 = 1;
+				expect(datasets.length).to.equal(EXPECTED_LENGTH_1);
+				expect(datasets).to.deep.equal([
+					{
+						id: "test3",
+						kind: InsightDatasetKind.Sections,
+						numRows: 2,
+					},
+				]);
+				const facade2: InsightFacade = new InsightFacade();
+
+				let datasets2 = await facade2.listDatasets();
+				expect(datasets2).to.deep.equal([
+					{
+						id: "test3",
+						kind: InsightDatasetKind.Sections,
+						numRows: 2,
+					},
+				]);
+
+				//expect(datasets2.length).to.be.equal(datasets.length);
+				const remove1 = await facade2.removeDataset("test3");
+				expect(remove1).to.be.equal("test3");
+
+				await facade2.addDataset("test3", sections, InsightDatasetKind.Sections);
+
+				const sections1 = await getContentFromArchives("test5.zip");
+				await facade2.addDataset("test5", sections1, InsightDatasetKind.Sections);
+
+				datasets = await facade2.listDatasets();
+
+				const facade3: InsightFacade = new InsightFacade();
+				datasets2 = await facade3.listDatasets();
+				const EXPECTED_LENGTH = 2;
+				expect(datasets.length).to.equal(EXPECTED_LENGTH);
+				//expect(datasets).to.deep.equal(datasets2);
+				expect(datasets).to.include.deep.members([
+					{
+						id: "test3",
+						kind: InsightDatasetKind.Sections,
+						numRows: 2,
+					},
+					{
+						id: "test5",
+						kind: InsightDatasetKind.Sections,
+						numRows: 2,
+					},
+				]);
+			} catch (err) {
+				expect.fail(`you failed to load the right sets ${err}`);
+			}
+		});
 	});
 
 	describe("PerformQuery", function () {
@@ -376,34 +484,6 @@ describe("InsightFacade", function () {
 				}
 			}
 		}
-		// async function checkQuery(this: Mocha.Context): Promise<void> {
-		// 	if (!this.test) {
-		// 		throw new Error(
-		// 			"Invalid call to checkQuery." +
-		// 				"Usage: 'checkQuery' must be passed as the second parameter of Mocha's it(..) function." +
-		// 				"Do not invoke the function directly."
-		// 		);
-		// 	}
-		// 	// Destructuring assignment to reduce property accesses
-		// 	const { input, expected, errorExpected } = await loadTestQuery(this.test.title);
-		// 	let result: InsightResult[] = []; // dummy value before being reassigned
-		// 	try {
-		// 		result = await facade.performQuery(input);
-		// 	} catch (err) {
-		// 		if (!errorExpected) {
-		// 			expect.fail(`performQuery threw unexpected error: ${err}`);
-		// 		}
-		// 		// TODO: replace this failing assertion with your assertions. You will need to reason about the code in this function
-		// 		// to determine what to put here :)
-		// 		return expect.fail("Write your assertion(s) here.");
-		// 	}
-		// 	if (errorExpected) {
-		// 		expect.fail(`performQuery resolved when it should have rejected with ${expected}`);
-		// 	}
-		// 	// TODO: replace this failing assertion with your assertions. You will need to reason about the code in this function
-		// 	// to determine what to put here :)
-		// 	return expect.fail("Write your assertion(s) here.");
-		// }
 
 		before(async function () {
 			facade = new InsightFacade();
@@ -438,12 +518,12 @@ describe("InsightFacade", function () {
 		*/
 		it("[valid/simple.json] SELECT dept, avg WHERE avg > 97", checkQuery);
 
-		//it("[valid/simple1.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = cps*", checkQuery);
+		it("[valid/simple1.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = cps*", checkQuery);
 		it("[valid/simple2.json] SELECT pass, audit, dept, avg WHERE avg == 97", checkQuery);
 
 		it("[valid/simple3.json] SELECT dept, avg, pass, fail, audit WHERE avg > 93 AND avg > 95", checkQuery);
 		it("[valid/case_sensitive_wildcard.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = CPS*", checkQuery);
-		//it("[valid/general_ast.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = *", checkQuery);
+		it("[valid/general_ast.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = *", checkQuery);
 
 		it("[valid/_wildcard.json] SELECT dept, uuid, avg WHERE avg > 95 AND dep = *psc", checkQuery);
 
@@ -478,7 +558,9 @@ describe("InsightFacade", function () {
 		it("[valid/filter_by_id.json] filter by id", checkQuery);
 		it("[valid/double_ast.json] double ast", checkQuery);
 
-		//it("[valid/notAnd.json] not and", checkQuery);
+		// it("[valid/notAnd.json] not and", checkQuery);
+		// it("[valid/notAnd2.json] not and2", checkQuery);
+		it("[valid/notAnd3.json] not and3", checkQuery);
 
 		it("[valid/doubleNegation.json] double negation", checkQuery);
 
@@ -510,8 +592,9 @@ describe("InsightFacade", function () {
 
 		it("[valid/mkeyWithDecimalNumber.json] mkey with decimal number", checkQuery);
 
-		//	it("[invalid/andIsInvalidObject.json] and is invalid object", checkQuery);
+		it("[invalid/andIsInvalidObject.json] and is invalid object", checkQuery);
 
+		it("[valid/andLt_Gt.json] avg > 96 and avg < 97", checkQuery);
 		it("[invalid/andEmptyKeylist.json] and empty keylist", checkQuery);
 
 		it("[invalid/andEmptyKeylistMissingBrace.json] and empty keylist missing brace", checkQuery);

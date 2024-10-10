@@ -31,6 +31,8 @@ export interface Mfield {
 	audit: number;
 }
 export default class Section {
+	private id: string;
+
 	public getMfields(): Mfield {
 		return this._mfields;
 	}
@@ -91,10 +93,34 @@ export default class Section {
 		// -1 if index is not found
 	}
 
+	public getID(): string {
+		return this.id;
+	}
+
 	private _mfields: Mfield;
 	private _sfields: Sfield;
 
-	constructor(mfields: Mfield, sfields: Sfield) {
+	private convertToJSON(): { setID: string; sFields: Sfield; mFields: Mfield } {
+		return {
+			setID: this.getID(),
+			sFields: {
+				uuid: this._sfields.uuid,
+				id: this._sfields.id,
+				title: this._sfields.title,
+				instructor: this._sfields.instructor,
+				dept: this._sfields.dept,
+			},
+			mFields: {
+				year: this._mfields.year,
+				avg: this._mfields.avg,
+				pass: this._mfields.pass,
+				fail: this._mfields.fail,
+				audit: this._mfields.audit,
+			},
+		};
+	}
+	constructor(id: string, mfields: Mfield, sfields: Sfield) {
+		this.id = id;
 		this._mfields = mfields;
 		this._sfields = sfields;
 	}
@@ -124,8 +150,6 @@ export class ResultTooLargeError extends Error {
 }
 
 export interface IInsightFacade {
-	// TODO: remove
-	sectionsDatabase: Map<string, Section[]>;
 	/**
 	 * Add a dataset to insightUBC.
 	 *

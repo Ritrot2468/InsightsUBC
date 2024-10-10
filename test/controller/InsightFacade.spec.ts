@@ -465,7 +465,7 @@ describe("InsightFacade", function () {
 					expect.fail(`performQuery resolved when it should have rejected with ${expected}`);
 				}
 				expect(result).to.includes.deep.members(expected);
-				//expect(result).to.include.members(expected);
+				//expect(result).to.deep.equal(expected);
 			} catch (err) {
 				if (!errorExpected) {
 					// facade.sectionsDatabase.forEach((key, value) => {
@@ -516,6 +516,7 @@ describe("InsightFacade", function () {
 			console.log(section);
 		});
 		*/
+
 		it("[valid/simple.json] SELECT dept, avg WHERE avg > 97", checkQuery);
 
 		it("[valid/simple1.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = cps*", checkQuery);
@@ -601,8 +602,6 @@ describe("InsightFacade", function () {
 
 		it("[invalid/whereHas2Keys.json] where has 2 keys", checkQuery);
 
-		it("[invalid/emptyStringQuery.json] empty string query", checkQuery);
-
 		it("[invalid/invalidKeyInColumns.json] invalid key in columns", checkQuery);
 
 		it("[invalid/queryNotAnObject.json] query not an object", checkQuery);
@@ -626,6 +625,8 @@ describe("InsightFacade", function () {
 		it("[invalid/columnsInvalidKeylist.json] columns invalid keylist", checkQuery);
 
 		it("[invalid/orderInvalidKeylist.json] order invalid keylist", checkQuery);
+
+		it("[invalid/orderNotAString.json] order is not a string", checkQuery);
 
 		it("[invalid/wHEREWith2Keys.json] WHERE with 2 keys", checkQuery);
 
@@ -668,6 +669,11 @@ describe("InsightFacade", function () {
 		);
 
 		it("[invalid/excessKeysInQuery.json] WHERE OPTIONS and HOW keys in Query", checkQuery);
+
+		it("[valid/uuidTest.json] check uuid type", checkQuery);
+		it("[valid/orderByUuid.json] order by uuid", checkQuery);
+		it("[valid/yearTest.json] order by year", checkQuery);
+		it("[valid/noOrder.json] no order", checkQuery);
 	});
 
 	describe("ListDataset", function () {

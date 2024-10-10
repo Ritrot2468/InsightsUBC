@@ -6,12 +6,6 @@ export default class QueryEngine {
 	private queryingIDString: string;
 	private sectionsDatabase: Map<string, Section[]>;
 	private noFilter: boolean;
-	private logicComparator: string[] = ["AND", "OR"];
-	private mComparator: string[] = ["LT", "GT", "EQ"];
-	private sFields: string[] = ["uuid", "id", "title", "instructor", "dept"];
-	private mFields: string[] = ["year", "avg", "pass", "fail", "audit"];
-	private validOptions: string[] = ["COLUMNS", "ORDER"];
-	private validQueryKeys: string[] = ["WHERE", "OPTIONS"];
 	private utils: QueryUtils;
 	private QueryOrderHandler: QueryOrderHandler;
 
@@ -31,7 +25,7 @@ export default class QueryEngine {
 		const queryObj = Object(query);
 		try {
 			const queryKeys = Object.keys(queryObj);
-			const invalidKeys = queryKeys.filter((key) => !this.validQueryKeys.includes(key));
+			const invalidKeys = queryKeys.filter((key) => !this.utils.validQueryKeys.includes(key));
 			if (invalidKeys.length > 0) {
 				throw new InsightError("Excess keys in query");
 			}
@@ -82,9 +76,9 @@ export default class QueryEngine {
 	private async handleFilter(filter: string, value: unknown): Promise<Section[]> {
 		let promise: Promise<Section[]>;
 		try {
-			if (this.logicComparator.includes(filter)) {
+			if (this.utils.logicComparator.includes(filter)) {
 				promise = this.handleLogicComparison(filter, value);
-			} else if (this.mComparator.includes(filter) || filter === "IS" || filter === "NOT") {
+			} else if (this.utils.mComparator.includes(filter) || filter === "IS" || filter === "NOT") {
 				this.utils.isObject(value);
 				const [key, input] = Object.entries(value as Record<string, any>)[0];
 				switch (filter) {
@@ -155,8 +149,8 @@ export default class QueryEngine {
 				// should not be possible
 				throw new InsightError("Can't find querying dataset");
 			} else {
-				if (this.sFields.includes(sfield)) {
-					const fieldIndex = this.sFields.indexOf(sfield);
+				if (this.utils.sFields.includes(sfield)) {
+					const fieldIndex = this.utils.sFields.indexOf(sfield);
 					const inputRegex = this.utils.testRegex(input); // Use case-insensitive matching
 					return datasetSections.filter((section) => inputRegex.test(section.getSFieldByIndex(fieldIndex)));
 				} else {
@@ -186,8 +180,8 @@ export default class QueryEngine {
 				// should not be possible
 				throw new InsightError("Can't find querying dataset");
 			} else {
-				if (this.mFields.includes(mfield)) {
-					const fieldIndex = this.mFields.indexOf(mfield);
+				if (this.utils.mFields.includes(mfield)) {
+					const fieldIndex = this.utils.mFields.indexOf(mfield);
 					return this.utils.filterMCompare(datasetSections, filter, fieldIndex, input);
 				} else {
 					throw new InsightError("Invalid mKey");
@@ -281,7 +275,7 @@ export default class QueryEngine {
 		let orderKey = "";
 		try {
 			const optionsKeys = Object.keys(options);
-			const invalidKeys = optionsKeys.filter((key) => !this.validOptions.includes(key));
+			const invalidKeys = optionsKeys.filter((key) => !this.utils.validOptions.includes(key));
 			if (invalidKeys.length > 0) {
 				throw new InsightError("Invalid keys in OPTIONS");
 			}
@@ -293,12 +287,8 @@ export default class QueryEngine {
 			}
 			//console.log(columns);
 			if ("ORDER" in options) {
-				orderKey = await this.QueryOrderHandler.handleORDER(
-					options.ORDER,
-					this.utils.coerceToArray(options.COLUMNS) as string[]
-				);
+				orderKey = await this.QueryOrderHandler.handleORDER(options.ORDER, columns);
 			}
-			orderKey = orderKey.split("_")[1];
 			results = await this.completeQuery(sections, columns, orderKey);
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
@@ -329,13 +319,13 @@ export default class QueryEngine {
 	}
 	// returns the columns as an array of strings (WORKING)
 	private handleCOLUMNS(value: unknown): string[] {
-		const columns = this.utils.coerceToArray(value);
+		const columns = this.utils.coerceToArray(value); // checks if is an array, if so, coerce to array type
 		const results: string[] = [];
 		for (const key of columns) {
 			const keyStr = String(key);
 			const field = keyStr.split("_")[1];
 			this.checkIDString(keyStr.split("_")[0]);
-			if (this.mFields.includes(field) || this.sFields.includes(field)) {
+			if (this.utils.mFields.includes(field) || this.utils.sFields.includes(field)) {
 				results.push(keyStr);
 			} else {
 				throw new InsightError(`Invalid key ${keyStr} in COLUMNS`);

@@ -1,8 +1,12 @@
 import Section, { InsightError, InsightResult, Mfield, ResultTooLargeError, Sfield } from "./IInsightFacade";
 
 export default class QueryUtils {
-	private sFields: string[] = ["uuid", "id", "title", "instructor", "dept"];
-	private mFields: string[] = ["year", "avg", "pass", "fail", "audit"];
+	public logicComparator: string[] = ["AND", "OR"];
+	public mComparator: string[] = ["LT", "GT", "EQ"];
+	public sFields: string[] = ["uuid", "id", "title", "instructor", "dept"];
+	public mFields: string[] = ["year", "avg", "pass", "fail", "audit"];
+	public validOptions: string[] = ["COLUMNS", "ORDER"];
+	public validQueryKeys: string[] = ["WHERE", "OPTIONS"];
 
 	public coerceToArray(value: unknown): unknown[] {
 		if (Array.isArray(value)) {
@@ -36,16 +40,13 @@ export default class QueryUtils {
 
 						if (typeof valueA === "string" && typeof valueB === "string") {
 							return valueA.localeCompare(valueB);
-						}
-
-						if (typeof valueA === "number" && typeof valueB === "number") {
+						} else if (typeof valueA === "number" && typeof valueB === "number") {
 							return valueA - valueB;
+						} else {
+							// Handle mixed types (e.g., string vs number)
+							return String(valueA).localeCompare(String(valueB));
 						}
-
-						// Handle mixed types (e.g., string vs number)
-						return String(valueA).localeCompare(String(valueB));
 					});
-
 					// Resolve the promise with the sorted results
 					resolve(results);
 				}, 0);

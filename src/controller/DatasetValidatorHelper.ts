@@ -1,6 +1,6 @@
 import { InsightError } from "./IInsightFacade";
 
-export default class SectionsValidator {
+export default class DatasetValidatorHelper {
 	// checks if a dataset id is valid to be added
 
 	// checks if a dataset id is valid to be removed
@@ -17,18 +17,4 @@ export default class SectionsValidator {
 			throw new InsightError("Invalid id");
 		}
 	}
-
-	// async checkPathAndValidateID(id: string): Promise<void> {
-	// 	try {
-	// 		const pathExists = await fs.pathExists("./data");
-	// 		if (pathExists) {
-	// 			const currIDs = await fs.readdir("./data");
-	// 			this.validateId(id, currIDs);
-	// 		} else {
-	// 			this.validateId(id, []);
-	// 		}
-	// 	} catch (err) {
-	// 		throw err;
-	// 	}
-	// }
 }

@@ -8,10 +8,10 @@ import Section, {
 	ResultTooLargeError,
 } from "./IInsightFacade";
 import fs from "fs-extra";
-import SectionsValidator from "./SectionsValidator";
-import SectionsParser from "./SectionsParser";
+import DatasetValidatorHelper from "./DatasetValidatorHelper";
 import QueryEngine from "./QueryEngine";
-import DiskReader from "./DiskReader";
+import SectionDiskReader from "./sections/SectionDiskReader";
+import SectionDiskWriter from "./sections/SectionDiskWriter";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -19,28 +19,22 @@ import DiskReader from "./DiskReader";
  *
  */
 export default class InsightFacade implements IInsightFacade {
-	// map to track record
-	//private datasets: Map<string, InsightResult>;
-
 	// tracks all sections added from a dataset using their associated id as the key
 	public sectionsDatabase: Map<string, Section[]>;
 
-	// list of name of current IDs added
-	//private currIDs: string[] = [];
-
 	// service classes
-	private sv: SectionsValidator;
-	private sp: SectionsParser;
+	private sv: DatasetValidatorHelper;
 	private qe: QueryEngine;
-	private dr: DiskReader;
+	private secDiskReader: SectionDiskReader;
+	private secDiskWriter: SectionDiskWriter;
 
 	constructor() {
 		//Log.info("InsightFacadeImpl::init()");
 		this.sectionsDatabase = new Map<string, []>();
-		this.sv = new SectionsValidator();
-		this.sp = new SectionsParser();
+		this.sv = new DatasetValidatorHelper();
 		this.qe = new QueryEngine(this.sectionsDatabase);
-		this.dr = new DiskReader(this.sectionsDatabase);
+		this.secDiskReader = new SectionDiskReader();
+		this.secDiskWriter = new SectionDiskWriter();
 		// initialize dictionary for the fields
 	}
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
@@ -52,11 +46,10 @@ export default class InsightFacade implements IInsightFacade {
 				throw new InsightError(`Dataset with id ${id} already exists.`);
 			}
 
-			await this.sp.logDatasetOnDisk(content, id);
-			await this.logNewDatasetFromDiskToMap(id);
-			await this.sp.logInsightKindToDisk(id, kind, this.sectionsDatabase.get(id)?.length as number);
-			//this.currIDs.push(id)
-			// Resolve with the dataset ID
+			await this.secDiskWriter.logSectionsDatasetOnDisk(content, id);
+			await this.secDiskReader.logNewDatasetFromDiskToMap(id, this.sectionsDatabase);
+			await this.secDiskWriter.logInsightKindToDisk(id, kind, this.sectionsDatabase.get(id)?.length as number);
+
 			return fs.readdir("./data");
 		} catch (err) {
 			if (err instanceof InsightError) {
@@ -66,21 +59,21 @@ export default class InsightFacade implements IInsightFacade {
 		}
 	}
 
-	// REQUIRES: id - name of dataset to be retrieved from disk (id IS NOT IN datasets ALREADY!!!!)
-	//           datasets - sets you'll be mapping new DatasetRecord to
-	// EFFECTS: Retrieves the sections associated with the dataset id on disk and turned into Sections objects and maps
-	//          them to sectionsDatabase with their associated id.
-	// OUTPUT: VOID
-	public async logNewDatasetFromDiskToMap(id: string): Promise<void> {
-		const newDataset = await this.sp.turnDatasetToSection(id);
-		const numRows = newDataset.sections.length;
-
-		if (numRows === 0) {
-			throw new InsightError("No valid Section");
-		}
-		// update member variables
-		this.sectionsDatabase.set(newDataset.id, newDataset.sections);
-	}
+	// // REQUIRES: id - name of dataset to be retrieved from disk (id IS NOT IN datasets ALREADY!!!!)
+	// //           datasets - sets you'll be mapping new DatasetRecord to
+	// // EFFECTS: Retrieves the sections associated with the dataset id on disk and turned into Sections objects and maps
+	// //          them to sectionsDatabase with their associated id.
+	// // OUTPUT: VOID
+	// public async logNewDatasetFromDiskToMap(id: string): Promise<void> {
+	// 	const newDataset = await this.sp.turnDatasetToSection(id);
+	// 	const numRows = newDataset.sections.length;
+	//
+	// 	if (numRows === 0) {
+	// 		throw new InsightError("No valid Section");
+	// 	}
+	// 	// update member variables
+	// 	this.sectionsDatabase.set(newDataset.id, newDataset.sections);
+	// }
 
 	public async removeDataset(id: string): Promise<string> {
 		try {
@@ -109,19 +102,13 @@ export default class InsightFacade implements IInsightFacade {
 		}
 	}
 
-	/*
-	public async performQuery(query: unknown): Promise<InsightResult[]> {
-		return Promise.reject("Not implemented.");
-	}
-	*/
-
 	public async performQuery(query: unknown): Promise<InsightResult[]> {
 		let result: InsightResult[] = [];
 		try {
 			const currIDs = await fs.readdir("./data");
 
 			if (this.sectionsDatabase.size !== currIDs.length) {
-				this.sectionsDatabase = await this.dr.mapMissingSections(currIDs);
+				this.sectionsDatabase = await this.secDiskReader.mapMissingSections(currIDs, this.sectionsDatabase);
 			}
 
 			result = await this.qe.query(query);
@@ -140,6 +127,6 @@ export default class InsightFacade implements IInsightFacade {
 		const currIDs = await fs.readdir("./data");
 
 		// reads their content info on disk and parses into InsightDataset[]
-		return this.sp.logInsightKindFromDisk(currIDs);
+		return this.secDiskReader.logInsightKindFromDisk(currIDs);
 	}
 }

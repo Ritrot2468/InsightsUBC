@@ -1,4 +1,4 @@
-import Section, { InsightError, InsightResult, Mfield, ResultTooLargeError, Sfield } from "./IInsightFacade";
+import Section, { InsightError, InsightResult, ResultTooLargeError } from "./IInsightFacade";
 
 export default class QueryUtils {
 	public logicComparator: string[] = ["AND", "OR"];
@@ -75,7 +75,6 @@ export default class QueryUtils {
 		return results;
 	}
 
-	//TODO: I had to change the name because lint and prettier would not let me push unless I shortened line
 	public async filterMCompare(dataset: Section[], filter: string, index: number, input: number): Promise<Section[]> {
 		let results: Section[];
 		//console.log("FILTER MCOMPARISON WORKING");
@@ -95,24 +94,41 @@ export default class QueryUtils {
 	}
 
 	public async mergeAndList(andList: Section[][]): Promise<Section[]> {
-		let shortestList = andList.reduce((shortest, currArray) => {
+		// make a map
+		const sectionCountMap = new Map<Section, number>();
+
+		// find the shortest list
+		const shortestList = andList.reduce((shortest, currArray) => {
 			return currArray.length < shortest.length ? currArray : shortest;
 		});
 
-		//console.log("Merge and list, shortest list:");
-		//console.log(shortestList.length);
+		// turn into a set for faster lookup
+		const shortestSet = new Set(shortestList);
+
+		// add all section in shortest list to map and increment count by 1
+		shortestSet.forEach((section) => {
+			sectionCountMap.set(section, (sectionCountMap.get(section) || 0) + 1);
+		});
+
+		// iterate through each array of section
 		for (const currArray of andList) {
+			// skip comparison with itself
 			if (currArray === shortestList) {
 				continue;
-			} // Skip comparing the shortest list with itself
+			}
 
-			// Filter the shortest list to keep only sections that exist in the current array
-			shortestList = shortestList.filter((section) =>
-				//currArray.some(async (currSection) => this.isEqual(section, currSection))
-				currArray.includes(section)
-			);
+			const currSet = new Set(currArray);
+
+			// only keep sections in the shortest list that are also in the current array
+			shortestList.forEach((section) => {
+				if (!currSet.has(section)) {
+					sectionCountMap.delete(section); // Remove sections not found in currArray
+				}
+			});
 		}
-		return shortestList;
+
+		// filter the shortest list to include only sections present in all arrays
+		return shortestList.filter((section) => sectionCountMap.has(section));
 	}
 
 	public isObject(obj: unknown): void {
@@ -128,27 +144,5 @@ export default class QueryUtils {
 		// fix this return, figure out what sfield is, how to match it, and how to access
 		const processedInput = input.replace(/\*/g, ".*");
 		return new RegExp(`^${processedInput}$`); // Use case-insensitive matching
-	}
-
-	public async isEqual(section1: Section, section2: Section): Promise<boolean> {
-		// Compare Sfield
-		const sfield1 = section1.getSfields();
-		const sfield2 = section2.getSfields();
-		for (const key of Object.keys(sfield1) as (keyof Sfield)[]) {
-			if (sfield1[key] !== sfield2[key]) {
-				return false;
-			}
-		}
-
-		// Compare Mfield
-		const mfield1 = section1.getMfields();
-		const mfield2 = section2.getMfields();
-		for (const key of Object.keys(mfield1) as (keyof Mfield)[]) {
-			if (mfield1[key] !== mfield2[key]) {
-				return false;
-			}
-		}
-
-		return true;
 	}
 }

@@ -1,6 +1,7 @@
-import Section, { InsightDataset, InsightDatasetKind, InsightError } from "../IInsightFacade";
+import { InsightDataset, InsightDatasetKind, InsightError } from "../IInsightFacade";
 import SectionsParser, { DatasetRecord } from "./SectionsParser";
 import fs from "fs-extra";
+import Section from "./Section";
 
 // Any information about Sections that need to read from the disk
 

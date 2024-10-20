@@ -1,4 +1,6 @@
-import { InsightError } from "./IInsightFacade";
+import {InsightDatasetKind, InsightError} from "./IInsightFacade";
+import fs from "fs-extra";
+import Section from "./sections/Section";
 
 export default class DatasetValidatorHelper {
 	// checks if a dataset id is valid to be added
@@ -16,5 +18,13 @@ export default class DatasetValidatorHelper {
 		if (!base64Regex.test(id)) {
 			throw new InsightError("Invalid id");
 		}
+	}
+
+	public async validateSectionAddition(id: string, sectionsDatabase: Map<string, Section[]>): Promise<void> {
+		if (sectionsDatabase.has(id) || (await fs.pathExists(`./data/${id}`))) {
+			throw new InsightError(`Dataset with id ${id} already exists.`);
+		}
+
+
 	}
 }

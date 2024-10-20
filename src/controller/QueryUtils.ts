@@ -1,4 +1,5 @@
-import Section, { InsightError, InsightResult, ResultTooLargeError } from "./IInsightFacade";
+import { InsightError, InsightResult, ResultTooLargeError } from "./IInsightFacade";
+import Section from "./sections/Section";
 
 export default class QueryUtils {
 	public logicComparator: string[] = ["AND", "OR"];

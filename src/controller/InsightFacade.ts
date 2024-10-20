@@ -1,4 +1,4 @@
-import Section, {
+import {
 	IInsightFacade,
 	InsightDataset,
 	InsightDatasetKind,
@@ -12,6 +12,9 @@ import DatasetValidatorHelper from "./DatasetValidatorHelper";
 import QueryEngine from "./QueryEngine";
 import SectionDiskReader from "./sections/SectionDiskReader";
 import SectionDiskWriter from "./sections/SectionDiskWriter";
+import Section from "./sections/Section";
+import RoomDiskReader from "./rooms/RoomDiskReader";
+import RoomDiskWriter from "./rooms/RoomDiskWriter";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -27,6 +30,8 @@ export default class InsightFacade implements IInsightFacade {
 	private qe: QueryEngine;
 	private secDiskReader: SectionDiskReader;
 	private secDiskWriter: SectionDiskWriter;
+	private roomDiskReader: RoomDiskReader;
+	private roomDiskWriter: RoomDiskWriter;
 
 	constructor() {
 		//Log.info("InsightFacadeImpl::init()");
@@ -35,22 +40,27 @@ export default class InsightFacade implements IInsightFacade {
 		this.qe = new QueryEngine(this.sectionsDatabase);
 		this.secDiskReader = new SectionDiskReader();
 		this.secDiskWriter = new SectionDiskWriter();
+		this.roomDiskReader = new RoomDiskReader();
+		this.roomDiskWriter = new RoomDiskWriter();
 		// initialize dictionary for the fields
 	}
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
 		try {
-			//await Promise.all([this.sv.validateId(id), this.sp.logDatasetOnDisk(content, id)]);
+
 			await this.sv.validateIdStructure(id);
 
-			if (this.sectionsDatabase.has(id) || (await fs.pathExists(`./data/${id}`))) {
-				throw new InsightError(`Dataset with id ${id} already exists.`);
+			if (kind == InsightDatasetKind.Sections) {
+				await this.sv.validateSectionAddition(id, this.sectionsDatabase);
+				await this.secDiskWriter.logSectionsDatasetOnDisk(content, id);
+				await this.secDiskReader.logNewDatasetFromDiskToMap(id, this.sectionsDatabase);
+				await this.secDiskWriter.logInsightKindToDisk(id, kind, this.sectionsDatabase.get(id)?.length as number);
+
+				return fs.readdir("./data");
+			} else {
+				this.roomDiskWriter.logRoomsDatasetOnDisk(content, id);
+				return fs.readdir("")
 			}
 
-			await this.secDiskWriter.logSectionsDatasetOnDisk(content, id);
-			await this.secDiskReader.logNewDatasetFromDiskToMap(id, this.sectionsDatabase);
-			await this.secDiskWriter.logInsightKindToDisk(id, kind, this.sectionsDatabase.get(id)?.length as number);
-
-			return fs.readdir("./data");
 		} catch (err) {
 			if (err instanceof InsightError) {
 				throw err;

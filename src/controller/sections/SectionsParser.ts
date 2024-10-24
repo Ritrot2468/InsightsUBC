@@ -1,5 +1,5 @@
 import fs from "fs-extra";
-import Section, {Mfield, Sfield} from "./Section";
+import Section, { Mfield, Sfield } from "./Section";
 
 export interface DatasetRecord {
 	id: string;

@@ -1,3 +1,5 @@
+import Building from "./Building";
+
 export interface Sfield {
 	fullname: string;
 	shortname: string;
@@ -15,8 +17,22 @@ export interface Mfield {
 	href: number;
 }
 
-export default class Room {
+export default class Room extends Building {
 	private id: string;
+	private _mfields: Mfield;
+	private _sfields: Sfield;
+
+	constructor(
+		id: string,
+		mfields: Mfield,
+		sfields: Sfield,
+		buildingParams: Required<Record<"fullname" | "shortname" | "address" | "href", string>>
+	) {
+		super(buildingParams);
+		this.id = id;
+		this._mfields = mfields;
+		this._sfields = sfields;
+	}
 
 	public getMfields(): Mfield {
 		return this._mfields;
@@ -82,10 +98,7 @@ export default class Room {
 		return this.id;
 	}
 
-	private _mfields: Mfield;
-	private _sfields: Sfield;
-
-	private convertToJSON(): {setID: string; sFields: Sfield; mFields: Mfield} {
+	private convertToJSON(): { setID: string; sFields: Sfield; mFields: Mfield } {
 		return {
 			setID: this.getID(),
 			sFields: {
@@ -104,11 +117,5 @@ export default class Room {
 				href: this._mfields.href,
 			},
 		};
-	}
-
-	constructor(id: string, mfields: Mfield, sfields: Sfield) {
-		this.id = id;
-		this._mfields = mfields;
-		this._sfields = sfields;
 	}
 }

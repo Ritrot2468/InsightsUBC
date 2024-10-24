@@ -84,7 +84,7 @@ export default class Section {
 	private _mfields: Mfield;
 	private _sfields: Sfield;
 
-	private convertToJSON(): {setID: string; sFields: Sfield; mFields: Mfield} {
+	private convertToJSON(): { setID: string; sFields: Sfield; mFields: Mfield } {
 		return {
 			setID: this.getID(),
 			sFields: {

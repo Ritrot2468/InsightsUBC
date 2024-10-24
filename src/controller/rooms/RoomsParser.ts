@@ -1,4 +1,3 @@
-import Section from "../rooms/Room";
 import Room from "../rooms/Room";
 
 export interface DatasetRecord {
@@ -6,10 +5,4 @@ export interface DatasetRecord {
 	rooms: Room[];
 }
 
-export default class RoomsParser {
-
-	public async findBuildingTable(doc: Document): Promise<void> {
-
-	}
-
-}
+export default class RoomsParser {}

@@ -1,4 +1,4 @@
-import {InsightDatasetKind, InsightError} from "./IInsightFacade";
+import { InsightError } from "./IInsightFacade";
 import fs from "fs-extra";
 import Section from "./sections/Section";
 
@@ -24,7 +24,5 @@ export default class DatasetValidatorHelper {
 		if (sectionsDatabase.has(id) || (await fs.pathExists(`./data/${id}`))) {
 			throw new InsightError(`Dataset with id ${id} already exists.`);
 		}
-
-
 	}
 }

@@ -46,21 +46,20 @@ export default class InsightFacade implements IInsightFacade {
 	}
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
 		try {
-
 			await this.sv.validateIdStructure(id);
 
-			if (kind == InsightDatasetKind.Sections) {
-				await this.sv.validateSectionAddition(id, this.sectionsDatabase);
-				await this.secDiskWriter.logSectionsDatasetOnDisk(content, id);
-				await this.secDiskReader.logNewDatasetFromDiskToMap(id, this.sectionsDatabase);
-				await this.secDiskWriter.logInsightKindToDisk(id, kind, this.sectionsDatabase.get(id)?.length as number);
+			//if (kind === InsightDatasetKind.Sections) {
+			await this.sv.validateSectionAddition(id, this.sectionsDatabase);
+			await this.secDiskWriter.logSectionsDatasetOnDisk(content, id);
+			await this.secDiskReader.logNewDatasetFromDiskToMap(id, this.sectionsDatabase);
+			await this.secDiskWriter.logInsightKindToDisk(id, kind, this.sectionsDatabase.get(id)?.length as number);
 
-				return fs.readdir("./data");
-			} else {
-				this.roomDiskWriter.logRoomsDatasetOnDisk(content, id);
-				return fs.readdir("")
-			}
-
+			return fs.readdir("./data");
+			//
+			// } else {
+			// 	this.roomDiskWriter.logRoomsDatasetOnDisk(content, id);
+			// 	return fs.readdir("");
+			// }
 		} catch (err) {
 			if (err instanceof InsightError) {
 				throw err;

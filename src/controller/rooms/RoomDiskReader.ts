@@ -3,6 +3,7 @@ import {InsightDataset, InsightDatasetKind, InsightError} from "../IInsightFacad
 import fs from "fs-extra";
 import Room from "./Room";
 import {DatasetRecord} from "../rooms/RoomsParser";
+import Section from "../sections/Section";
 
 export default class RoomDiskReader extends RoomsParser {
 	constructor() {
@@ -79,4 +80,26 @@ export default class RoomDiskReader extends RoomsParser {
 		return datasetRecord;
 	}
 
+	public async mapMissingRooms(
+		roomIDs: string[],
+		roomsDatabase: Map<string, Room[]>
+	): Promise<Map<string, Room[]>> {
+		const allPromises: Promise<DatasetRecord>[] = [];
+		// the id of all datasets not currently added
+
+		roomIDs.forEach((setId) => {
+			// all ids for missing datasets are returned as a Record
+			// with all the sections associated with the id
+			const promise = this.turnDatasetToRoom(setId);
+			allPromises.push(promise);
+		});
+
+		const records = await Promise.all(allPromises);
+		// add all records collected to Map
+		records.forEach((record) => {
+			roomsDatabase.set(record.id, record.rooms);
+		});
+
+		return roomsDatabase;
+	}
 }

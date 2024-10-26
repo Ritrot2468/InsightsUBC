@@ -29,7 +29,7 @@ export default class InsightFacade implements IInsightFacade {
 	public roomsDatabase: Map<string, Room[]>;
 
 	// service classes
-	private sv: DatasetValidatorHelper;
+	private datasetValidatorHelper: DatasetValidatorHelper;
 	private qe: QueryEngine;
 	private secDiskReader: SectionDiskReader;
 	private secDiskWriter: SectionDiskWriter;
@@ -41,7 +41,7 @@ export default class InsightFacade implements IInsightFacade {
 		//Log.info("InsightFacadeImpl::init()");
 		this.sectionsDatabase = new Map<string, []>();
 		this.roomsDatabase = new Map<string, Room[]>()
-		this.sv = new DatasetValidatorHelper();
+		this.datasetValidatorHelper = new DatasetValidatorHelper();
 		this.qe = new QueryEngine(this.sectionsDatabase);
 		this.secDiskReader = new SectionDiskReader();
 		this.secDiskWriter = new SectionDiskWriter();
@@ -53,8 +53,8 @@ export default class InsightFacade implements IInsightFacade {
 	}
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
 		try {
-			await this.sv.validateIdStructure(id);
-			await this.sv.validateSectionAddition(id, this.sectionsDatabase, this.roomsDatabase);
+			await this.datasetValidatorHelper.validateIdStructure(id);
+			await this.datasetValidatorHelper.validateSectionAddition(id, this.sectionsDatabase, this.roomsDatabase);
 
 			if (kind === InsightDatasetKind.Sections) {
 				//return this.sectionHelper.addRoom(id, this.sectionsDatabase, content, kind)
@@ -80,7 +80,7 @@ export default class InsightFacade implements IInsightFacade {
 
 	public async removeDataset(id: string): Promise<string> {
 		try {
-			await this.sv.validateIdStructure(id);
+			await this.datasetValidatorHelper.validateIdStructure(id);
 			const datasetPath = `./data/${id}`;
 			if (!(await fs.pathExists(datasetPath))) {
 				throw new NotFoundError(`Dataset with id ${id} not found.`);
@@ -113,9 +113,12 @@ export default class InsightFacade implements IInsightFacade {
 		let result: InsightResult[] = [];
 		try {
 			const currIDs = await fs.readdir("./data");
+			const idRecords = await this.datasetValidatorHelper.seperateRoomAndCourseIDs(currIDs)
 
 			if ((this.sectionsDatabase.size + this.roomsDatabase.size) !== currIDs.length) {
-				this.sectionsDatabase = await this.secDiskReader.mapMissingSections(currIDs, this.sectionsDatabase);
+				this.sectionsDatabase = await this.secDiskReader
+					.mapMissingSections(idRecords.courses, this.sectionsDatabase);
+				this.roomsDatabase = await this.roomDiskReader.mapMissingRooms(idRecords.rooms, this.roomsDatabase);
 			}
 
 			result = await this.qe.query(query);

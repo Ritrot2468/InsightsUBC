@@ -16,7 +16,7 @@ import Section from "./sections/Section";
 import RoomDiskReader from "./rooms/RoomDiskReader";
 import RoomDiskWriter from "./rooms/RoomDiskWriter";
 import Room from "./rooms/Room";
-import FacadeSectionFunctions from "./sections/FacadeSectionFunctions";
+import AddSectionDataset from "./sections/addSectionDataset";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -35,12 +35,12 @@ export default class InsightFacade implements IInsightFacade {
 	private secDiskWriter: SectionDiskWriter;
 	private roomDiskReader: RoomDiskReader;
 	private roomDiskWriter: RoomDiskWriter;
-	private sectionHelper: FacadeSectionFunctions;
+	private sectionHelper: AddSectionDataset;
 
 	constructor() {
 		//Log.info("InsightFacadeImpl::init()");
 		this.sectionsDatabase = new Map<string, []>();
-		this.roomsDatabase = new Map<string, Room[]>()
+		this.roomsDatabase = new Map<string, Room[]>();
 		this.datasetValidatorHelper = new DatasetValidatorHelper();
 		this.qe = new QueryEngine(this.sectionsDatabase);
 		this.secDiskReader = new SectionDiskReader();
@@ -48,7 +48,7 @@ export default class InsightFacade implements IInsightFacade {
 		this.roomDiskReader = new RoomDiskReader();
 		this.roomDiskWriter = new RoomDiskWriter();
 
-		this.sectionHelper = new FacadeSectionFunctions();
+		this.sectionHelper = new AddSectionDataset();
 		// initialize dictionary for the fields
 	}
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
@@ -57,13 +57,7 @@ export default class InsightFacade implements IInsightFacade {
 			await this.datasetValidatorHelper.validateSectionAddition(id, this.sectionsDatabase, this.roomsDatabase);
 
 			if (kind === InsightDatasetKind.Sections) {
-				//return this.sectionHelper.addRoom(id, this.sectionsDatabase, content, kind)
-				await this.secDiskWriter.logSectionsDatasetOnDisk(content, id);
-				await this.secDiskReader.logNewDatasetFromDiskToMap(id, this.sectionsDatabase);
-				await this.secDiskWriter.logInsightKindToDisk(id, kind, this.sectionsDatabase.get(id)?.length as number);
-
-				return fs.readdir("./data");
-
+				return this.sectionHelper.addCourses(id, this.sectionsDatabase, content, kind);
 			} else {
 				await this.roomDiskWriter.logRoomsDatasetOnDisk(content, id, this.roomsDatabase);
 				return fs.readdir("./data");
@@ -75,8 +69,6 @@ export default class InsightFacade implements IInsightFacade {
 			throw new InsightError(`An unexpected error occurred: ${err}`);
 		}
 	}
-
-
 
 	public async removeDataset(id: string): Promise<string> {
 		try {
@@ -113,12 +105,14 @@ export default class InsightFacade implements IInsightFacade {
 		let result: InsightResult[] = [];
 		try {
 			const currIDs = await fs.readdir("./data");
-			const idRecords = await this.datasetValidatorHelper.seperateRoomAndCourseIDs(currIDs)
+			const idRecords = await this.datasetValidatorHelper.separateRoomAndCourseIDs(currIDs);
 
-			if ((this.sectionsDatabase.size + this.roomsDatabase.size) !== currIDs.length) {
-				this.sectionsDatabase = await this.secDiskReader
-					.mapMissingSections(idRecords.courses, this.sectionsDatabase);
-				this.roomsDatabase = await this.roomDiskReader.mapMissingRooms(idRecords.rooms, this.roomsDatabase);
+			if (this.sectionsDatabase.size + this.roomsDatabase.size !== currIDs.length) {
+				const cIDs = idRecords.courses;
+				const rIDs = idRecords.rooms;
+
+				this.sectionsDatabase = await this.secDiskReader.mapMissingSections(cIDs, this.sectionsDatabase);
+				this.roomsDatabase = await this.roomDiskReader.mapMissingRooms(rIDs, this.roomsDatabase);
 			}
 
 			result = await this.qe.query(query);

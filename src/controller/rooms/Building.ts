@@ -1,4 +1,4 @@
-import {Mfield, Sfield} from "./Room";
+import { Mfield, Sfield } from "./Room";
 
 export default class Building {
 	protected fullname: string;
@@ -14,10 +14,18 @@ export default class Building {
 		this.address = params.address;
 		this.href = params.href;
 
-			// Initialize Mfield and Sfield with default values
-		this._mfields = { lat: 0, lon: 0, seats: 0};
-		this._sfields = { fullname: this.fullname, shortname: this.shortname, number: "", name: "", address: this.address, type: "", furniture: "", href: this.href};
-
+		// Initialize Mfield and Sfield with default values
+		this._mfields = { lat: 0, lon: 0, seats: 0 };
+		this._sfields = {
+			fullname: this.fullname,
+			shortname: this.shortname,
+			number: "",
+			name: "",
+			address: this.address,
+			type: "",
+			furniture: "",
+			href: this.href,
+		};
 	}
 
 	public getFullname(): string {

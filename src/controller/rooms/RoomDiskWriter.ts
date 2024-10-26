@@ -1,7 +1,7 @@
 import JSZip from "jszip";
 import RoomsParser from "./RoomsParser";
 import * as parse5 from "parse5";
-import {InsightDatasetKind, InsightError} from "../IInsightFacade";
+import { InsightDatasetKind, InsightError } from "../IInsightFacade";
 import Building from "./Building";
 import Room from "./Room";
 import fs from "fs-extra";
@@ -14,7 +14,7 @@ export default class RoomDiskWriter extends RoomsParser {
 		"views-field views-field-field-room-capacity",
 		"views-field views-field-field-room-furniture",
 		"views-field views-field-field-room-type",
-		"views-field views-field-nothing"
+		"views-field views-field-nothing",
 	];
 	constructor() {
 		super();
@@ -33,10 +33,10 @@ export default class RoomDiskWriter extends RoomsParser {
 		const newRooms = await this.logAllRoomFilesOnDisk(zip, buildingMap, id);
 		roomMap.set(id, newRooms);
 	}
-	protected async logAllRoomFilesOnDisk(zip: JSZip, buildingMap: Map<string, Building>, id:string): Promise<Room[]> {
+	protected async logAllRoomFilesOnDisk(zip: JSZip, buildingMap: Map<string, Building>, id: string): Promise<Room[]> {
 		const allPromises: Promise<Room[]>[] = [];
-		const dirs = Array.from(buildingMap.keys())
-		let numRows  = 0;
+		const dirs = Array.from(buildingMap.keys());
+		let numRows = 0;
 		//console.log(dirs)
 
 		const folder = zip.folder("campus/campus/discover/buildings-and-classrooms");
@@ -44,7 +44,7 @@ export default class RoomDiskWriter extends RoomsParser {
 			throw new Error("Folder not found in zip file");
 		}
 		folder.forEach((relativePath, file) => {
-			const buildingCode = relativePath.split('.')[0]; // Extract dir or file name
+			const buildingCode = relativePath.split(".")[0]; // Extract dir or file name
 			//console.log(buildingCode)
 			if (dirs.includes(buildingCode)) {
 				//console.log("File object:", file);
@@ -58,30 +58,27 @@ export default class RoomDiskWriter extends RoomsParser {
 			}
 		});
 		const roomArrays = await Promise.all(allPromises);
-		const allRooms: Room[] = []
-		roomArrays.forEach(rooms => {
+		const allRooms: Room[] = [];
+		roomArrays.forEach((rooms) => {
 			if (rooms.length > 0) {
-				allRooms.push(...rooms)
+				allRooms.push(...rooms);
 			}
-
-		})
-		numRows = allRooms.length
-		if (numRows == 0) {
-			throw new InsightError("No valid rooms")
+		});
+		numRows = allRooms.length;
+		if (numRows === 0) {
+			throw new InsightError("No valid rooms");
 		}
 		//console.log(numRows)
 		await this.storeRoomsOnDisk(allRooms, id);
 
-		await this.logRoomInsightKindToDisk(id, InsightDatasetKind.Rooms, numRows)
-		return allRooms
-
+		await this.logRoomInsightKindToDisk(id, InsightDatasetKind.Rooms, numRows);
+		return allRooms;
 	}
 
-
 	protected async findTdElemsOfRooms(doc: any, building: Building, id: string): Promise<Room[]> {
-		const roomPromises: Promise<Room | null>[] = []
+		const roomPromises: Promise<Room | null>[] = [];
 		//  traverse the parsed tree
-		const traverse = (node: any) => {
+		const traverse = (node: any): any => {
 			// check if the current node is a <tr> element
 			const currClassNames: string[] = [];
 			if (node.nodeName === "tr" && node.childNodes) {
@@ -93,20 +90,16 @@ export default class RoomDiskWriter extends RoomsParser {
 				tdElems.forEach((tdElem: any) => {
 					const classAttr = tdElem.attrs.find((attr: any) => attr.name === "class");
 					//console.log(classAttr)
-					const classList = classAttr.value
+					const classList = classAttr.value;
 					currClassNames.push(classList);
-
 				});
 
-
-					//console.log("classNames: ", classNames)
-					//console.log("currClassNames: ", currClassNames)
-					if (this.compareClassNames(this.roomTdClassNames, currClassNames)) {
-						const newRoom = this.parseRoomInfo(tdElems, building, id)
-						roomPromises.push(newRoom)
-
-					}
-
+				//console.log("classNames: ", classNames)
+				//console.log("currClassNames: ", currClassNames)
+				if (this.compareClassNames(this.roomTdClassNames, currClassNames)) {
+					const newRoom = this.parseRoomInfo(tdElems, building, id);
+					roomPromises.push(newRoom);
+				}
 			}
 
 			// Recursively traverse child nodes
@@ -115,20 +108,17 @@ export default class RoomDiskWriter extends RoomsParser {
 			}
 		};
 
-
 		traverse(doc); // Start traversing from the root document
-		const rooms : Room[] = []
-		return Promise.all(roomPromises)
-			.then((results) => {
-				results.forEach((room) => {
-					if (room) {
-						rooms.push(room);
-					}
-				});
-				//console.log(rooms.length)
-				return rooms;
-			})
-
+		const rooms: Room[] = [];
+		return Promise.all(roomPromises).then((results) => {
+			results.forEach((room) => {
+				if (room) {
+					rooms.push(room);
+				}
+			});
+			//console.log(rooms.length)
+			return rooms;
+		});
 	}
 
 	// Writes InsightDataset info about a dataset

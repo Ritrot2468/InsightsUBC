@@ -1,34 +1,12 @@
 import RoomsParser from "./RoomsParser";
-import {InsightDataset, InsightDatasetKind, InsightError} from "../IInsightFacade";
+import { InsightError } from "../IInsightFacade";
 import fs from "fs-extra";
 import Room from "./Room";
-import {DatasetRecord} from "../rooms/RoomsParser";
-import Section from "../sections/Section";
+import { DatasetRecord } from "../rooms/RoomsParser";
 
 export default class RoomDiskReader extends RoomsParser {
 	constructor() {
 		super();
-	}
-
-	public async logInsightKindFromDisk(ids: string[]): Promise<InsightDataset[]> {
-		const allPromises = ids.map(async (id) => {
-			const file = await fs.promises.readFile(`./data/${id}/kind`, "utf8");
-			const obj = JSON.parse(file);
-
-			const numRows = obj.table[0].numRows as number;
-			const kind = obj.table[0].kind as InsightDatasetKind;
-
-			const newInsightDataset: InsightDataset = {
-				id: id,
-				kind: kind,
-				numRows: numRows,
-			};
-
-			return newInsightDataset;
-		});
-
-		const result = await Promise.all(allPromises);
-		return result;
 	}
 
 	// REQUIRES: id - name of dataset to be retrieved from disk (id IS NOT IN datasets ALREADY!!!!)
@@ -47,12 +25,11 @@ export default class RoomDiskReader extends RoomsParser {
 		roomsDatabase.set(newDataset.id, newDataset.rooms);
 	}
 
-
 	public async turnDatasetToRoom(id: string): Promise<DatasetRecord> {
-			// tracks number of sections in a given dataset and is initialized to 0
+		// tracks number of sections in a given dataset and is initialized to 0
 
-			// where each promise is appended to for each course object
-			const allPromises: any[] = [];
+		// where each promise is appended to for each course object
+		const allPromises: any[] = [];
 		const rooms: Room[] = [];
 
 		// list of all courses under the dataset file
@@ -62,9 +39,9 @@ export default class RoomDiskReader extends RoomsParser {
 				.readJson(`./data/${id}/rooms/${room}`)
 				.then(async (file) => {
 					// turn room JSON file to Room objects
-					const newRoom : Room = Room.fromJSON(file)
-					rooms.push(newRoom)
-					console.log(newRoom.getID())
+					const newRoom: Room = Room.fromJSON(file);
+					rooms.push(newRoom);
+					//console.log(newRoom.getID());
 
 					return { id, file };
 				})
@@ -76,14 +53,11 @@ export default class RoomDiskReader extends RoomsParser {
 		}
 
 		await Promise.all(allPromises);
-		const datasetRecord: DatasetRecord = {id: id, rooms: rooms };
+		const datasetRecord: DatasetRecord = { id: id, rooms: rooms };
 		return datasetRecord;
 	}
 
-	public async mapMissingRooms(
-		roomIDs: string[],
-		roomsDatabase: Map<string, Room[]>
-	): Promise<Map<string, Room[]>> {
+	public async mapMissingRooms(roomIDs: string[], roomsDatabase: Map<string, Room[]>): Promise<Map<string, Room[]>> {
 		const allPromises: Promise<DatasetRecord>[] = [];
 		// the id of all datasets not currently added
 

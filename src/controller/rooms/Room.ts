@@ -15,7 +15,6 @@ export interface Mfield {
 	lat: number;
 	lon: number;
 	seats: number;
-
 }
 
 interface RoomJSON {
@@ -41,12 +40,11 @@ export default class Room extends Building {
 			fullname: building.getFullname(),
 			shortname: building.getShortname(),
 			address: building.getAddress(),
-			href: building.getHref()
+			href: building.getHref(),
 		});
 		this.id = id;
 		this._mfields = { lat, lon, seats };
 		this._sfields = { ...this.getSfields(), ...sfields } as Sfield;
-
 	}
 
 	public getMfields(): Mfield {
@@ -121,7 +119,6 @@ export default class Room extends Building {
 		};
 	}
 
-
 	public static fromJSON(json: RoomJSON): Room {
 		const { setID, sFields, mFields } = json;
 
@@ -132,21 +129,14 @@ export default class Room extends Building {
 
 		// extract building-related fields
 		const { fullname, shortname, address, href } = sFields;
-		if (!fullname || !shortname || !address || !href) {
-			throw new Error("Missing building information in sFields.");
-		}
 
 		// create building
 		const building = new Building({ fullname, shortname, address, href });
 
 		// get room-specific fields
 		const { number, name, type, furniture } = sFields;
-		if (!number || !name || !type || !furniture) {
-			throw new Error("Missing room-specific information in sFields.");
-		}
-
 		let seats: number;
-		 if (typeof mFields.seats === 'number') {
+		if (typeof mFields.seats === "number") {
 			seats = mFields.seats;
 		} else {
 			throw new Error(`Invalid type for seats`);
@@ -156,18 +146,22 @@ export default class Room extends Building {
 		const mfields: Mfield = {
 			lat: mFields.lat,
 			lon: mFields.lon,
-			seats: seats
+			seats: seats,
 		};
 
 		// create the Sfield object
 		const sfields: Sfield = {
-			fullname, shortname, number,
-			name, address, type,
-			furniture, href
+			fullname,
+			shortname,
+			number,
+			name,
+			address,
+			type,
+			furniture,
+			href,
 		};
 
 		// instantiate and return the Room object
 		return new Room(setID, mfields, sfields, building);
 	}
 }
-

@@ -1,8 +1,8 @@
-import Room, {Mfield, Sfield} from "../rooms/Room";
+import Room, { Mfield, Sfield } from "../rooms/Room";
 import JSZip from "jszip";
 import Building from "./Building";
 import * as parse5 from "parse5";
-import {InsightError} from "../IInsightFacade";
+import { InsightError } from "../IInsightFacade";
 import * as http from "node:http";
 
 export default interface GeoResponse {
@@ -22,13 +22,12 @@ interface Geolocation {
 }
 
 export default class RoomsParser {
-
 	private TEAM_NUMBER = 59;
 	private buildingTdClassNames: string[] = [
 		"views-field views-field-field-building-code",
 		"views-field views-field-title",
 		"views-field views-field-field-building-address",
-		"views-field views-field-nothing"
+		"views-field views-field-nothing",
 	];
 	// parses through index.htm file to return a map with associated populated fields of all buildings in the file
 	protected async parseIndexFile(zip: JSZip): Promise<Map<string, Building>> {
@@ -63,7 +62,7 @@ export default class RoomsParser {
 	protected findTdElemsInIndexFile(doc: any): Map<string, Building> {
 		const buildingsMap = new Map<string, Building>();
 		// Function to traverse the parsed tree
-		const traverse = (node: any) => {
+		const traverse = (node: any): any => {
 			// Check if the current node is a <tr> element
 			const currClassNames: string[] = [];
 			if (node.nodeName === "tr" && node.childNodes) {
@@ -77,20 +76,17 @@ export default class RoomsParser {
 					//console.log(classAttr)
 					const classList = classAttr.value;
 					currClassNames.push(classList);
-
 				});
 
+				if (this.compareClassNames(this.buildingTdClassNames, currClassNames)) {
+					const newBuilding: Building = this.parseBuildingInfo(tdElems);
+					const codeKey: string[] = newBuilding.getHref().split("/");
+					// get from href in the case shortname on index file is empty string
+					const buildingCode: string = codeKey[codeKey.length - 1].split(".")[0];
+					//console.log(buildingCode)
 
-					if (this.compareClassNames(this.buildingTdClassNames, currClassNames)) {
-						const newBuilding: Building = this.parseBuildingInfo(tdElems);
-						const codeKey: string[] = newBuilding.getHref().split('/');
-						// get from href in the case shortname on index file is empty string
-						const buildingCode: string = codeKey[codeKey.length - 1].split('.')[0];
-						//console.log(buildingCode)
-
-						buildingsMap.set(buildingCode, newBuilding);
-					}
-
+					buildingsMap.set(buildingCode, newBuilding);
+				}
 			}
 
 			// Recursively traverse child nodes
@@ -117,82 +113,65 @@ export default class RoomsParser {
 		let furniture = "";
 
 		// Extract room information from tdElems
-		const __ret = this.findElementInfo(tdElems, number, seats, furniture, type);
-		number = __ret.number;
-		seats = __ret.seats;
-		furniture = __ret.furniture;
-		type = __ret.type;
+		const roomInfo = this.findElementInfo(tdElems, number, seats, furniture, type);
+		number = roomInfo.number;
+		seats = roomInfo.seats;
+		furniture = roomInfo.furniture;
+		type = roomInfo.type;
 
 		const name = `${building.getShortname()}_${number}`;
 
-		try {
-			// Fetch geolocation data
-			const geoLoc = await this.fetchGeoLocation(building.getAddress());
+		// Fetch geolocation data
+		const geoLoc = await this.fetchGeoLocation(building.getAddress());
 
-			// Ensure both lat and lon are present
-			if (geoLoc && typeof geoLoc.lat === 'number' && typeof geoLoc.lon === 'number') {
-				const roomMfields: Mfield = {
-					lat: geoLoc.lat,
-					lon: geoLoc.lon,
-					seats: seats,
-				};
+		// Ensure both lat and lon are present
+		if (geoLoc && typeof geoLoc.lat === "number" && typeof geoLoc.lon === "number") {
+			const roomMfields: Mfield = {
+				lat: geoLoc.lat,
+				lon: geoLoc.lon,
+				seats: seats,
+			};
 
-				// Define the Sfield object
-				const roomSfields: Partial<Sfield> = {
-					number: number,
-					name: name,
-					type: type,
-					furniture: furniture,
-				};
+			// Define the Sfield object
+			const roomSfields: Partial<Sfield> = {
+				number: number,
+				name: name,
+				type: type,
+				furniture: furniture,
+			};
 
-				// Create and return a new Room instance
-				return new Room(id, roomMfields, roomSfields, building);
-			} else {
-				return null;
-			}
-		} catch (error) {
-			return null
+			// Create and return a new Room instance
+			return new Room(id, roomMfields, roomSfields, building);
+		} else {
+			return null;
 		}
 	}
 
-	private findElementInfo(tdElems: any, number: string, seats: number, furniture: string, type: string) {
-		tdElems.forEach((tdElem: any) => {
+	private findElementInfo(
+		tdElems: any,
+		number: string,
+		seats: number,
+		furniture: string,
+		type: string
+	): { number: string; seats: number; furniture: string; type: string } {
+		tdElems.forEach((tdElem: any): any => {
 			const classAttr = tdElem.attrs.find((attr: any) => attr.name === "class");
 			const className = classAttr ? classAttr.value : "";
 
 			const anchor = tdElem.childNodes.find((node: any) => node.nodeName === "a");
-			//console.log(anchor)
-			//console.log(className)
 			switch (className) {
 				case "views-field views-field-field-room-number":
-					number = anchor.childNodes
-						.map((node: any) => node.value)
-						.join("")
-						.trim();
-					//console.log(number)
+					number = this.processNodeValue(anchor);
 					break;
 				case "views-field views-field-field-room-capacity":
-					seats = tdElem.childNodes
-						.map((node: any) => node.value)
-						.join("")
-						.trim();
+					seats = this.processNodeValue(tdElem);
 					//console.log(seats)
 					break;
 				case "views-field views-field-field-room-furniture":
-					furniture = tdElem.childNodes
-						.map((node: any) => node.value)
-						.join("")
-						.trim();
-
-					//console.log(furniture)
+					furniture = this.processNodeValue(tdElem);
 					break;
 				case "views-field views-field-field-room-type":
-					type = tdElem.childNodes
-						.map((node: any) => node.value)
-						.join("")
-						.trim();
-
-					//console.log(type)
+					type = this.processNodeValue(tdElem);
 					break;
 				case "views-field views-field-nothing":
 					break;
@@ -200,11 +179,18 @@ export default class RoomsParser {
 					throw new InsightError("Not a valid building table cell");
 			}
 		});
-		return {number, seats, furniture, type};
+		return { number, seats, furniture, type };
 	}
 
 	protected compareClassNames(arr1: any[], arr2: any[]): boolean {
 		return arr1.every((value) => arr2.includes(value));
+	}
+
+	protected processNodeValue(tdElem: any): any {
+		return tdElem.childNodes
+			.map((node: any) => node.value)
+			.join("")
+			.trim();
 	}
 
 	protected parseBuildingInfo(tdElems: any): Building {
@@ -223,34 +209,19 @@ export default class RoomsParser {
 				return; // SKIP
 			}
 			const anchor = tdElem.childNodes.find((node: any) => node.nodeName === "a");
-			//console.log(anchor)
-			//console.log(className)
+
 			switch (className) {
 				case "views-field views-field-field-building-code":
-					shortname = tdElem.childNodes
-						.map((node: any) => node.value)
-						.join("")
-						.trim();
-					//console.log(shortname)
+					shortname = this.processNodeValue(tdElem);
 					break;
 				case "views-field views-field-title":
-					fullname = anchor.childNodes
-						.map((node: any) => node.value)
-						.join("")
-						.trim();
-					//console.log(fullname)
+					fullname = this.processNodeValue(anchor);
 					break;
 				case "views-field views-field-field-building-address":
-					address = tdElem.childNodes
-						.map((node: any) => node.value)
-						.join("")
-						.trim();
-
-					//console.log(address)
+					address = this.processNodeValue(tdElem);
 					break;
 				case "views-field views-field-nothing":
 					href = anchor.attrs.find((attr: any) => attr.name === "href")?.value || "";
-					//console.log(href)
 					break;
 				default:
 					throw new InsightError("Not a valid building table cell");
@@ -261,49 +232,54 @@ export default class RoomsParser {
 		return new Building({ fullname, shortname, address, href });
 	}
 
-
-	protected async fetchGeoLocation (address: string): Promise< Geolocation> {
-		const encodedAddress = encodeURIComponent(address)
+	protected async fetchGeoLocation(address: string): Promise<Geolocation> {
+		const encodedAddress = encodeURIComponent(address);
 		const url = `http://cs310.students.cs.ubc.ca:11316/api/v1/project_team${this.TEAM_NUMBER}/${encodedAddress}`;
-
-		//console.log(`Request URL: ${url}`);
-
+		// based on https://nodejs.org/api/http.html#http_http implementation of 'http.get(url[, options][, callback])'
 		return new Promise<Geolocation>((resolve, reject) => {
-			http.get(url, (res) => {
-
-				let error;
-				if (res.statusCode !== 200) {
-					error = new Error(`Request Failed.\nStatus Code: ${res.statusCode}`);
-				}
-				if (error) {
-					res.resume();
-					return;
-				}
-
-				let rawData = '';
-				res.on('data', (chunk) => { rawData += chunk; });
-				res.on('end', () => {
-					try {
-						const response: GeoResponse = JSON.parse(rawData);
-						//console.log(`Response : ${rawData}`);
-
-						if (response.lat !== undefined && response.lon !== undefined) {
-							//console.log(`Geolocation found: lat=${response.lat}, lon=${response.lon}`);
-							resolve({ lat: response.lat, lon: response.lon });
-						} else {
-							reject( new Error())
-						}
-					} catch (err) {
-						reject(err);
+			http
+				.get(url, (res) => {
+					let error;
+					const errorCode = 200;
+					if (res.statusCode !== errorCode) {
+						error = new Error(`Request Failed.\nStatus Code: ${res.statusCode}`);
 					}
-				});
-			}).on('error', (e) => {
-				console.log(`Request error: ${e.message}`);
-				reject(e);
-			});
-		});
+					if (error) {
+						res.resume();
+						return;
+					}
 
+					let rawData = "";
+					res.on("data", (chunk) => {
+						rawData += chunk;
+					});
+					res.on("end", () => {
+						this.fetchResponse(rawData, resolve, reject);
+					});
+				})
+				.on("error", (e) => {
+					reject(e);
+				});
+		});
 	}
 
+	private fetchResponse(
+		rawData: string,
+		resolve: (value: PromiseLike<Geolocation> | Geolocation) => void,
+		reject: (reason?: any) => void
+	): any {
+		try {
+			const response: GeoResponse = JSON.parse(rawData);
+			//console.log(`Response : ${rawData}`);
 
+			if (response.lat !== undefined && response.lon !== undefined) {
+				//console.log(`Geolocation found: lat=${response.lat}, lon=${response.lon}`);
+				resolve({ lat: response.lat, lon: response.lon });
+			} else {
+				reject(new Error());
+			}
+		} catch (err) {
+			reject(err);
+		}
+	}
 }

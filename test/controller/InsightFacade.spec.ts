@@ -7,9 +7,9 @@ import {
 	ResultTooLargeError,
 } from "../../src/controller/IInsightFacade";
 import InsightFacade from "../../src/controller/InsightFacade";
-import {clearDisk, getContentFromArchives, loadTestQuery} from "../TestUtil";
+import { clearDisk, getContentFromArchives, loadTestQuery } from "../TestUtil";
 
-import {expect, use} from "chai";
+import { expect, use } from "chai";
 import chaiAsPromised from "chai-as-promised";
 
 use(chaiAsPromised);
@@ -29,7 +29,6 @@ describe("InsightFacade", function () {
 	let rooms: string;
 
 	describe("AddDataset - Sections", function () {
-
 		let sections2: string;
 		let empty: string;
 		let defectiveSet: string;
@@ -119,7 +118,6 @@ describe("InsightFacade", function () {
 		});
 
 		it("should add valid data properly", async function () {
-
 			const result = await facade.addDataset("sections", sections, InsightDatasetKind.Sections);
 			return expect(result).to.have.members(["sections"]);
 		});
@@ -231,7 +229,6 @@ describe("InsightFacade", function () {
 				expect.fail(`you failed to load the right sets ${err}`);
 			}
 		});
-
 	});
 
 	describe("AddDataset - Rooms", function () {
@@ -267,17 +264,21 @@ describe("InsightFacade", function () {
 			await expect(facade.addDataset("", rooms1, InsightDatasetKind.Rooms)).to.be.rejectedWith(InsightError);
 		});
 		it("should reject with no valid table -> no rooms - rooms", async function () {
-			await expect(facade.addDataset("room2", noValidRooms2, InsightDatasetKind.Rooms)).to.be.rejectedWith(InsightError);
+			await expect(facade.addDataset("room2", noValidRooms2, InsightDatasetKind.Rooms)).to.be.rejectedWith(
+				InsightError
+			);
 		});
 		it("course not in index file -> no rooms - rooms", async function () {
-			await expect(facade.addDataset("room3", noValidRooms3, InsightDatasetKind.Rooms)).to.be.rejectedWith(InsightError);
+			await expect(facade.addDataset("room3", noValidRooms3, InsightDatasetKind.Rooms)).to.be.rejectedWith(
+				InsightError
+			);
 		});
 		it("course not in index file -> valid rooms - rooms", async function () {
-			const result = await facade.addDataset("room3", rooms2, InsightDatasetKind.Rooms)
+			const result = await facade.addDataset("room3", rooms2, InsightDatasetKind.Rooms);
 			return expect(result).to.have.members(["room3"]);
 		});
 		it("building field not in index file -> valid rooms - rooms", async function () {
-			const result = await facade.addDataset("room4", missingFields2, InsightDatasetKind.Rooms)
+			const result = await facade.addDataset("room4", missingFields2, InsightDatasetKind.Rooms);
 			return expect(result).to.have.members(["room4"]);
 		});
 		//
@@ -291,60 +292,40 @@ describe("InsightFacade", function () {
 		// 	await expect(facade.addDataset("sections", noJson, InsightDatasetKind.Sections)).to.be.rejectedWith(InsightError);
 		// });
 
-		it("invalid id underscore - rooms", async function() {
-			await expect(facade.addDataset("red_", rooms1, InsightDatasetKind.Rooms)).to.be.rejectedWith(InsightError)
+		it("invalid id underscore - rooms", async function () {
+			await expect(facade.addDataset("red_", rooms1, InsightDatasetKind.Rooms)).to.be.rejectedWith(InsightError);
 		});
 
-		it("invalid rooms- duplicate datasets id", async function() {
+		it("invalid rooms- duplicate datasets id", async function () {
 			await facade.addDataset("red", rooms1, InsightDatasetKind.Rooms);
-			await expect(facade.addDataset("red", rooms1, InsightDatasetKind.Rooms)).to.be.rejectedWith(InsightError)
+			await expect(facade.addDataset("red", rooms1, InsightDatasetKind.Rooms)).to.be.rejectedWith(InsightError);
 		});
 
 		// it("invalid rooms entry with Sections kind", async function() {
 		// 	await expect(facade.addDataset("red", rooms1, InsightDatasetKind.Sections)).to.be.rejectedWith(InsightError)
 		// });
 
-		it("invalid rooms entry with Sections content", async function() {
-			await expect(facade.addDataset("red", sections, InsightDatasetKind.Rooms)).to.be.rejectedWith(InsightError)
+		it("invalid rooms entry with Sections content", async function () {
+			await expect(facade.addDataset("red", sections, InsightDatasetKind.Rooms)).to.be.rejectedWith(InsightError);
 		});
 
-		it("add a room Dataset properly - room", async function() {
+		it("add a room Dataset properly - room", async function () {
 			const result = await facade.addDataset("room1", rooms1, InsightDatasetKind.Rooms);
 			return expect(result).to.have.members(["room1"]);
 		});
 
-		it("no valid rooms- room", async function() {
-			 await expect(facade.addDataset("room2", noValidRooms1, InsightDatasetKind.Rooms)).to.be.rejectedWith(InsightError);
-
+		it("no valid rooms- room", async function () {
+			await expect(facade.addDataset("room2", noValidRooms1, InsightDatasetKind.Rooms)).to.be.rejectedWith(
+				InsightError
+			);
 		});
 		it("should reject with an underscore1 - rooms", async function () {
-			// const result = await facade.addDataset(
-			// 	"red_",
-			// 	sections,
-			// 	InsightDatasetKind.Sections
-			// )
-			// return expect(result).to.eventually.be.rejectedWith(InsightError);
 			await expect(facade.addDataset("red_", rooms1, InsightDatasetKind.Rooms)).to.be.rejectedWith(InsightError);
 		});
 
 		it("should reject with an underscore2 - rooms", async function () {
-			// const result = facade.addDataset(
-			// 	"_1_",
-			// 	sections,
-			// 	InsightDatasetKind.Sections
-			// );
-			// return expect(result).to.eventually.be.rejectedWith(InsightError);
 			await expect(facade.addDataset("_1_", rooms1, InsightDatasetKind.Rooms)).to.be.rejectedWith(InsightError);
 		});
-
-		// it("should reject repeat adds with same id and diff sets - rooms", async function () {
-		// 	await expect(facade.addDataset("section", sections, InsightDatasetKind.Sections)).to.eventually.have.members([
-		// 		"section",
-		// 	]);
-		// 	await expect(facade.addDataset("section", sections2, InsightDatasetKind.Sections)).to.eventually.be.rejectedWith(
-		// 		InsightError
-		// 	);
-		// });
 
 		it("should reject repeat adds with same id cross different facades - rooms", async function () {
 			await expect(facade.addDataset("section", rooms1, InsightDatasetKind.Rooms)).to.eventually.have.members([
@@ -367,9 +348,9 @@ describe("InsightFacade", function () {
 		});
 		//
 		it("invalid (defective dataset) - rooms", async function () {
-			await expect(
-				facade.addDataset("courses", "232/DTETGTE", InsightDatasetKind.Rooms)
-			).to.eventually.be.rejectedWith(InsightError);
+			await expect(facade.addDataset("courses", "232/DTETGTE", InsightDatasetKind.Rooms)).to.eventually.be.rejectedWith(
+				InsightError
+			);
 		});
 
 		it("should reject with empty space - rooms", async function () {
@@ -378,7 +359,6 @@ describe("InsightFacade", function () {
 				InsightError
 			);
 		});
-
 
 		it("should add valid data properly (valid id - one char) - rooms", async function () {
 			// const result = await
@@ -399,16 +379,6 @@ describe("InsightFacade", function () {
 			const result = await facade.addDataset("missingFields", missingFields1, InsightDatasetKind.Rooms);
 
 			return expect(result).to.have.members(["missingFields"]);
-		});
-
-		// test content data
-		it("should add valid data properly (invalid content not 64 - space between) - rooms", async function () {
-			// const result = await
-
-			//return expect(result).to.eventually.have.members(["sections"]);
-			await expect(facade.addDataset("sections", "/5", InsightDatasetKind.Rooms)).to.eventually.be.rejectedWith(
-				InsightError
-			);
 		});
 
 		// it("should reject with an empty zip file", async function () {
@@ -469,10 +439,7 @@ describe("InsightFacade", function () {
 				expect.fail(`you failed to load the right sets ${err}`);
 			}
 		});
-
-
 	});
-
 
 	// added James' tests for removeDataset (async tests with try catch)
 	describe("RemoveDataset - Room", function () {
@@ -769,7 +736,6 @@ describe("InsightFacade", function () {
 		});
 	});
 
-
 	describe("PerformQuery", function () {
 		/**
 		 * Loads the TestQuery specified in the test name and asserts the behaviour of performQuery.
@@ -1038,7 +1004,6 @@ describe("InsightFacade", function () {
 				expect.fail(`you failed to load the right sets: ${err}`);
 			}
 		});
-
 	});
 
 	describe("ListDataset - Sections", function () {
@@ -1187,5 +1152,4 @@ describe("InsightFacade", function () {
 			}
 		});
 	});
-
 });

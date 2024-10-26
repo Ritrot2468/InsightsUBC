@@ -2,8 +2,7 @@ import DatasetValidatorHelper from "../DatasetValidatorHelper";
 import RoomDiskReader from "./RoomDiskReader";
 import RoomDiskWriter from "./RoomDiskWriter";
 
-export default class FacadeRoomFunction{
-
+export default class FacadeRoomFunction {
 	private sv: DatasetValidatorHelper;
 	private roomDiskReader: RoomDiskReader;
 	private roomDiskWriter: RoomDiskWriter;

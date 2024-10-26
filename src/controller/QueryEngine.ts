@@ -1,6 +1,7 @@
-import Section, { InsightError, InsightResult, ResultTooLargeError } from "./IInsightFacade";
+import { InsightError, InsightResult, ResultTooLargeError } from "./IInsightFacade";
 import { QueryOrderHandler } from "./QueryOrderHandler";
 import QueryUtils from "./QueryUtils";
+import Section from "./sections/Section";
 
 export default class QueryEngine {
 	private queryingIDString: string;

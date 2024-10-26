@@ -1,6 +1,8 @@
 import { InsightError } from "./IInsightFacade";
+import fs from "fs-extra";
+import Section from "./sections/Section";
 
-export default class SectionsValidator {
+export default class DatasetValidatorHelper {
 	// checks if a dataset id is valid to be added
 
 	// checks if a dataset id is valid to be removed
@@ -18,17 +20,9 @@ export default class SectionsValidator {
 		}
 	}
 
-	// async checkPathAndValidateID(id: string): Promise<void> {
-	// 	try {
-	// 		const pathExists = await fs.pathExists("./data");
-	// 		if (pathExists) {
-	// 			const currIDs = await fs.readdir("./data");
-	// 			this.validateId(id, currIDs);
-	// 		} else {
-	// 			this.validateId(id, []);
-	// 		}
-	// 	} catch (err) {
-	// 		throw err;
-	// 	}
-	// }
+	public async validateSectionAddition(id: string, sectionsDatabase: Map<string, Section[]>): Promise<void> {
+		if (sectionsDatabase.has(id) || (await fs.pathExists(`./data/${id}`))) {
+			throw new InsightError(`Dataset with id ${id} already exists.`);
+		}
+	}
 }

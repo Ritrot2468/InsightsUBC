@@ -161,14 +161,9 @@ export default class Room extends Building {
 
 		// create the Sfield object
 		const sfields: Sfield = {
-			fullname,
-			shortname,
-			number,
-			name,
-			address,
-			type,
-			furniture,
-			href
+			fullname, shortname, number,
+			name, address, type,
+			furniture, href
 		};
 
 		// instantiate and return the Room object

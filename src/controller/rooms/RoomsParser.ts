@@ -4,7 +4,6 @@ import Building from "./Building";
 import * as parse5 from "parse5";
 import {InsightError} from "../IInsightFacade";
 import * as http from "node:http";
-import Section from "../sections/Section";
 
 export default interface GeoResponse {
 	lat?: number;
@@ -25,6 +24,12 @@ interface Geolocation {
 export default class RoomsParser {
 
 	private TEAM_NUMBER = 59;
+	private buildingTdClassNames: string[] = [
+		"views-field views-field-field-building-code",
+		"views-field views-field-title",
+		"views-field views-field-field-building-address",
+		"views-field views-field-nothing"
+	];
 	// parses through index.htm file to return a map with associated populated fields of all buildings in the file
 	protected async parseIndexFile(zip: JSZip): Promise<Map<string, Building>> {
 		const allPromises: Promise<Map<string, Building>>[] = [];
@@ -33,8 +38,8 @@ export default class RoomsParser {
 			if (key === "campus/index.htm") {
 				const promiseContent = zip.files[key].async("string").then((content0) => {
 					const document = parse5.parse(content0);
-					const buildingTdClassNames: string[] = [];
-					return this.findTdElemsInIndexFile(document, buildingTdClassNames);
+
+					return this.findTdElemsInIndexFile(document);
 				});
 				allPromises.push(promiseContent);
 			}
@@ -55,7 +60,7 @@ export default class RoomsParser {
 	}
 
 	// finds all the td elems associated with the index table of
-	protected findTdElemsInIndexFile(doc: any, classNames: string[]): Map<string, Building> {
+	protected findTdElemsInIndexFile(doc: any): Map<string, Building> {
 		const buildingsMap = new Map<string, Building>();
 		// Function to traverse the parsed tree
 		const traverse = (node: any) => {
@@ -70,24 +75,22 @@ export default class RoomsParser {
 				tdElems.forEach((tdElem: any) => {
 					const classAttr = tdElem.attrs.find((attr: any) => attr.name === "class");
 					//console.log(classAttr)
-					const classList = classAttr ? classAttr.value : "";
-					if (classList != "") {
-						currClassNames.push(classList);
-					}
+					const classList = classAttr.value;
+					currClassNames.push(classList);
+
 				});
 
-				if (classNames.length === 0) {
-					classNames = currClassNames;
-				} else {
-					//console.log("classNames: ", classNames)
-					//console.log("currClassNames: ", currClassNames)
-					if (this.compareClassNames(classNames, currClassNames)) {
-						const newBuilding: Building = this.parseBuildingInfo(tdElems);
 
-						buildingsMap.set(newBuilding.getShortname(), newBuilding);
-						//console.log(newBuilding.getShortname())
+					if (this.compareClassNames(this.buildingTdClassNames, currClassNames)) {
+						const newBuilding: Building = this.parseBuildingInfo(tdElems);
+						const codeKey: string[] = newBuilding.getHref().split('/');
+						// get from href in the case shortname on index file is empty string
+						const buildingCode: string = codeKey[codeKey.length - 1].split('.')[0];
+						//console.log(buildingCode)
+
+						buildingsMap.set(buildingCode, newBuilding);
 					}
-				}
+
 			}
 
 			// Recursively traverse child nodes
@@ -201,7 +204,7 @@ export default class RoomsParser {
 	}
 
 	protected compareClassNames(arr1: any[], arr2: any[]): boolean {
-		return arr1.length === arr2.length && arr1.every((value) => arr2.includes(value));
+		return arr1.every((value) => arr2.includes(value));
 	}
 
 	protected parseBuildingInfo(tdElems: any): Building {

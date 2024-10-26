@@ -8,6 +8,14 @@ import fs from "fs-extra";
 
 export default class RoomDiskWriter extends RoomsParser {
 	//Every SectionDiskWriter needs to be able to parse sections using SectionsParser
+
+	private roomTdClassNames: string[] = [
+		"views-field views-field-field-room-number",
+		"views-field views-field-field-room-capacity",
+		"views-field views-field-field-room-furniture",
+		"views-field views-field-field-room-type",
+		"views-field views-field-nothing"
+	];
 	constructor() {
 		super();
 	}
@@ -43,9 +51,8 @@ export default class RoomDiskWriter extends RoomsParser {
 
 				const promiseContent = file.async("text").then(async (content0) => {
 					const document = parse5.parse(content0);
-					const roomTdClassNames: string[] = [];
 					const building: Building = buildingMap.get(buildingCode) as Building;
-					return this.findTdElemsOfRooms(document, roomTdClassNames, building, id);
+					return this.findTdElemsOfRooms(document, building, id);
 				});
 				allPromises.push(promiseContent);
 			}
@@ -71,7 +78,7 @@ export default class RoomDiskWriter extends RoomsParser {
 	}
 
 
-	protected async findTdElemsOfRooms(doc: any, classNames: string[], building: Building, id: string): Promise<Room[]> {
+	protected async findTdElemsOfRooms(doc: any, building: Building, id: string): Promise<Room[]> {
 		const roomPromises: Promise<Room | null>[] = []
 		//  traverse the parsed tree
 		const traverse = (node: any) => {
@@ -86,23 +93,20 @@ export default class RoomDiskWriter extends RoomsParser {
 				tdElems.forEach((tdElem: any) => {
 					const classAttr = tdElem.attrs.find((attr: any) => attr.name === "class");
 					//console.log(classAttr)
-					const classList = classAttr ? classAttr.value : "";
-					if (classList != "") {
-						currClassNames.push(classList);
-					}
+					const classList = classAttr.value
+					currClassNames.push(classList);
+
 				});
 
-				if (classNames.length === 0) {
-					classNames = currClassNames;
-				} else {
+
 					//console.log("classNames: ", classNames)
 					//console.log("currClassNames: ", currClassNames)
-					if (this.compareClassNames(classNames, currClassNames)) {
+					if (this.compareClassNames(this.roomTdClassNames, currClassNames)) {
 						const newRoom = this.parseRoomInfo(tdElems, building, id)
 						roomPromises.push(newRoom)
 
 					}
-				}
+
 			}
 
 			// Recursively traverse child nodes

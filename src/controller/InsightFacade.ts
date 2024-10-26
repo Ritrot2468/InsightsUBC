@@ -57,12 +57,12 @@ export default class InsightFacade implements IInsightFacade {
 			await this.sv.validateSectionAddition(id, this.sectionsDatabase, this.roomsDatabase);
 
 			if (kind === InsightDatasetKind.Sections) {
-				return this.sectionHelper.addRoom(id, this.sectionsDatabase, content, kind)
-				// await this.secDiskWriter.logSectionsDatasetOnDisk(content, id);
-				// await this.secDiskReader.logNewDatasetFromDiskToMap(id, this.sectionsDatabase);
-				// await this.secDiskWriter.logInsightKindToDisk(id, kind, this.sectionsDatabase.get(id)?.length as number);
-				//
-				// return fs.readdir("./data");
+				//return this.sectionHelper.addRoom(id, this.sectionsDatabase, content, kind)
+				await this.secDiskWriter.logSectionsDatasetOnDisk(content, id);
+				await this.secDiskReader.logNewDatasetFromDiskToMap(id, this.sectionsDatabase);
+				await this.secDiskWriter.logInsightKindToDisk(id, kind, this.sectionsDatabase.get(id)?.length as number);
+
+				return fs.readdir("./data");
 
 			} else {
 				await this.roomDiskWriter.logRoomsDatasetOnDisk(content, id, this.roomsDatabase);
@@ -134,7 +134,7 @@ export default class InsightFacade implements IInsightFacade {
 
 		const currIDs = await fs.readdir("./data");
 
-		// reads their content info on disk and parses into InsightDataset[]
+		// reads their content info on disk and parses into InsightDataset[](works for rooms as well)
 		return this.secDiskReader.logInsightKindFromDisk(currIDs);
 	}
 }

@@ -75,4 +75,6 @@ export default class SectionDiskReader extends SectionsParser {
 		// update member variables
 		sectionsDatabase.set(newDataset.id, newDataset.sections);
 	}
+
+
 }

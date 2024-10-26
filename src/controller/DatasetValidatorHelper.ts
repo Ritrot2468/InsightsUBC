@@ -1,6 +1,7 @@
 import { InsightError } from "./IInsightFacade";
 import fs from "fs-extra";
 import Section from "./sections/Section";
+import Room from "./rooms/Room";
 
 export default class DatasetValidatorHelper {
 	// checks if a dataset id is valid to be added
@@ -20,9 +21,11 @@ export default class DatasetValidatorHelper {
 		}
 	}
 
-	public async validateSectionAddition(id: string, sectionsDatabase: Map<string, Section[]>): Promise<void> {
-		if (sectionsDatabase.has(id) || (await fs.pathExists(`./data/${id}`))) {
+	public async validateSectionAddition(id: string, sectionsDatabase: Map<string, Section[]>, roomsDatabase: Map<string, Room[]>): Promise<void> {
+		if (sectionsDatabase.has(id)|| roomsDatabase.has(id) || (await fs.pathExists(`./data/${id}`))) {
 			throw new InsightError(`Dataset with id ${id} already exists.`);
 		}
 	}
+
+
 }

@@ -321,10 +321,8 @@ describe("InsightFacade", function () {
 			);
 		});
 		it("no index file- room", async function () {
-			const no_Index = await getContentFromArchives("rooms/no_index.zip");
-			await expect(facade.addDataset("noindex", no_Index, InsightDatasetKind.Rooms)).to.be.rejectedWith(
-				InsightError
-			);
+			const noIndex = await getContentFromArchives("rooms/no_index.zip");
+			await expect(facade.addDataset("noindex", noIndex, InsightDatasetKind.Rooms)).to.be.rejectedWith(InsightError);
 		});
 		it("should reject with an underscore1 - rooms", async function () {
 			await expect(facade.addDataset("red_", rooms1, InsightDatasetKind.Rooms)).to.be.rejectedWith(InsightError);
@@ -381,7 +379,6 @@ describe("InsightFacade", function () {
 
 			return expect(result).to.have.members([" s "]);
 		});
-
 
 		it("should add valid data properly (some rooms missing fields) - rooms", async function () {
 			const result = await facade.addDataset("missingFields", missingFields1, InsightDatasetKind.Rooms);
@@ -580,8 +577,6 @@ describe("InsightFacade", function () {
 				expect.fail(`you failed to load the right sets ${err}`);
 			}
 		});
-
-
 	});
 
 	describe("RemoveDataset - Sections", function () {
@@ -886,7 +881,6 @@ describe("InsightFacade", function () {
 			"[sections/invalid/output_too_large.json] SELECT dept, avg - RESULT TOO LARGE",
 			"[sections/invalid/reference_too_many_datasets.json] SELECT sections_dept sections_avg WHERE section_avg > 80 AND section_year = 202*",
 			"[sections/invalid/excessKeysInQuery.json] WHERE OPTIONS and HOW keys in Query",
-
 		];
 
 		// Automated test cases for sections
@@ -1032,23 +1026,51 @@ describe("InsightFacade", function () {
 						kind: InsightDatasetKind.Rooms,
 						numRows: 2,
 					},
-				])
+				]);
 			} catch (err) {
 				expect.fail(`you failed to load the right sets: ${err}`);
 			}
+		});
 
-
-
-
-		})
-
-		// it(" ", async function () {
+		// it("2 valid tables and only pick first one - rooms", async function () {
+		// 	try {
+		// 		sections = await getContentFromArchives("rooms/duplicate_tables.zip");
+		// 		await facade.addDataset("test3", sections, InsightDatasetKind.Rooms);
 		//
-		// })
-		//
-		// it(" ", async function () {
-		//
-		// })
+		// 		const datasets = await facade.listDatasets();
+		// 		const EXPECTED_LENGTH = 1;
+		// 		expect(datasets.length).to.equal(EXPECTED_LENGTH);
+		// 		expect(datasets).to.include.deep.members([
+		// 			{
+		// 				id: "test3",
+		// 				kind: InsightDatasetKind.Rooms,
+		// 				numRows: 2,
+		// 			},
+		// 		]);
+		// 	} catch (err) {
+		// 		expect.fail(`you failed to load the right sets ${err}`);
+		// 	}
+		// });
+
+		it("2 tables and only one valid table - rooms", async function () {
+			try {
+				sections = await getContentFromArchives("rooms/oneValidTable.zip");
+				await facade.addDataset("test3", sections, InsightDatasetKind.Rooms);
+
+				const datasets = await facade.listDatasets();
+				const EXPECTED_LENGTH = 1;
+				expect(datasets.length).to.equal(EXPECTED_LENGTH);
+				expect(datasets).to.include.deep.members([
+					{
+						id: "test3",
+						kind: InsightDatasetKind.Rooms,
+						numRows: 18,
+					},
+				]);
+			} catch (err) {
+				expect.fail(`you failed to load the right sets ${err}`);
+			}
+		});
 	});
 
 	describe("ListDataset - Sections", function () {

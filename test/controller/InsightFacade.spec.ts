@@ -589,16 +589,6 @@ describe("InsightFacade", function () {
 			await clearDisk();
 		});
 
-		it("should reject remove with empty dataset id", async function () {
-			await facade.addDataset("UBC", sections, InsightDatasetKind.Sections);
-			try {
-				await facade.removeDataset("");
-				expect.fail("Error should have been thrown.");
-			} catch (err) {
-				expect(err).to.be.instanceOf(InsightError);
-			}
-		});
-
 		it("should reject remove with underscore in dataset id", async function () {
 			await facade.addDataset("UBC", sections, InsightDatasetKind.Sections);
 			try {

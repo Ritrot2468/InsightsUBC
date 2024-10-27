@@ -33,15 +33,12 @@ export default class RoomsParser {
 	protected async parseIndexFile(zip: JSZip): Promise<Map<string, Building>> {
 		const allPromises: Promise<Map<string, Building>>[] = [];
 
-		for (const key in zip.files) {
-			if (key === "campus/index.htm") {
-				const promiseContent = zip.files[key].async("string").then((content0) => {
-					const document = parse5.parse(content0);
-
-					return this.findTdElemsInIndexFile(document);
-				});
-				allPromises.push(promiseContent);
-			}
+		if (zip.files["campus/index.htm"]) {
+			const promiseContent = zip.files["campus/index.htm"].async("string").then(async (content0) => {
+				const document = parse5.parse(content0);
+				return this.findTdElemsInIndexFile(document);
+			});
+			allPromises.push(promiseContent);
 		}
 
 		// wait for all promises
@@ -58,46 +55,63 @@ export default class RoomsParser {
 		return combinedMap;
 	}
 
-	// finds all the td elems associated with the index table of
-	protected findTdElemsInIndexFile(doc: any): Map<string, Building> {
-		const buildingsMap = new Map<string, Building>();
-		// Function to traverse the parsed tree
-		const traverse = (node: any): any => {
-			// Check if the current node is a <tr> element
-			const currClassNames: string[] = [];
-			if (node.nodeName === "tr" && node.childNodes) {
-				// Gather all <td> elements within this <tr>
-				const tdElems = node.childNodes.filter((child: any) => child.nodeName === "td");
-				//console.log(tdElems)
-
-				// Process each <td> element
-				tdElems.forEach((tdElem: any) => {
-					const classAttr = tdElem.attrs.find((attr: any) => attr.name === "class");
-					//console.log(classAttr)
-					const classList = classAttr.value;
-					currClassNames.push(classList);
-				});
-
-				if (this.compareClassNames(this.buildingTdClassNames, currClassNames)) {
-					const newBuilding: Building = this.parseBuildingInfo(tdElems);
-					const codeKey: string[] = newBuilding.getHref().split("/");
-					// get from href in the case shortname on index file is empty string
-					const buildingCode: string = codeKey[codeKey.length - 1].split(".")[0];
-					//console.log(buildingCode)
-
-					buildingsMap.set(buildingCode, newBuilding);
-				}
+	private async getAllTables(doc: any): Promise<any[]> {
+		const tables: any[] = [];
+		const traverse = (node: any): void => {
+			// Check if the current node is a <table>
+			if (node.nodeName === "table") {
+				tables.push(node); // Add the table to the list
 			}
 
-			// Recursively traverse child nodes
 			if (node.childNodes) {
 				node.childNodes.forEach((child: any) => traverse(child));
 			}
 		};
 
 		traverse(doc); // Start traversing from the root document
+		return tables; // Return the collected tables
+	}
 
-		//console.log(buildingsMap.size)
+	protected async findTdElemsInIndexFile(doc: any): Promise<Map<string, Building>> {
+		const buildingsMap = new Map<string, Building>();
+		let foundTable = false;
+
+		const tables = await this.getAllTables(doc);
+
+		// Process each table
+		tables.forEach((table: any) => {
+			// Find the <tbody> in the <table>
+			if (foundTable) {
+				return buildingsMap;
+			}
+			const tbody = table.childNodes.find((child: any) => child.nodeName === "tbody");
+
+			// if <tbody> exists, process its <tr> elements
+			if (tbody) {
+				tbody.childNodes.forEach((child: any) => {
+					if (child.nodeName === "tr") {
+						const currClassNames: string[] = [];
+						const tdElems = child.childNodes.filter((grandchild: any) => grandchild.nodeName === "td");
+
+						// process each <td> element
+						tdElems.forEach((tdElem: any) => {
+							const classAttr = tdElem.attrs.find((attr: any) => attr.name === "class");
+							const classList = classAttr ? classAttr.value : "";
+							currClassNames.push(classList);
+						});
+
+						if (this.compareClassNames(this.buildingTdClassNames, currClassNames)) {
+							foundTable = true;
+							const newBuilding: Building = this.parseBuildingInfo(tdElems);
+							const codeKey: string[] = newBuilding.getHref().split("/");
+							const buildingCode: string = codeKey[codeKey.length - 1].split(".")[0];
+
+							buildingsMap.set(buildingCode, newBuilding);
+						}
+					}
+				});
+			}
+		});
 
 		if (buildingsMap.size === 0) {
 			throw new InsightError("No <td> elements found or valid buildings detected.");
@@ -105,6 +119,54 @@ export default class RoomsParser {
 
 		return buildingsMap;
 	}
+
+	// // finds all the td elems associated with the index table of
+	// protected findTdElemsInIndexFile(doc: any): Map<string, Building> {
+	// 	const buildingsMap = new Map<string, Building>();
+	// 	// Function to traverse the parsed tree
+	// 	const traverse = (node: any): any => {
+	// 		// Check if the current node is a <tr> element
+	// 		const currClassNames: string[] = [];
+	// 		if (node.nodeName === "tr" && node.childNodes) {
+	// 			// Gather all <td> elements within this <tr>
+	// 			const tdElems = node.childNodes.filter((child: any) => child.nodeName === "td");
+	// 			//console.log(tdElems)
+	//
+	// 			// Process each <td> element
+	// 			tdElems.forEach((tdElem: any) => {
+	// 				const classAttr = tdElem.attrs.find((attr: any) => attr.name === "class");
+	// 				//console.log(classAttr)
+	// 				const classList = classAttr.value;
+	// 				currClassNames.push(classList);
+	// 			});
+	//
+	// 			if (this.compareClassNames(this.buildingTdClassNames, currClassNames)) {
+	// 				const newBuilding: Building = this.parseBuildingInfo(tdElems);
+	// 				const codeKey: string[] = newBuilding.getHref().split("/");
+	// 				// get from href in the case shortname on index file is empty string
+	// 				const buildingCode: string = codeKey[codeKey.length - 1].split(".")[0];
+	// 				//console.log(buildingCode)
+	//
+	// 				buildingsMap.set(buildingCode, newBuilding);
+	// 			}
+	// 		}
+	//
+	// 		// Recursively traverse child nodes
+	// 		if (node.childNodes) {
+	// 			node.childNodes.forEach((child: any) => traverse(child));
+	// 		}
+	// 	};
+	//
+	// 	traverse(doc); // Start traversing from the root document
+	//
+	// 	//console.log(buildingsMap.size)
+	//
+	// 	if (buildingsMap.size === 0) {
+	// 		throw new InsightError("No <td> elements found or valid buildings detected.");
+	// 	}
+	//
+	// 	return buildingsMap;
+	// }
 
 	protected async parseRoomInfo(tdElems: any, building: Building, id: string): Promise<Room | null> {
 		let number = "";
@@ -118,33 +180,35 @@ export default class RoomsParser {
 		seats = roomInfo.seats;
 		furniture = roomInfo.furniture;
 		type = roomInfo.type;
-
 		const name = `${building.getShortname()}_${number}`;
+		try {
+			// Fetch geolocation data
+			const geoLoc = await this.fetchGeoLocation(building.getAddress());
+			// Ensure both lat and lon are present
+			if (geoLoc && typeof geoLoc.lat === "number" && typeof geoLoc.lon === "number") {
+				const roomMfields: Mfield = {
+					lat: geoLoc.lat,
+					lon: geoLoc.lon,
+					seats: seats,
+				};
 
-		// Fetch geolocation data
-		const geoLoc = await this.fetchGeoLocation(building.getAddress());
+				// Define the Sfield object
+				const roomSfields: Partial<Sfield> = {
+					number: number,
+					name: name,
+					type: type,
+					furniture: furniture,
+				};
 
-		// Ensure both lat and lon are present
-		if (geoLoc && typeof geoLoc.lat === "number" && typeof geoLoc.lon === "number") {
-			const roomMfields: Mfield = {
-				lat: geoLoc.lat,
-				lon: geoLoc.lon,
-				seats: seats,
-			};
-
-			// Define the Sfield object
-			const roomSfields: Partial<Sfield> = {
-				number: number,
-				name: name,
-				type: type,
-				furniture: furniture,
-			};
-
-			// Create and return a new Room instance
-			return new Room(id, roomMfields, roomSfields, building);
-		} else {
-			return null;
+				// Create and return a new Room instance
+				return new Room(id, roomMfields, roomSfields, building);
+			} else {
+				return null;
+			}
+		} catch (error) {
+			return null
 		}
+
 	}
 
 	private findElementInfo(
@@ -246,7 +310,7 @@ export default class RoomsParser {
 					}
 					if (error) {
 						res.resume();
-						return;
+						reject(error);
 					}
 
 					let rawData = "";
@@ -270,10 +334,7 @@ export default class RoomsParser {
 	): any {
 		try {
 			const response: GeoResponse = JSON.parse(rawData);
-			//console.log(`Response : ${rawData}`);
-
 			if (response.lat !== undefined && response.lon !== undefined) {
-				//console.log(`Geolocation found: lat=${response.lat}, lon=${response.lon}`);
 				resolve({ lat: response.lat, lon: response.lon });
 			} else {
 				reject(new Error());

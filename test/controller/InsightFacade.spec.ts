@@ -282,11 +282,12 @@ describe("InsightFacade", function () {
 			return expect(result).to.have.members(["room4"]);
 		});
 		//
-		// it("should reject with an empty file in zip - rooms", async function () {
-		// 	await expect(facade.addDataset("section", emptyCourse, InsightDatasetKind.Sections)).to.be.rejectedWith(
-		// 		InsightError
-		// 	);
-		// });
+		it("no room files - rooms", async function () {
+			const noRoomsFile = await getContentFromArchives("rooms/noRoomFiles.zip");
+			await expect(facade.addDataset("section", noRoomsFile, InsightDatasetKind.Sections)).to.be.rejectedWith(
+				InsightError
+			);
+		});
 		//
 		// it("non JSON formatted file in zip - rooms", async function () {
 		// 	await expect(facade.addDataset("sections", noJson, InsightDatasetKind.Sections)).to.be.rejectedWith(InsightError);
@@ -316,6 +317,12 @@ describe("InsightFacade", function () {
 
 		it("no valid rooms- room", async function () {
 			await expect(facade.addDataset("room2", noValidRooms1, InsightDatasetKind.Rooms)).to.be.rejectedWith(
+				InsightError
+			);
+		});
+		it("no index file- room", async function () {
+			const no_Index = await getContentFromArchives("rooms/no_index.zip");
+			await expect(facade.addDataset("noindex", no_Index, InsightDatasetKind.Rooms)).to.be.rejectedWith(
 				InsightError
 			);
 		});
@@ -375,6 +382,7 @@ describe("InsightFacade", function () {
 			return expect(result).to.have.members([" s "]);
 		});
 
+
 		it("should add valid data properly (some rooms missing fields) - rooms", async function () {
 			const result = await facade.addDataset("missingFields", missingFields1, InsightDatasetKind.Rooms);
 
@@ -384,21 +392,6 @@ describe("InsightFacade", function () {
 		// it("should reject with an empty zip file", async function () {
 		// 	await expect(facade.addDataset("sections", empty, InsightDatasetKind.Sections)).to.be.rejectedWith(InsightError);
 		// });
-		//
-		// it("should reject with an empty file", async function () {
-		// 	await expect(facade.addDataset("sections", "", InsightDatasetKind.Sections)).to.be.rejectedWith(InsightError);
-		// });
-		//
-		// it("one course with all invalid sections - contains valid sections", async function () {
-		// 	try {
-		// 		const result1 = await facade.addDataset("section", defectiveSet, InsightDatasetKind.Sections);
-		// 		expect(result1.length).to.equal(1);
-		// 		expect(result1).to.include.members(["section"]);
-		// 	} catch (err) {
-		// 		expect.fail(`Not valid entry: ${err}`);
-		// 	}
-		// });
-		//
 
 		it("list 2 datasets from different facades - room", async function () {
 			try {
@@ -587,6 +580,8 @@ describe("InsightFacade", function () {
 				expect.fail(`you failed to load the right sets ${err}`);
 			}
 		});
+
+
 	});
 
 	describe("RemoveDataset - Sections", function () {
@@ -803,94 +798,95 @@ describe("InsightFacade", function () {
 		});
 
 		const sectionTestCases = [
-			"[valid/simple.json] SELECT dept, avg WHERE avg > 97",
-			"[valid/simple1.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = cps*",
-			"[valid/simple2.json] SELECT pass, audit, dept, avg WHERE avg == 97",
-			"[valid/simple3.json] SELECT dept, avg, pass, fail, audit WHERE avg > 93 AND avg > 95",
-			"[valid/case_sensitive_wildcard.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = CPS*",
-			"[valid/general_ast.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = *",
-			"[valid/_wildcard.json] SELECT dept, uuid, avg WHERE avg > 95 AND dep = *psc",
-			"[valid/_wildcard_.json] SELECT dept, uuid, avg WHERE avg > 98 AND dep = *ps*",
-			"[valid/negation.json] SELECT dept, uuid, avg WHERE NOT avg > 95 AND dep = *psc",
-			"[valid/gt_than_one_logic1.json] SELECT sections_dept sections_avg WHERE section_avg > 80 OR section_avg < 85",
-			"[valid/complex1.json] SELECT sections_dept, sections_avg WHERE (sections_avg > 90 AND sections_avg < 100 AND sections_dept LIKE cpsc*) OR (sections_dept = bioc AND sections_avg > 90) ORDER BY sections_avg",
-			"[valid/oR1Comp.json] OR 1 comp",
-			"[valid/notOr.json] not or",
-			"[valid/orderByTitle.json] order by title",
-			"[valid/orderByYear.json] order by year",
-			"[valid/orderByFail.json] order by fail",
-			"[valid/aND1Comp.json] AND 1 comp",
-			"[valid/no_order.json] no order",
-			"[valid/order1.json] order by instructor",
-			"[valid/order2.json] order by audit",
-			"[valid/order3.json] order by pass",
-			"[valid/order4.json] order by uuid",
-			"[valid/filter_by_id.json] filter by id",
-			"[valid/double_ast.json] double ast",
-			"[valid/notAnd3.json] not and3",
-			"[valid/doubleNegation.json] double negation",
-			"[invalid/wrongFormatWhere.json] wrong format where",
-			"[invalid/lowerCaseGt.json] lower case gt",
-			"[invalid/lowerCaseOr.json] lower case or",
-			"[invalid/lowerCaseNot.json] lower case not",
-			"[invalid/caseSensitiveIdstring.json] case sensitive idstring",
-			"[invalid/idstringWith_.json] idstring with _",
-			"[invalid/emptyIdstring.json] empty idstring",
-			"[invalid/emptyMkey.json] empty mkey",
-			"[invalid/mkeyNo_.json] mkey no _",
-			"[invalid/oneCharIdstring.json] one char idstring",
-			"[invalid/noIdstringAnd_.json] no idstring and _",
-			"[invalid/mkeyWithSfield.json] mkey with sfield",
-			"[invalid/mkeyWithStringAsKey.json] mkey with string as key",
-			"[valid/mkeyWithDecimalNumber.json] mkey with decimal number",
-			"[invalid/andIsInvalidObject.json] and is invalid object",
-			"[valid/andLt_Gt.json] avg > 96 and avg < 97",
-			"[invalid/andEmptyKeylist.json] and empty keylist",
-			"[invalid/andEmptyKeylistMissingBrace.json] and empty keylist missing brace",
-			"[invalid/whereHas2Keys.json] where has 2 keys",
-			"[invalid/invalidKeyInColumns.json] invalid key in columns",
-			"[invalid/queryNotAnObject.json] query not an object",
-			"[invalid/notIsNotAnObject.json] not is not an object",
-			"[invalid/isIsNotAnObject.json] is is not an object",
-			"[invalid/eqIsNotAnObject.json] eq is not an object",
-			"[valid/optionsAndBodySwapped.json] options and body swapped",
-			"[valid/bodyOptionsBody.json] body options body",
-			"[valid/bodyBodyOptions.json] body body options",
-			"[valid/optionsBodyOptions.json] options body options",
-			"[invalid/skeyWithMfield.json] skey with mfield",
-			"[invalid/columnsInvalidKeylist.json] columns invalid keylist",
-			"[invalid/orderInvalidKeylist.json] order invalid keylist",
-			"[invalid/orderNotAString.json] order is not a string",
-			"[invalid/wHEREWith2Keys.json] WHERE with 2 keys",
-			"[invalid/gt_than_one_logic.txt] SELECT pass, audit, dept, avg WHERE avg == 97",
-			"[invalid/datasetNotAdded.json] dataset not added",
-			"[invalid/missingWhereWithContent.json] missing where with content",
-			"[valid/lTNegativeVal.json] lt negative value",
-			"[invalid/order_key_not_in_columns.json] Wrong ORDER key",
-			"[invalid/invalid8.json] Query missing valid OPTIONS key",
-			"[invalid/invalid7.json] SELECT dept, uuid, avg WHERE avg > 93 AND NOT",
-			"[invalid/invalid6.json] SELECT dept, uuid, avg WHERE avg > 93 AND avg is 95",
-			"[invalid/invalid5.json] SELECT pass, audit, dept, avg WHERE dept == apbl",
-			"[invalid/invalid4.json] SELECT pass, audit, dept, avg WHERE avg == 97",
-			"[invalid/invalid3.json] SELECT pass, audit, dept, avg WHERE avg == 97",
-			"[invalid/invalid2.json] SELECT pass, audit, dept, avg WHERE avg == 97",
-			"[invalid/invalid1.json] Query missing OPTIONS",
-			"[invalid/invalid.json] Query missing WHERE",
-			"[invalid/options_no_columns.json] SELECT dept, uuid, avg WHERE NOT avg > 95 AND dep = *psc",
-			"[invalid/options_no_columns1.json] SELECT dept, uuid, avg WHERE NOT avg > 95 AND dep = *psc",
-			"[invalid/gt_than_one_logic.json] SELECT sections_dept sections_avg WHERE section_avg > 80 OR section_avg < 85",
-			"[invalid/missing_logic.json] SELECT sections_dept sections_avg WHERE AND",
-			"[invalid/triple_ast.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = ***",
-			"[invalid/wildcard_ast_in_btwn.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = cp*c",
-			"[invalid/output_too_large.json] SELECT dept, avg - RESULT TOO LARGE",
-			"[invalid/reference_too_many_datasets.json] SELECT sections_dept sections_avg WHERE section_avg > 80 AND section_year = 202*",
-			"[invalid/excessKeysInQuery.json] WHERE OPTIONS and HOW keys in Query",
-			"[valid/uuidTest.json] check uuid type",
-			"[valid/orderByUuid.json] order by uuid",
-			"[valid/yearTest.json] order by year",
-			"[valid/noOrder.json] no order",
-			"[valid/notAnd.json] not and",
-			"[valid/notAnd2.json] not and2",
+			"[sections/valid/simple.json] SELECT dept, avg WHERE avg > 97",
+			"[sections/valid/simple1.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = cps*",
+			"[sections/valid/simple2.json] SELECT pass, audit, dept, avg WHERE avg == 97",
+			"[sections/valid/simple3.json] SELECT dept, avg, pass, fail, audit WHERE avg > 93 AND avg > 95",
+			"[sections/valid/case_sensitive_wildcard.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = CPS*",
+			"[sections/valid/general_ast.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = *",
+			"[sections/valid/_wildcard.json] SELECT dept, uuid, avg WHERE avg > 95 AND dep = *psc",
+			"[sections/valid/_wildcard_.json] SELECT dept, uuid, avg WHERE avg > 98 AND dep = *ps*",
+			"[sections/valid/negation.json] SELECT dept, uuid, avg WHERE NOT avg > 95 AND dep = *psc",
+			"[sections/valid/gt_than_one_logic1.json] SELECT sections_dept sections_avg WHERE section_avg > 80 OR section_avg < 85",
+			"[sections/valid/complex1.json] SELECT sections_dept, sections_avg WHERE (sections_avg > 90 AND sections_avg < 100 AND sections_dept LIKE cpsc*) OR (sections_dept = bioc AND sections_avg > 90) ORDER BY sections_avg",
+			"[sections/valid/oR1Comp.json] OR 1 comp",
+			"[sections/valid/notOr.json] not or",
+			"[sections/valid/orderByTitle.json] order by title",
+			"[sections/valid/orderByYear.json] order by year",
+			"[sections/valid/orderByFail.json] order by fail",
+			"[sections/valid/aND1Comp.json] AND 1 comp",
+			"[sections/valid/no_order.json] no order",
+			"[sections/valid/order1.json] order by instructor",
+			"[sections/valid/order2.json] order by audit",
+			"[sections/valid/order3.json] order by pass",
+			"[sections/valid/order4.json] order by uuid",
+			"[sections/valid/filter_by_id.json] filter by id",
+			"[sections/valid/double_ast.json] double ast",
+			"[sections/valid/notAnd3.json] not and3",
+			"[sections/valid/doubleNegation.json] double negation",
+			"[sections/valid/mkeyWithDecimalNumber.json] mkey with decimal number",
+			"[sections/valid/andLt_Gt.json] avg > 96 and avg < 97",
+			"[sections/valid/optionsAndBodySwapped.json] options and body swapped",
+			"[sections/valid/bodyOptionsBody.json] body options body",
+			"[sections/valid/bodyBodyOptions.json] body body options",
+			"[sections/valid/optionsBodyOptions.json] options body options",
+			"[sections/valid/uuidTest.json] check uuid type",
+			"[sections/valid/orderByUuid.json] order by uuid",
+			"[sections/valid/yearTest.json] order by year",
+			"[sections/valid/noOrder.json] no order",
+			"[sections/valid/notAnd.json] not and",
+			"[sections/valid/notAnd2.json] not and2",
+
+			"[sections/invalid/wrongFormatWhere.json] wrong format where",
+			"[sections/invalid/lowerCaseGt.json] lower case gt",
+			"[sections/invalid/lowerCaseOr.json] lower case or",
+			"[sections/invalid/lowerCaseNot.json] lower case not",
+			"[sections/invalid/caseSensitiveIdstring.json] case sensitive idstring",
+			"[sections/invalid/idstringWith_.json] idstring with _",
+			"[sections/invalid/emptyIdstring.json] empty idstring",
+			"[sections/invalid/emptyMkey.json] empty mkey",
+			"[sections/invalid/mkeyNo_.json] mkey no _",
+			"[sections/invalid/oneCharIdstring.json] one char idstring",
+			"[sections/invalid/noIdstringAnd_.json] no idstring and _",
+			"[sections/invalid/mkeyWithSfield.json] mkey with sfield",
+			"[sections/invalid/mkeyWithStringAsKey.json] mkey with string as key",
+			"[sections/invalid/andIsInvalidObject.json] and is invalid object",
+			"[sections/invalid/andEmptyKeylist.json] and empty keylist",
+			"[sections/invalid/andEmptyKeylistMissingBrace.json] and empty keylist missing brace",
+			"[sections/invalid/whereHas2Keys.json] where has 2 keys",
+			"[sections/invalid/invalidKeyInColumns.json] invalid key in columns",
+			"[sections/invalid/queryNotAnObject.json] query not an object",
+			"[sections/invalid/notIsNotAnObject.json] not is not an object",
+			"[sections/invalid/isIsNotAnObject.json] is is not an object",
+			"[sections/invalid/eqIsNotAnObject.json] eq is not an object",
+			"[sections/invalid/skeyWithMfield.json] skey with mfield",
+			"[sections/invalid/columnsInvalidKeylist.json] columns invalid keylist",
+			"[sections/invalid/orderInvalidKeylist.json] order invalid keylist",
+			"[sections/invalid/orderNotAString.json] order is not a string",
+			"[sections/invalid/wHEREWith2Keys.json] WHERE with 2 keys",
+			"[sections/invalid/gt_than_one_logic.txt] SELECT pass, audit, dept, avg WHERE avg == 97",
+			"[sections/invalid/datasetNotAdded.json] dataset not added",
+			"[sections/invalid/missingWhereWithContent.json] missing where with content",
+			"[sections/invalid/order_key_not_in_columns.json] Wrong ORDER key",
+			"[sections/invalid/invalid8.json] Query missing valid OPTIONS key",
+			"[sections/invalid/invalid7.json] SELECT dept, uuid, avg WHERE avg > 93 AND NOT",
+			"[sections/invalid/invalid6.json] SELECT dept, uuid, avg WHERE avg > 93 AND avg is 95",
+			"[sections/invalid/invalid5.json] SELECT pass, audit, dept, avg WHERE dept == apbl",
+			"[sections/invalid/invalid4.json] SELECT pass, audit, dept, avg WHERE avg == 97",
+			"[sections/invalid/invalid3.json] SELECT pass, audit, dept, avg WHERE avg == 97",
+			"[sections/invalid/invalid2.json] SELECT pass, audit, dept, avg WHERE avg == 97",
+			"[sections/invalid/invalid1.json] Query missing OPTIONS",
+			"[sections/invalid/invalid.json] Query missing WHERE",
+			"[sections/invalid/options_no_columns.json] SELECT dept, uuid, avg WHERE NOT avg > 95 AND dep = *psc",
+			"[sections/invalid/options_no_columns1.json] SELECT dept, uuid, avg WHERE NOT avg > 95 AND dep = *psc",
+			"[sections/invalid/gt_than_one_logic.json] SELECT sections_dept sections_avg WHERE section_avg > 80 OR section_avg < 85",
+			"[sections/invalid/missing_logic.json] SELECT sections_dept sections_avg WHERE AND",
+			"[sections/invalid/triple_ast.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = ***",
+			"[sections/invalid/wildcard_ast_in_btwn.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = cp*c",
+			"[sections/invalid/output_too_large.json] SELECT dept, avg - RESULT TOO LARGE",
+			"[sections/invalid/reference_too_many_datasets.json] SELECT sections_dept sections_avg WHERE section_avg > 80 AND section_year = 202*",
+			"[sections/invalid/excessKeysInQuery.json] WHERE OPTIONS and HOW keys in Query",
+
 		];
 
 		// Automated test cases for sections
@@ -1004,6 +1000,55 @@ describe("InsightFacade", function () {
 				expect.fail(`you failed to load the right sets: ${err}`);
 			}
 		});
+
+		it("check rooms with bad address - rooms", async function () {
+			try {
+				sections = await getContentFromArchives("rooms/normal_before.zip");
+				await facade.addDataset("test3", sections, InsightDatasetKind.Rooms);
+				const result1 = await facade.listDatasets();
+				const EXPECTED_LENGTH = 1;
+				expect(result1.length).to.equal(EXPECTED_LENGTH);
+				expect(result1).to.include.deep.members([
+					{
+						id: "test3",
+						kind: InsightDatasetKind.Rooms,
+						numRows: 18,
+					},
+				]);
+
+				const sectionsAfter = await getContentFromArchives("rooms/normal_after.zip");
+				await facade.addDataset("test4", sectionsAfter, InsightDatasetKind.Rooms);
+				const result2 = await facade.listDatasets();
+				const EXPECTED_NEW_LENGTH = 2;
+				expect(result2.length).to.equal(EXPECTED_NEW_LENGTH);
+				expect(result2).to.include.deep.members([
+					{
+						id: "test3",
+						kind: InsightDatasetKind.Rooms,
+						numRows: 18,
+					},
+					{
+						id: "test4",
+						kind: InsightDatasetKind.Rooms,
+						numRows: 2,
+					},
+				])
+			} catch (err) {
+				expect.fail(`you failed to load the right sets: ${err}`);
+			}
+
+
+
+
+		})
+
+		// it(" ", async function () {
+		//
+		// })
+		//
+		// it(" ", async function () {
+		//
+		// })
 	});
 
 	describe("ListDataset - Sections", function () {

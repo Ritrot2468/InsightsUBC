@@ -247,28 +247,34 @@ export default class RoomsParser {
 		furniture = roomInfo.furniture;
 		type = roomInfo.type;
 		const name = `${building.getShortname()}_${number}`;
+		try {
+			// Fetch geolocation data
+			const geoLoc = await this.fetchGeoLocation(building.getAddress());
+			// Ensure both lat and lon are present
+			if (geoLoc && typeof geoLoc.lat === "number" && typeof geoLoc.lon === "number") {
+				const roomMfields: Mfield = {
+					lat: geoLoc.lat,
+					lon: geoLoc.lon,
+					seats: seats,
+				};
 
-		// Fetch geolocation data
-		const geoLoc = await this.fetchGeoLocation(building.getAddress());
-		// Ensure both lat and lon are present
-		if (geoLoc && typeof geoLoc.lat === "number" && typeof geoLoc.lon === "number") {
-			const roomMfields: Mfield = {
-				lat: geoLoc.lat,
-				lon: geoLoc.lon,
-				seats: seats,
-			};
+				// Define the Sfield object
+				const roomSfields: Partial<Sfield> = {
+					number: number,
+					name: name,
+					type: type,
+					furniture: furniture,
+				};
 
-			// Define the Sfield object
-			const roomSfields: Partial<Sfield> = {
-				number: number,
-				name: name,
-				type: type,
-				furniture: furniture,
-			};
-
-			return new Room(id, roomMfields, roomSfields, building);
+				return new Room(id, roomMfields, roomSfields, building);
+			}
+			return null;
+		} catch (error) {
+			if (error) {
+				return null;
+			}
+			return null;
 		}
-		return null;
 	}
 
 	private findElementInfo(

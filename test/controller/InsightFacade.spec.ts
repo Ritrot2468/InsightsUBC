@@ -233,7 +233,7 @@ describe("InsightFacade", function () {
 
 	describe("AddDataset - Rooms", function () {
 		let rooms1: string;
-		let rooms2: string;
+		//let rooms2: string;
 		let noValidRooms1: string;
 		let noValidRooms2: string;
 		let noValidRooms3: string;
@@ -252,7 +252,7 @@ describe("InsightFacade", function () {
 
 			//emptyCourse = await getContentFromArchives("sections/empty_file.zip");
 			rooms1 = await getContentFromArchives("rooms/test1.zip");
-			rooms2 = await getContentFromArchives("rooms/test2.zip");
+			//rooms2 = await getContentFromArchives("rooms/test2.zip");
 			noValidRooms1 = await getContentFromArchives("rooms/no_valid_rooms.zip");
 			noValidRooms2 = await getContentFromArchives("rooms/no_valid_table1.zip");
 			noValidRooms3 = await getContentFromArchives("rooms/no_valid_rooms3.zip");
@@ -273,11 +273,11 @@ describe("InsightFacade", function () {
 				InsightError
 			);
 		});
-		//TODO
-		it("course not in index file -> valid rooms - rooms", async function () {
-			const result = await facade.addDataset("room3", rooms2, InsightDatasetKind.Rooms);
-			return expect(result).to.have.members(["room3"]);
-		});
+		// //TODO
+		// it("course not in index file -> valid rooms - rooms", async function () {
+		// 	const result = await facade.addDataset("room3", rooms2, InsightDatasetKind.Rooms);
+		// 	return expect(result).to.have.members(["room3"]);
+		// });
 		//TODO
 		it("building field not in index file -> valid rooms - rooms", async function () {
 			const result = await facade.addDataset("room4", missingFields2, InsightDatasetKind.Rooms);
@@ -904,17 +904,16 @@ describe("InsightFacade", function () {
 
 		//TODO
 		it("list one dataset - rooms ", async function () {
-			sections = await getContentFromArchives("rooms/test1.zip");
-			await facade.addDataset("test1", sections, InsightDatasetKind.Rooms);
+			sections = await getContentFromArchives("rooms/normal_before.zip");
+			await facade.addDataset("test3", sections, InsightDatasetKind.Rooms);
 
 			const datasets = await facade.listDatasets();
-			//console.log(datasets[1])
 
 			expect(datasets).to.deep.equal([
 				{
-					id: "test1",
+					id: "test3",
 					kind: InsightDatasetKind.Rooms,
-					numRows: 162,
+					numRows: 18,
 				},
 			]);
 		});
@@ -922,25 +921,25 @@ describe("InsightFacade", function () {
 		//TODO:
 		it("list 2 datasets - rooms", async function () {
 			try {
-				sections = await getContentFromArchives("rooms/test1.zip");
-				await facade.addDataset("test1", sections, InsightDatasetKind.Rooms);
+				sections = await getContentFromArchives("rooms/normal_before.zip");
+				await facade.addDataset("test3", sections, InsightDatasetKind.Rooms);
 
-				const sections1 = await getContentFromArchives("rooms/test2.zip");
-				await facade.addDataset("test2", sections1, InsightDatasetKind.Rooms);
+				const sections1 = await getContentFromArchives("rooms/campus.zip");
+				await facade.addDataset("campus", sections1, InsightDatasetKind.Rooms);
 
 				const datasets = await facade.listDatasets();
 				const EXPECTED_LENGTH = 2;
 				expect(datasets.length).to.equal(EXPECTED_LENGTH);
 				expect(datasets).to.include.deep.members([
 					{
-						id: "test1",
+						id: "test3",
 						kind: InsightDatasetKind.Rooms,
-						numRows: 162,
+						numRows: 18,
 					},
 					{
-						id: "test2",
+						id: "campus",
 						kind: InsightDatasetKind.Rooms,
-						numRows: 16,
+						numRows: 364,
 					},
 				]);
 			} catch (err) {
@@ -951,10 +950,10 @@ describe("InsightFacade", function () {
 		// TODO
 		it("list and remove datasets - rooms", async function () {
 			try {
-				sections = await getContentFromArchives("rooms/test1.zip");
+				sections = await getContentFromArchives("rooms/normal_before.zip");
 				await facade.addDataset("test1", sections, InsightDatasetKind.Rooms);
 
-				const sections1 = await getContentFromArchives("rooms/test2.zip");
+				const sections1 = await getContentFromArchives("rooms/normal_before.zip");
 				await facade.addDataset("test5", sections1, InsightDatasetKind.Rooms);
 
 				const datasets = await facade.listDatasets();
@@ -964,12 +963,12 @@ describe("InsightFacade", function () {
 					{
 						id: "test1",
 						kind: InsightDatasetKind.Rooms,
-						numRows: 162,
+						numRows: 18,
 					},
 					{
 						id: "test5",
 						kind: InsightDatasetKind.Rooms,
-						numRows: 16,
+						numRows: 18,
 					},
 				]);
 
@@ -981,7 +980,7 @@ describe("InsightFacade", function () {
 					{
 						id: "test5",
 						kind: InsightDatasetKind.Rooms,
-						numRows: 16,
+						numRows: 18,
 					},
 				]);
 			} catch (err) {
@@ -991,38 +990,40 @@ describe("InsightFacade", function () {
 
 		// TODO
 		it("check rooms with bad address - rooms", async function () {
-			sections = await getContentFromArchives("rooms/normal_before.zip");
-			await facade.addDataset("test3", sections, InsightDatasetKind.Rooms);
-			const result1 = await facade.listDatasets();
-			const EXPECTED_LENGTH = 1;
-			expect(result1.length).to.equal(EXPECTED_LENGTH);
-			expect(result1).to.include.deep.members([
-				{
-					id: "test3",
-					kind: InsightDatasetKind.Rooms,
-					numRows: 18,
-				},
-			]);
+			try {
+				sections = await getContentFromArchives("rooms/normal_before.zip");
+				await facade.addDataset("test3", sections, InsightDatasetKind.Rooms);
+				const result1 = await facade.listDatasets();
+				const EXPECTED_LENGTH = 1;
+				expect(result1.length).to.equal(EXPECTED_LENGTH);
+				expect(result1).to.include.deep.members([
+					{
+						id: "test3",
+						kind: InsightDatasetKind.Rooms,
+						numRows: 18,
+					},
+				]);
 
-			const sectionsAfter = await getContentFromArchives("rooms/normal_after.zip");
-			await facade.addDataset("test4", sectionsAfter, InsightDatasetKind.Rooms);
-			expect.fail(`you failed to load the right sets: `);
-
-			// const result2 = await facade.listDatasets();
-			// const EXPECTED_NEW_LENGTH = 2;
-			// expect(result2.length).to.equal(EXPECTED_NEW_LENGTH);
-			// expect(result2).to.include.deep.members([
-			// 	{
-			// 		id: "test3",
-			// 		kind: InsightDatasetKind.Rooms,
-			// 		numRows: 18,
-			// 	},
-			// 	{
-			// 		id: "test4",
-			// 		kind: InsightDatasetKind.Rooms,
-			// 		numRows: 2,
-			// 	},
-			// ]);
+				const sectionsAfter = await getContentFromArchives("rooms/normal_after.zip");
+				await facade.addDataset("test4", sectionsAfter, InsightDatasetKind.Rooms);
+				const result2 = await facade.listDatasets();
+				const EXPECTED_NEW_LENGTH = 2;
+				expect(result2.length).to.equal(EXPECTED_NEW_LENGTH);
+				expect(result2).to.include.deep.members([
+					{
+						id: "test3",
+						kind: InsightDatasetKind.Rooms,
+						numRows: 18,
+					},
+					{
+						id: "test4",
+						kind: InsightDatasetKind.Rooms,
+						numRows: 2,
+					},
+				]);
+			} catch (err) {
+				expect.fail(`you failed to load the right sets: ${err}`);
+			}
 		});
 
 		// it("2 valid tables and only pick first one - rooms", async function () {

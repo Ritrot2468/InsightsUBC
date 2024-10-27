@@ -33,8 +33,8 @@ export default class RoomsParser {
 	protected async parseIndexFile(zip: JSZip): Promise<Map<string, Building>> {
 		const allPromises: Promise<Map<string, Building>>[] = [];
 
-		if (zip.files["campus/index.htm"]) {
-			const promiseContent = zip.files["campus/index.htm"].async("string").then(async (content0) => {
+		if (zip.files["index.htm"]) {
+			const promiseContent = zip.files["index.htm"].async("string").then(async (content0) => {
 				const document = parse5.parse(content0);
 				return this.findTdElemsInIndexFile(document);
 			});

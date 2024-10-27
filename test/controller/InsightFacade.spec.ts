@@ -302,10 +302,6 @@ describe("InsightFacade", function () {
 			await expect(facade.addDataset("red", rooms1, InsightDatasetKind.Rooms)).to.be.rejectedWith(InsightError);
 		});
 
-		// it("invalid rooms entry with Sections kind", async function() {
-		// 	await expect(facade.addDataset("red", rooms1, InsightDatasetKind.Sections)).to.be.rejectedWith(InsightError)
-		// });
-
 		it("invalid rooms entry with Sections content", async function () {
 			await expect(facade.addDataset("red", sections, InsightDatasetKind.Rooms)).to.be.rejectedWith(InsightError);
 		});

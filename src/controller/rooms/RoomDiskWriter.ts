@@ -39,7 +39,7 @@ export default class RoomDiskWriter extends RoomsParser {
 		let numRows = 0;
 		//console.log(dirs)
 
-		const folder = zip.folder("campus/campus/discover/buildings-and-classrooms");
+		const folder = zip.folder("campus/discover/buildings-and-classrooms");
 		if (!folder) {
 			throw new Error("Folder not found in zip file");
 		}

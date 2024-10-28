@@ -14,7 +14,7 @@ export default class RoomDiskWriter extends RoomsParser {
 		"views-field views-field-field-room-capacity",
 		"views-field views-field-field-room-furniture",
 		"views-field views-field-field-room-type",
-		"views-field views-field-nothing",
+		//"views-field views-field-nothing",
 	];
 	constructor() {
 		super();

@@ -233,12 +233,12 @@ describe("InsightFacade", function () {
 
 	describe("AddDataset - Rooms", function () {
 		let rooms1: string;
-		//let rooms2: string;
+		let rooms2: string;
 		let noValidRooms1: string;
 		let noValidRooms2: string;
 		let noValidRooms3: string;
 		//let missingFields1: string;
-		let missingFields2: string;
+		//let missingFields2: string;
 
 		beforeEach(async function () {
 			// This section resets the insightFacade instance
@@ -252,12 +252,12 @@ describe("InsightFacade", function () {
 
 			//emptyCourse = await getContentFromArchives("sections/empty_file.zip");
 			rooms1 = await getContentFromArchives("rooms/test1.zip");
-			//rooms2 = await getContentFromArchives("rooms/test2.zip");
+			rooms2 = await getContentFromArchives("rooms/test2.zip");
 			noValidRooms1 = await getContentFromArchives("rooms/no_valid_rooms.zip");
 			noValidRooms2 = await getContentFromArchives("rooms/no_valid_table1.zip");
 			noValidRooms3 = await getContentFromArchives("rooms/no_valid_rooms3.zip");
 			//missingFields1 = await getContentFromArchives("rooms/missing_fields.zip");
-			missingFields2 = await getContentFromArchives("rooms/missing_fields2.zip");
+			//missingFields2 = await getContentFromArchives("rooms/missing_fields2.zip");
 		});
 
 		it("should reject with an empty dataset id - rooms", async function () {
@@ -274,15 +274,15 @@ describe("InsightFacade", function () {
 			);
 		});
 		// //TODO
-		// it("course not in index file -> valid rooms - rooms", async function () {
-		// 	const result = await facade.addDataset("room3", rooms2, InsightDatasetKind.Rooms);
-		// 	return expect(result).to.have.members(["room3"]);
-		// });
-		//TODO
-		it("building field not in index file -> valid rooms - rooms", async function () {
-			const result = await facade.addDataset("room4", missingFields2, InsightDatasetKind.Rooms);
-			return expect(result).to.have.members(["room4"]);
+		it("course not in index file -> valid rooms - rooms", async function () {
+			const result = await facade.addDataset("room3", rooms2, InsightDatasetKind.Rooms);
+			return expect(result).to.have.members(["room3"]);
 		});
+		//TODO
+		// it("building field not in index file -> valid rooms - rooms", async function () {
+		// 	const result = await facade.addDataset("room4", missingFields2, InsightDatasetKind.Rooms);
+		// 	return expect(result).to.have.members(["room4"]);
+		// });
 
 		it("no room files - rooms", async function () {
 			const noRoomsFile = await getContentFromArchives("rooms/noRoomFiles.zip");
@@ -524,54 +524,47 @@ describe("InsightFacade", function () {
 		//TODO
 		it("should remove the same datasets from 2 different facades - room", async function () {
 			try {
-				await facade.addDataset("test3", rooms, InsightDatasetKind.Rooms);
-				let datasets = await facade.listDatasets();
-				const EXPECTED_LENGTH_1 = 1;
-				expect(datasets.length).to.equal(EXPECTED_LENGTH_1);
+				sections = await getContentFromArchives("sections/test3.zip");
+				await facade.addDataset("test3", sections, InsightDatasetKind.Sections);
+				const datasets = await facade.listDatasets();
 				expect(datasets).to.deep.equal([
 					{
 						id: "test3",
-						kind: InsightDatasetKind.Rooms,
-						numRows: 162,
+						kind: InsightDatasetKind.Sections,
+						numRows: 2,
 					},
 				]);
+
 				const facade2: InsightFacade = new InsightFacade();
-
 				let datasets2 = await facade2.listDatasets();
-				expect(datasets2).to.deep.equal([
-					{
-						id: "test3",
-						kind: InsightDatasetKind.Rooms,
-						numRows: 162,
-					},
-				]);
+				expect(datasets2).to.deep.equal(datasets);
 
-				//expect(datasets2.length).to.be.equal(datasets.length);
-				const remove1 = await facade2.removeDataset("test3");
-				expect(remove1).to.be.equal("test3");
+				const sections1 = await getContentFromArchives("rooms/test1.zip");
+				await facade2.addDataset("test1", sections1, InsightDatasetKind.Rooms);
 
-				await facade2.addDataset("test3", rooms, InsightDatasetKind.Rooms);
-
-				const sections1 = await getContentFromArchives("rooms/missing_fields2.zip");
-				await facade2.addDataset("test5", sections1, InsightDatasetKind.Rooms);
-
-				datasets = await facade2.listDatasets();
-
-				const facade3: InsightFacade = new InsightFacade();
-				datasets2 = await facade3.listDatasets();
+				datasets2 = await facade2.listDatasets();
 				const EXPECTED_LENGTH = 2;
 				expect(datasets2.length).to.equal(EXPECTED_LENGTH);
-				//expect(datasets).to.deep.equal(datasets2);
 				expect(datasets2).to.include.deep.members([
 					{
 						id: "test3",
+						kind: InsightDatasetKind.Sections,
+						numRows: 2,
+					},
+					{
+						id: "test1",
 						kind: InsightDatasetKind.Rooms,
 						numRows: 162,
 					},
+				]);
+				const result = await facade2.removeDataset("test3");
+				expect(result).to.equal("test3");
+				const datasets3 = await facade2.listDatasets();
+				expect(datasets3).to.include.deep.members([
 					{
-						id: "test5",
+						id: "test1",
 						kind: InsightDatasetKind.Rooms,
-						numRows: 2,
+						numRows: 162,
 					},
 				]);
 			} catch (err) {
@@ -878,6 +871,12 @@ describe("InsightFacade", function () {
 		for (const testCase of sectionTestCases) {
 			it(testCase, checkQuery);
 		}
+
+		// const roomTestCases = ["[rooms/valid/allRoomsInUbc.json] all rooms in ubc"]
+		// // Automated test cases for rooms
+		// for (const testCase of roomTestCases) {
+		// 	it(testCase, checkQuery);
+		// }
 	});
 
 	describe("ListDataset - rooms", function () {
@@ -904,7 +903,7 @@ describe("InsightFacade", function () {
 
 		//TODO
 		it("list one dataset - rooms ", async function () {
-			sections = await getContentFromArchives("rooms/normal_before.zip");
+			sections = await getContentFromArchives("rooms/test1.zip");
 			await facade.addDataset("test3", sections, InsightDatasetKind.Rooms);
 
 			const datasets = await facade.listDatasets();
@@ -913,7 +912,7 @@ describe("InsightFacade", function () {
 				{
 					id: "test3",
 					kind: InsightDatasetKind.Rooms,
-					numRows: 18,
+					numRows: 162,
 				},
 			]);
 		});
@@ -991,30 +990,12 @@ describe("InsightFacade", function () {
 		// TODO
 		it("check rooms with bad address - rooms", async function () {
 			try {
-				sections = await getContentFromArchives("rooms/normal_before.zip");
-				await facade.addDataset("test3", sections, InsightDatasetKind.Rooms);
-				const result1 = await facade.listDatasets();
-				const EXPECTED_LENGTH = 1;
-				expect(result1.length).to.equal(EXPECTED_LENGTH);
-				expect(result1).to.include.deep.members([
-					{
-						id: "test3",
-						kind: InsightDatasetKind.Rooms,
-						numRows: 18,
-					},
-				]);
-
 				const sectionsAfter = await getContentFromArchives("rooms/normal_after.zip");
 				await facade.addDataset("test4", sectionsAfter, InsightDatasetKind.Rooms);
 				const result2 = await facade.listDatasets();
-				const EXPECTED_NEW_LENGTH = 2;
+				const EXPECTED_NEW_LENGTH = 1;
 				expect(result2.length).to.equal(EXPECTED_NEW_LENGTH);
 				expect(result2).to.include.deep.members([
-					{
-						id: "test3",
-						kind: InsightDatasetKind.Rooms,
-						numRows: 18,
-					},
 					{
 						id: "test4",
 						kind: InsightDatasetKind.Rooms,

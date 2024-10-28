@@ -128,9 +128,14 @@ export default class RoomsParser {
 		});
 
 		if (this.compareClassNames(this.buildingTdClassNames, currClassNames)) {
+			// console.log("reqClass: ", this.buildingTdClassNames)
+			// console.log("currClass: ", currClassNames)
+
 			const newBuilding: Building = this.parseBuildingInfo(tdElems);
 			const codeKey: string[] = newBuilding.getHref().split("/");
+
 			const buildingCode: string = codeKey[codeKey.length - 1].split(".")[0];
+			//console.log(buildingCode)
 
 			return { code: buildingCode, building: newBuilding };
 		}
@@ -313,7 +318,7 @@ export default class RoomsParser {
 	}
 
 	protected compareClassNames(arr1: any[], arr2: any[]): boolean {
-		return arr1.every((value) => arr2.includes(value));
+		return arr1.length + 1 === arr2.length && arr1.every((value) => arr2.includes(value));
 	}
 
 	protected processNodeValue(tdElem: any): any {

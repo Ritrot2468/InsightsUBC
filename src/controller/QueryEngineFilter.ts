@@ -3,7 +3,7 @@ import QueryUtils from "./QueryUtils";
 import Section from "./sections/Section";
 
 export default class QueryEngineFilter {
-	private queryingIDString: string;
+	public queryingIDString: string;
 	private sectionsDatabase: Map<string, Section[]>;
 	private utils: QueryUtils;
 
@@ -83,7 +83,9 @@ export default class QueryEngineFilter {
 			const sfield = skey.split("_")[1];
 
 			// check if database contains dataset with idstring
-			this.checkIDString(idstring);
+			//this.utils.checkIDString(this.sectionsDatabase, this.queryingIDString, idstring);
+			this.utils.checkIDString(this.sectionsDatabase, this.queryingIDString, idstring);
+			this.queryingIDString = idstring;
 
 			// query based on idstring
 			const datasetSections = this.sectionsDatabase.get(idstring);
@@ -116,7 +118,10 @@ export default class QueryEngineFilter {
 			const mfield = mkey.split("_")[1];
 
 			// check if database contains dataset with idstring
-			this.checkIDString(idstring);
+			//this.utils.checkIDString(this.sectionsDatabase, this.queryingIDString, idstring);
+			this.utils.checkIDString(this.sectionsDatabase, this.queryingIDString, idstring);
+			this.queryingIDString = idstring;
+
 			const datasetSections = this.sectionsDatabase.get(idstring);
 			if (datasetSections === undefined) {
 				// should not be possible

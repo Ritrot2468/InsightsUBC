@@ -7,7 +7,7 @@ export default class QueryUtils {
 	public sFields: string[] = ["uuid", "id", "title", "instructor", "dept"];
 	public mFields: string[] = ["year", "avg", "pass", "fail", "audit"];
 	public validOptions: string[] = ["COLUMNS", "ORDER"];
-	public validQueryKeys: string[] = ["WHERE", "OPTIONS"];
+	public validQueryKeys: string[] = ["WHERE", "OPTIONS", "TRANSFORMATIONS"];
 
 	public coerceToArray(value: unknown): unknown[] {
 		if (Array.isArray(value)) {
@@ -17,7 +17,7 @@ export default class QueryUtils {
 		}
 	}
 
-	public checkSize(sections: Section[]): boolean {
+	public checkSize(sections: Object[]): boolean {
 		const maxQuerySize = 5000;
 		if (sections.length > maxQuerySize) {
 			throw new ResultTooLargeError(
@@ -145,5 +145,19 @@ export default class QueryUtils {
 		// fix this return, figure out what sfield is, how to match it, and how to access
 		const processedInput = input.replace(/\*/g, ".*");
 		return new RegExp(`^${processedInput}$`); // Use case-insensitive matching
+	}
+
+	public checkIDString(datasets: Map<string, Section[]>, queryingIDString: string, idStr: string): boolean {
+		if (!datasets.has(idStr)) {
+			throw new InsightError(`Dataset with id: ${idStr} not added.`);
+		}
+
+		// check if a dataset has already been referenced if not return true
+		if (queryingIDString === "") {
+			return true;
+		} else if (queryingIDString !== idStr) {
+			throw new InsightError("Cannot reference multiple datasets.");
+		}
+		return true;
 	}
 }

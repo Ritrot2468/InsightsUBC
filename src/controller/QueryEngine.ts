@@ -23,7 +23,8 @@ export default class QueryEngine {
 
 	public async query(query: unknown): Promise<InsightResult[]> {
 		//console.log("QUERY method");
-		let filteredSections: Section[] = [];
+		let filteredSOR: Object[] = [];
+		let transformedResults: Object[] = [];
 		let result: InsightResult[] = [];
 		this.queryingIDString = ""; // restart on every query;
 		const queryObj = Object(query);
@@ -35,14 +36,21 @@ export default class QueryEngine {
 			}
 			// If WHERE key exists, filter all the sections, else throw InsightError
 			if ("WHERE" in queryObj) {
-				filteredSections = await this.handleWHERE(queryObj.WHERE);
+				filteredSOR = await this.handleWHERE(queryObj.WHERE);
 			} else {
 				throw new InsightError("Query missing WHERE");
 			}
 
+			// If TRANSFORMATIONS key exists, complete transformation on filtered sections
+			if ("TRANSFORMATIONS" in queryObj) {
+				transformedResults = await this.handleTransformations(queryObj.TRANSFORMATIONS, filteredSOR);
+			} else {
+				transformedResults = filteredSOR;
+			}
+
 			// If OPTIONS key exists, collect InsightResults, else throw InsightError
 			if ("OPTIONS" in queryObj) {
-				result = await this.handleOPTIONS(queryObj.OPTIONS, filteredSections);
+				result = await this.handleOPTIONS(queryObj.OPTIONS, transformedResults);
 			} else {
 				throw new InsightError("Query missing OPTIONS");
 			}
@@ -57,20 +65,21 @@ export default class QueryEngine {
 		return result;
 	}
 
-	private async handleWHERE(where: object): Promise<Section[]> {
-		let filteredSections: Section[] = [];
+	private async handleWHERE(where: object): Promise<Object[]> {
+		let filteredSOR: Object[] = [];
 		this.noFilter = false;
 		//console.log("WHERE WORKING");
 		try {
 			if (Object.keys(where).length === 0) {
 				this.noFilter = true;
-				return filteredSections;
+				return filteredSOR;
 			} else if (Object.keys(where).length > 1) {
 				throw new InsightError("WHERE should only have 1 key");
 			} else {
 				const filter = Object.keys(where)[0];
 				const values = Object.values(where)[0];
-				filteredSections = await this.QueryEngineFilter.handleFilter(filter, values);
+				filteredSOR = await this.QueryEngineFilter.handleFilter(filter, values);
+				this.queryingIDString = this.QueryEngineFilter.queryingIDString;
 			}
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
@@ -78,24 +87,10 @@ export default class QueryEngine {
 			}
 			throw new InsightError("Unexpected error.");
 		}
-		return filteredSections;
+		return filteredSOR;
 	}
 
-	// check if an id string is already being referenced, if not, return true
-	private checkIDString(idstring: string): boolean {
-		if (!this.sectionsDatabase.has(idstring)) {
-			throw new InsightError(`Dataset with id: ${idstring} not added.`);
-		}
-		// check if a dataset has already been referenced if not set queryingIDString as idstring
-		if (this.queryingIDString === "") {
-			this.queryingIDString = idstring;
-		} else if (this.queryingIDString !== idstring) {
-			throw new InsightError("Cannot reference multiple datasets.");
-		}
-		return true;
-	}
-
-	private async handleOPTIONS(options: object, sections: Section[]): Promise<InsightResult[]> {
+	private async handleOPTIONS(options: object, sectionsOrRooms: Object[]): Promise<InsightResult[]> {
 		//console.log("OPTIONS WORKING");
 		let results: InsightResult[] = [];
 		let columns: string[] = [];
@@ -116,7 +111,8 @@ export default class QueryEngine {
 			if ("ORDER" in options) {
 				orderKey = await this.QueryOrderHandler.handleORDER(options.ORDER, columns);
 			}
-			results = await this.completeQuery(sections, columns, orderKey);
+
+			results = await this.completeQuery(sectionsOrRooms, columns, orderKey);
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;
@@ -126,7 +122,11 @@ export default class QueryEngine {
 		return results;
 	}
 
-	private async completeQuery(sections: Section[], columns: string[], orderKey: string): Promise<InsightResult[]> {
+	private async completeQuery(
+		sectionsOrRooms: Object[],
+		columns: string[],
+		orderKey: string
+	): Promise<InsightResult[]> {
 		let results: InsightResult[] = [];
 		//console.log("COMPLETE QUERY WORKING");
 		// if no filters have been applied
@@ -136,11 +136,11 @@ export default class QueryEngine {
 				// should not be possible given current implementation of other methods for query
 				throw new InsightError("Can't find querying dataset");
 			} else {
-				sections = datasetSections;
+				sectionsOrRooms = datasetSections;
 			}
 		}
-		this.utils.checkSize(sections);
-		results = await this.utils.selectCOLUMNS(sections, columns);
+		this.utils.checkSize(sectionsOrRooms);
+		results = await this.utils.selectCOLUMNS(sectionsOrRooms, columns);
 		results = await this.utils.sortByOrder(results, orderKey);
 		return results;
 	}
@@ -151,7 +151,11 @@ export default class QueryEngine {
 		for (const key of columns) {
 			const keyStr = String(key);
 			const field = keyStr.split("_")[1];
-			this.checkIDString(keyStr.split("_")[0]);
+			//this.checkIDString(this.sectionsDatabase, this.queryingIDString, keyStr.split("_")[0]);
+			const idstring = keyStr.split("_")[0];
+			this.utils.checkIDString(this.sectionsDatabase, this.queryingIDString, idstring);
+			this.queryingIDString = idstring;
+
 			if (this.utils.mFields.includes(field) || this.utils.sFields.includes(field)) {
 				results.push(keyStr);
 			} else {

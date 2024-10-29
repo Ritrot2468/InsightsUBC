@@ -4,7 +4,7 @@ export default class Building {
 	protected fullname: string;
 	protected shortname: string;
 	protected address: string;
-	protected href: string;
+	protected bHref: string;
 	protected _mfields: Mfield;
 	protected _sfields: Sfield;
 
@@ -12,7 +12,7 @@ export default class Building {
 		this.fullname = params.fullname;
 		this.shortname = params.shortname;
 		this.address = params.address;
-		this.href = params.href;
+		this.bHref = params.href;
 
 		// Initialize Mfield and Sfield with default values
 		this._mfields = { lat: 0, lon: 0, seats: 0 };
@@ -24,7 +24,7 @@ export default class Building {
 			address: this.address,
 			type: "",
 			furniture: "",
-			href: this.href,
+			href: "",
 		};
 	}
 
@@ -40,8 +40,8 @@ export default class Building {
 		return this.address;
 	}
 
-	public getHref(): string {
-		return this.href;
+	public getbHref(): string {
+		return this.bHref;
 	}
 
 	public static fromJSON(json: any): Building {

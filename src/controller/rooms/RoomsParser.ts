@@ -132,7 +132,7 @@ export default class RoomsParser {
 			// console.log("currClass: ", currClassNames)
 
 			const newBuilding: Building = this.parseBuildingInfo(tdElems);
-			const codeKey: string[] = newBuilding.getHref().split("/");
+			const codeKey: string[] = newBuilding.getbHref().split("/");
 
 			const buildingCode: string = codeKey[codeKey.length - 1].split(".")[0];
 			//console.log(buildingCode)
@@ -244,13 +244,10 @@ export default class RoomsParser {
 		let seats = 0;
 		let type = "";
 		let furniture = "";
-
+		let href = "";
 		// Extract room information from tdElems
-		const roomInfo = this.findElementInfo(tdElems, number, seats, furniture, type);
-		number = roomInfo.number;
-		seats = roomInfo.seats;
-		furniture = roomInfo.furniture;
-		type = roomInfo.type;
+		const roomInfo = this.findElementInfo(tdElems, number, seats, href, furniture, type);
+		({ href, number, seats, furniture, type } = roomInfo);
 		const name = `${building.getShortname()}_${number}`;
 		try {
 			// Fetch geolocation data
@@ -269,6 +266,7 @@ export default class RoomsParser {
 					name: name,
 					type: type,
 					furniture: furniture,
+					href: href,
 				};
 
 				return new Room(id, roomMfields, roomSfields, building);
@@ -286,9 +284,10 @@ export default class RoomsParser {
 		tdElems: any,
 		number: string,
 		seats: number,
+		href: string,
 		furniture: string,
 		type: string
-	): { number: string; seats: number; furniture: string; type: string } {
+	): { number: string; seats: number; href: string; furniture: string; type: string } {
 		tdElems.forEach((tdElem: any): any => {
 			const classAttr = tdElem.attrs.find((attr: any) => attr.name === "class");
 			const className = classAttr ? classAttr.value : "";
@@ -309,16 +308,17 @@ export default class RoomsParser {
 					type = this.processNodeValue(tdElem);
 					break;
 				case "views-field views-field-nothing":
+					href = anchor.attrs.find((attr: any) => attr.name === "href")?.value || "";
 					break;
 				default:
 					throw new InsightError("Not a valid building table cell");
 			}
 		});
-		return { number, seats, furniture, type };
+		return { number, seats, href, furniture, type };
 	}
 
 	protected compareClassNames(arr1: any[], arr2: any[]): boolean {
-		return arr1.length + 1 === arr2.length && arr1.every((value) => arr2.includes(value));
+		return arr1.every((value) => arr2.includes(value));
 	}
 
 	protected processNodeValue(tdElem: any): any {
@@ -351,12 +351,12 @@ export default class RoomsParser {
 					break;
 				case "views-field views-field-title":
 					fullname = this.processNodeValue(anchor);
+					href = anchor.attrs.find((attr: any) => attr.name === "href")?.value || "";
 					break;
 				case "views-field views-field-field-building-address":
 					address = this.processNodeValue(tdElem);
 					break;
 				case "views-field views-field-nothing":
-					href = anchor.attrs.find((attr: any) => attr.name === "href")?.value || "";
 					break;
 				default:
 					throw new InsightError("Not a valid building table cell");

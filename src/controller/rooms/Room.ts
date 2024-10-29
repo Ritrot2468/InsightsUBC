@@ -40,7 +40,7 @@ export default class Room extends Building {
 			fullname: building.getFullname(),
 			shortname: building.getShortname(),
 			address: building.getAddress(),
-			href: building.getHref(),
+			href: building.getbHref(),
 		});
 		this.id = id;
 		this._mfields = { lat, lon, seats };
@@ -53,6 +53,10 @@ export default class Room extends Building {
 
 	public setMfields(value: Mfield): void {
 		this._mfields = value;
+	}
+
+	public setHref(newHref: string): void {
+		this._sfields.href = newHref;
 	}
 
 	public setMfield(index: number, newVal: number): void {

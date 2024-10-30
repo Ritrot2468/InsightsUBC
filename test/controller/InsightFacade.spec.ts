@@ -760,7 +760,7 @@ describe("InsightFacade", function () {
 			facade = new InsightFacade();
 			//facade2 = new InsightFacade()
 			sections = await getContentFromArchives("sections/pair.zip");
-			rooms = await getContentFromArchives("rooms/test1.zip");
+			rooms = await getContentFromArchives("rooms/campus.zip");
 
 			// Add the datasets to InsightFacade once.
 			// Will *fail* if there is a problem reading ANY dataset.
@@ -880,12 +880,11 @@ describe("InsightFacade", function () {
 		}
 		*/
 
-		/*
 		// 364 rooms total
 		const roomTestCases = [
 			// valid room queries
 			"[rooms/valid/allRoomsInUbc.json] room names, no filter",
-			/*
+
 			"[rooms/valid/allRoomsAllColumns.json] all room columns, no filter",
 			"[rooms/valid/classroomsFurniture.json] filter by rooms furniture",
 			"[rooms/valid/latitudeQuery.json] filter by latitude",
@@ -926,14 +925,13 @@ describe("InsightFacade", function () {
 			"[rooms/invalid/roomsInvalidApplyRuleMultipleKeys.json] order missing keys",
 			"[rooms/invalid/roomsTransformCOUNTTargetKeyInvalidType.json] order missing keys",
 			"[rooms/invalid/roomsUnderscoreInApplyKey.json] order missing keys",
-			*/
-		//];
-		/*
+		];
+
 		// Automated test cases for room
 		for (const testCase of roomTestCases) {
 			it(testCase, checkQuery);
 		}
-		*/
+
 		// const roomTestCases = ["[rooms/valid/allRoomsInUbc.json] all rooms in ubc"]
 		// // Automated test cases for rooms
 		// for (const testCase of roomTestCases) {
@@ -950,13 +948,13 @@ describe("InsightFacade", function () {
 		});
 
 		it("list all ubc rooms ", async function () {
-			sections = await getContentFromArchives("rooms/campus.zip");
-			await facade.addDataset("ubc1", sections, InsightDatasetKind.Rooms);
+			rooms = await getContentFromArchives("rooms/campus.zip");
+			await facade.addDataset("rooms", rooms, InsightDatasetKind.Rooms);
 			const datasets = await facade.listDatasets();
 
 			expect(datasets).to.deep.equal([
 				{
-					id: "ubc1",
+					id: "rooms",
 					kind: InsightDatasetKind.Rooms,
 					numRows: 364,
 				},

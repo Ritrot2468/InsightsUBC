@@ -109,7 +109,7 @@ export default class InsightFacade implements IInsightFacade {
 			const idRecords = await this.datasetValidatorHelper.separateRoomAndCourseIDs(currIDs);
 			//console.log(idRecords.rooms, idRecords.courses)
 
-			if ((this.sectionsDatabase.size + this.roomsDatabase.size) < currIDs.length) {
+			if (this.sectionsDatabase.size + this.roomsDatabase.size < currIDs.length) {
 				const cIDs = idRecords.sections;
 				const rIDs = idRecords.rooms;
 				//console.log(rIDs)

@@ -61,11 +61,11 @@ export default class Room extends Building {
 		this.lon = lon;
 		this.lat = lat;
 		this.seats = seats;
-		this.type = this._sfields.type
-		this.furniture = this._sfields.furniture
+		this.type = this._sfields.type;
+		this.furniture = this._sfields.furniture;
 		this.href = this._sfields.href;
-		this.number = this._sfields.number
-		this.name = this._sfields.name
+		this.number = this._sfields.number;
+		this.name = this._sfields.name;
 	}
 
 	public getMfields(): Mfield {

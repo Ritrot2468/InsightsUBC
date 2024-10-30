@@ -20,7 +20,7 @@ export default class QueryEngine {
 	private newCols: string[];
 	private isGrouped: boolean;
 	private dir: string;
-	private datasetValidator: DatasetValidatorHelper
+	private datasetValidator: DatasetValidatorHelper;
 
 	constructor(sectionsDatabase: Map<string, Section[]>, roomsDatabase: Map<string, Room[]>) {
 		this.queryingIDString = "";
@@ -31,7 +31,7 @@ export default class QueryEngine {
 		this.QueryOrderHandler = new QueryOrderHandler();
 		this.QueryEngineFilter = new QueryEngineFilter(sectionsDatabase, roomsDatabase);
 		this.sectionOrRoom = "";
-		this.datasetValidator = new DatasetValidatorHelper()
+		this.datasetValidator = new DatasetValidatorHelper();
 		this.sDSList = Array.from(sectionsDatabase.keys());
 		this.rDSList = Array.from(roomsDatabase.keys());
 		//console.log(this.rDSList)
@@ -43,9 +43,9 @@ export default class QueryEngine {
 	public async query(query: unknown, currIDs: string[]): Promise<InsightResult[]> {
 		//console.log("QUERY method");
 		const idRecords = await this.datasetValidator.separateRoomAndCourseIDs(currIDs);
-		this.rDSList = idRecords.rooms
-		this.sDSList = idRecords.sections
-		this.QueryEngineFilter.setIDs(this.sDSList, this.rDSList)
+		this.rDSList = idRecords.rooms;
+		this.sDSList = idRecords.sections;
+		this.QueryEngineFilter.setIDs(this.sDSList, this.rDSList);
 		let filteredSOR: Object[] = [];
 		let transformedResults: Object[] = [];
 		let result: InsightResult[] = [];

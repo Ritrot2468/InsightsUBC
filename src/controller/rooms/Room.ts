@@ -28,11 +28,11 @@ interface RoomJSON {
 }
 
 export default class Room extends Building {
-	private id: string;
-	private lat: number;
-	private lon: number;
-	private seats: number;
-	private href: string;
+	public id: string;
+	public lat: number;
+	public lon: number;
+	public seats: number;
+	public href: string;
 
 	constructor(
 		id: string,
@@ -126,10 +126,6 @@ export default class Room extends Building {
 		// -1 if index is not found
 	}
 
-	public getID(): string {
-		return this.id;
-	}
-
 	public getLat(): number {
 		return this.lat;
 	}
@@ -140,6 +136,10 @@ export default class Room extends Building {
 
 	public getSeats(): number {
 		return this.seats;
+	}
+
+	public getID(): string {
+		return this.id;
 	}
 
 	public getHref(): string {

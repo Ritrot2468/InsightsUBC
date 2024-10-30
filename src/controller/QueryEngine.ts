@@ -18,7 +18,7 @@ export default class QueryEngine {
 	private rDSList: string[];
 	private newCols: string[];
 	private isGrouped: boolean;
-	private dir = "";
+	private dir: string;
 
 	constructor(sectionsDatabase: Map<string, Section[]>, roomsDatabase: Map<string, Room[]>) {
 		this.queryingIDString = "";
@@ -33,6 +33,7 @@ export default class QueryEngine {
 		this.rDSList = Array.from(roomsDatabase.keys());
 		this.newCols = [];
 		this.isGrouped = false;
+		this.dir = "UP"; // default (one key) sorting is UP
 	}
 
 	public async query(query: unknown): Promise<InsightResult[]> {
@@ -139,6 +140,7 @@ export default class QueryEngine {
 			// Done
 			if ("ORDER" in options) {
 				orderKeys = await this.QueryOrderHandler.handleORDER(options.ORDER, columns);
+				this.dir = this.QueryOrderHandler.dir;
 			}
 
 			results = await this.completeQuery(transformedResults, columns, orderKeys);
@@ -180,7 +182,7 @@ export default class QueryEngine {
 
 		//TODO
 		results = await this.utils.selectCOLUMNS(transformedResults, columns, this.isGrouped);
-		results = await this.utils.sortByOrder(results, orderKeys);
+		results = await this.utils.sortByOrder(results, orderKeys, this.dir);
 		return results;
 	}
 

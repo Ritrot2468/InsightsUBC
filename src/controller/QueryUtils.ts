@@ -33,14 +33,14 @@ export default class QueryUtils {
 	}
 
 	// DONE?
-	public async sortByOrder(results: InsightResult[], orderKeys: string[]): Promise<InsightResult[]> {
+	public async sortByOrder(results: InsightResult[], orderKeys: string[], dir: string): Promise<InsightResult[]> {
 		if (orderKeys.length === 0) {
 			return results;
 		} else {
 			// Perform the sorting asynchronously
 			return new Promise((resolve) => {
 				setTimeout(() => {
-					results.sort((recordA, recordB) => this.sortFunction(recordA, recordB, orderKeys));
+					results.sort((recordA, recordB) => this.sortFunction(recordA, recordB, orderKeys, dir));
 					// Resolve the promise with the sorted results
 					resolve(results);
 				}, 0);
@@ -48,28 +48,34 @@ export default class QueryUtils {
 		}
 	}
 
-	private sortFunction(recordA: InsightResult, recordB: InsightResult, orderKeys: string[]): number {
+	private sortFunction(recordA: InsightResult, recordB: InsightResult, orderKeys: string[], dir: string): number {
 		for (const key of orderKeys) {
 			const valueA = recordA[key];
 			const valueB = recordB[key];
+			let comparison = 0;
 
 			if (valueA === undefined || valueB === undefined) {
 				throw new InsightError(`a record has an undefined value for ${key}`);
 			}
 
 			if (typeof valueA === "string" && typeof valueB === "string") {
-				const comparison = valueA.localeCompare(valueB);
+				comparison =
+					dir === "UP" ? (comparison = valueA.localeCompare(valueB)) : (comparison = valueB.localeCompare(valueA));
 				if (comparison !== 0) {
 					return comparison;
 				}
 			} else if (typeof valueA === "number" && typeof valueB === "number") {
-				const comparison = valueA - valueB;
+				comparison = dir === "UP" ? (comparison = valueA - valueB) : (comparison = valueB - valueA);
+
 				if (comparison !== 0) {
 					return comparison;
 				}
 			} else {
 				// Handle mixed types (e.g., string vs number)
-				const comparison = String(valueA).localeCompare(String(valueB));
+				comparison =
+					dir === "UP"
+						? (comparison = String(valueA).localeCompare(String(valueB)))
+						: (comparison = String(valueB).localeCompare(String(valueA)));
 				if (comparison !== 0) {
 					return comparison;
 				}

@@ -16,17 +16,17 @@ export interface Mfield {
 
 export default class Section {
 	private datasetId: string;
-	private uuid: string;
-	private id: string;
-	private title: string;
-	private instructor: string;
-	private dept: string;
+	public uuid: string;
+	public id: string;
+	public title: string;
+	public instructor: string;
+	public dept: string;
 
-	private year: number;
-	private avg: number;
-	private pass: number;
-	private fail: number;
-	private audit: number;
+	public year: number;
+	public avg: number;
+	public pass: number;
+	public fail: number;
+	public audit: number;
 
 	// public getMfields(): Mfield {
 	// 	return this._mfields;

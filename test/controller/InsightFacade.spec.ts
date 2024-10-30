@@ -776,7 +776,7 @@ describe("InsightFacade", function () {
 			await clearDisk();
 		});
 
-		it("[sections/valid/simple.json] SELECT dept, avg WHERE avg > 97", checkQuery)
+		it("[sections/valid/simple.json] SELECT dept, avg WHERE avg > 97", checkQuery);
 		const sectionTestCases = [
 			"[sections/valid/simple.json] SELECT dept, avg WHERE avg > 97",
 			"[sections/valid/simple1.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = cps*",
@@ -918,14 +918,10 @@ describe("InsightFacade", function () {
 			it(testCase, checkQuery);
 		}
 
-		/*
-
 		// Automated test cases for room
 		for (const testCase of roomTestCases) {
 			it(testCase, checkQuery);
 		}
-
-		*/
 
 		// const roomTestCases = ["[rooms/valid/allRoomsInUbc.json] all rooms in ubc"]
 		// // Automated test cases for rooms

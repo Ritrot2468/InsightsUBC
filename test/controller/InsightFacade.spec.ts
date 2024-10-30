@@ -938,14 +938,14 @@ describe("InsightFacade", function () {
 			facade = new InsightFacade();
 		});
 
-		it("list all ubc rooms", async function () {
+		it("list all ubc rooms ", async function () {
 			sections = await getContentFromArchives("rooms/campus.zip");
-			await facade.addDataset("ubc", sections, InsightDatasetKind.Rooms);
+			await facade.addDataset("ubc1", sections, InsightDatasetKind.Rooms);
 			const datasets = await facade.listDatasets();
 
 			expect(datasets).to.deep.equal([
 				{
-					id: "ubc",
+					id: "ubc1",
 					kind: InsightDatasetKind.Rooms,
 					numRows: 364,
 				},

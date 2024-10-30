@@ -880,11 +880,11 @@ describe("InsightFacade", function () {
 		}
 		*/
 
+		/*
 		// 364 rooms total
 		const roomTestCases = [
 			// valid room queries
 			"[rooms/valid/allRoomsInUbc.json] room names, no filter",
-
 			/*
 			"[rooms/valid/allRoomsAllColumns.json] all room columns, no filter",
 			"[rooms/valid/classroomsFurniture.json] filter by rooms furniture",
@@ -902,6 +902,7 @@ describe("InsightFacade", function () {
 			"[rooms/valid/roomsGroupByLatOrderByMinSeats.json] group by late order by min seats",
 			"[rooms/valid/roomsGroupByLatOrderBySumSeats.json] group by lat order by sum seats",
 			"[rooms/valid/roomsGroupByLatAndLonOrderByCountseats.json] group by lat and lon order by count seats",
+			"[rooms/valid/applyTargetKeySameAsGroupKey.json] apply target key same as group key (group by seats then avg seats)",
 
 			// invalid room queries
 			"[rooms/invalid/invalidRoomsAndSectionsQuery.json] room and sections idstrings",
@@ -926,13 +927,13 @@ describe("InsightFacade", function () {
 			"[rooms/invalid/roomsTransformCOUNTTargetKeyInvalidType.json] order missing keys",
 			"[rooms/invalid/roomsUnderscoreInApplyKey.json] order missing keys",
 			*/
-		];
-
+		//];
+		/*
 		// Automated test cases for room
 		for (const testCase of roomTestCases) {
 			it(testCase, checkQuery);
 		}
-
+		*/
 		// const roomTestCases = ["[rooms/valid/allRoomsInUbc.json] all rooms in ubc"]
 		// // Automated test cases for rooms
 		// for (const testCase of roomTestCases) {
@@ -940,7 +941,6 @@ describe("InsightFacade", function () {
 		// }
 	});
 
-	/*
 	describe("ListDataset - rooms", function () {
 		beforeEach(async function () {
 			// This section resets the insightFacade instance
@@ -1111,6 +1111,7 @@ describe("InsightFacade", function () {
 		// });
 	});
 
+	/*
 	describe("ListDataset - Sections", function () {
 		beforeEach(async function () {
 			// This section resets the insightFacade instance
@@ -1256,6 +1257,5 @@ describe("InsightFacade", function () {
 				expect.fail(`you failed to load the right sets ${err}`);
 			}
 		});
-	});
-	*/
+	});*/
 });

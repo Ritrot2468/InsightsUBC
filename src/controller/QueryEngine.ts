@@ -145,10 +145,15 @@ export default class QueryEngine {
 			}
 			/*
 			if ("GROUP" in transformationKeys) {
+
 			} else {
-				throw new InsightError("")
+				throw new InsightError("TRANSFORMATIONS missing GROUP key");
 			}
-			if ("")
+			if ("APPLY" in transformationKeys) {
+
+			} else {
+				throw new InsightError("TRANSFORMATIONS missing APPLY key");
+			}
 			*/
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
@@ -220,6 +225,7 @@ export default class QueryEngine {
 			}
 		}
 
+		//console.log(transformedResults.length);
 		this.utils.checkSize(transformedResults);
 
 		//TODO

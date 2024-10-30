@@ -1,0 +1,310 @@
+{
+	"title": "apply target key same as group key",
+	"input": {
+		"WHERE": {
+			"GT": {
+				"rooms_seats": 20
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"averageSeats"
+			],
+			"ORDER": "averageSeats"
+		},
+		"TRANSFORMATIONS": {
+			"GROUP": [
+				"rooms_seats"
+			],
+			"APPLY": [
+				{
+					"averageSeats": {
+						"AVG": "rooms_seats"
+					}
+				}
+			]
+		}
+	},
+	"errorExpected": false,
+	"expected": [
+		{
+			"averageSeats": 21
+		},
+		{
+			"averageSeats": 22
+		},
+		{
+			"averageSeats": 24
+		},
+		{
+			"averageSeats": 25
+		},
+		{
+			"averageSeats": 26
+		},
+		{
+			"averageSeats": 27
+		},
+		{
+			"averageSeats": 28
+		},
+		{
+			"averageSeats": 29
+		},
+		{
+			"averageSeats": 30
+		},
+		{
+			"averageSeats": 31
+		},
+		{
+			"averageSeats": 32
+		},
+		{
+			"averageSeats": 33
+		},
+		{
+			"averageSeats": 34
+		},
+		{
+			"averageSeats": 35
+		},
+		{
+			"averageSeats": 36
+		},
+		{
+			"averageSeats": 37
+		},
+		{
+			"averageSeats": 38
+		},
+		{
+			"averageSeats": 39
+		},
+		{
+			"averageSeats": 40
+		},
+		{
+			"averageSeats": 41
+		},
+		{
+			"averageSeats": 42
+		},
+		{
+			"averageSeats": 43
+		},
+		{
+			"averageSeats": 44
+		},
+		{
+			"averageSeats": 45
+		},
+		{
+			"averageSeats": 47
+		},
+		{
+			"averageSeats": 48
+		},
+		{
+			"averageSeats": 50
+		},
+		{
+			"averageSeats": 51
+		},
+		{
+			"averageSeats": 53
+		},
+		{
+			"averageSeats": 54
+		},
+		{
+			"averageSeats": 55
+		},
+		{
+			"averageSeats": 56
+		},
+		{
+			"averageSeats": 58
+		},
+		{
+			"averageSeats": 60
+		},
+		{
+			"averageSeats": 62
+		},
+		{
+			"averageSeats": 63
+		},
+		{
+			"averageSeats": 65
+		},
+		{
+			"averageSeats": 66
+		},
+		{
+			"averageSeats": 68
+		},
+		{
+			"averageSeats": 70
+		},
+		{
+			"averageSeats": 72
+		},
+		{
+			"averageSeats": 74
+		},
+		{
+			"averageSeats": 75
+		},
+		{
+			"averageSeats": 76
+		},
+		{
+			"averageSeats": 78
+		},
+		{
+			"averageSeats": 80
+		},
+		{
+			"averageSeats": 84
+		},
+		{
+			"averageSeats": 88
+		},
+		{
+			"averageSeats": 90
+		},
+		{
+			"averageSeats": 94
+		},
+		{
+			"averageSeats": 99
+		},
+		{
+			"averageSeats": 100
+		},
+		{
+			"averageSeats": 102
+		},
+		{
+			"averageSeats": 106
+		},
+		{
+			"averageSeats": 108
+		},
+		{
+			"averageSeats": 112
+		},
+		{
+			"averageSeats": 114
+		},
+		{
+			"averageSeats": 120
+		},
+		{
+			"averageSeats": 123
+		},
+		{
+			"averageSeats": 125
+		},
+		{
+			"averageSeats": 131
+		},
+		{
+			"averageSeats": 136
+		},
+		{
+			"averageSeats": 144
+		},
+		{
+			"averageSeats": 150
+		},
+		{
+			"averageSeats": 154
+		},
+		{
+			"averageSeats": 155
+		},
+		{
+			"averageSeats": 160
+		},
+		{
+			"averageSeats": 167
+		},
+		{
+			"averageSeats": 181
+		},
+		{
+			"averageSeats": 183
+		},
+		{
+			"averageSeats": 187
+		},
+		{
+			"averageSeats": 188
+		},
+		{
+			"averageSeats": 190
+		},
+		{
+			"averageSeats": 200
+		},
+		{
+			"averageSeats": 205
+		},
+		{
+			"averageSeats": 224
+		},
+		{
+			"averageSeats": 225
+		},
+		{
+			"averageSeats": 228
+		},
+		{
+			"averageSeats": 236
+		},
+		{
+			"averageSeats": 240
+		},
+		{
+			"averageSeats": 250
+		},
+		{
+			"averageSeats": 257
+		},
+		{
+			"averageSeats": 260
+		},
+		{
+			"averageSeats": 265
+		},
+		{
+			"averageSeats": 275
+		},
+		{
+			"averageSeats": 280
+		},
+		{
+			"averageSeats": 299
+		},
+		{
+			"averageSeats": 325
+		},
+		{
+			"averageSeats": 350
+		},
+		{
+			"averageSeats": 375
+		},
+		{
+			"averageSeats": 426
+		},
+		{
+			"averageSeats": 442
+		},
+		{
+			"averageSeats": 503
+		}
+	]
+}

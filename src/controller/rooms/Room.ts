@@ -36,7 +36,6 @@ export default class Room extends Building {
 	public type: string;
 	public furniture: string;
 	public number: string;
-	public name: string;
 	constructor(
 		id: string,
 		{ lat, lon, seats }: Mfield,

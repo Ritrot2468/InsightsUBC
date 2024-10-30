@@ -96,10 +96,10 @@ export default class QueryEngine {
 				const filter = Object.keys(where)[0];
 				const values = Object.values(where)[0];
 
-				//TODO
+				//TODO;
 				filteredSOR = await this.QueryEngineFilter.handleFilter(filter, values);
 				this.queryingIDString = this.QueryEngineFilter.queryingIDString;
-				this.sectionOrRoom = this.utils.checkSectionOrRoom(this.sDSList, this.rDSList, this.queryingIDString);
+				this.sectionOrRoom = this.QueryEngineFilter.sectionOrRoom;
 			}
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
@@ -110,7 +110,7 @@ export default class QueryEngine {
 		return filteredSOR;
 	}
 
-	// TODO
+	//TODO;
 	private async handleTRANSFORMATIONS(transformations: object, filteredSOR: Object[]): Promise<Object[]> {
 		const transformedResults: Object[] = [];
 		this.isGrouped = true;

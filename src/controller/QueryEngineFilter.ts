@@ -8,9 +8,10 @@ export default class QueryEngineFilter {
 	private sectionsDatabase: Map<string, Section[]>;
 	private roomsDatabase: Map<string, Room[]>;
 	private utils: QueryUtils;
-	private sectionOrRoom: string;
+	public sectionOrRoom: string;
 	private sDSList: string[];
 	private rDSList: string[];
+	private currDataset: Object[];
 
 	constructor(sectionsDatabase: Map<string, Section[]>, roomsDatabase: Map<string, Room[]>) {
 		this.queryingIDString = "";
@@ -20,6 +21,7 @@ export default class QueryEngineFilter {
 		this.sectionOrRoom = "";
 		this.sDSList = Array.from(sectionsDatabase.keys());
 		this.rDSList = Array.from(roomsDatabase.keys());
+		this.currDataset = [];
 	}
 
 	public async handleFilter(filter: string, value: unknown): Promise<Object[]> {
@@ -35,14 +37,14 @@ export default class QueryEngineFilter {
 				switch (filter) {
 					case "IS":
 						if (typeof input !== "string") {
-							throw new InsightError(`Invalid input type for IS`);
+							throw new InsightError("Invalid skey type.");
 						}
 						promise = this.handleSComparison(key, input);
 						break;
 					case "NOT":
 						promise = this.handleNegation(key, input);
 						break;
-					default:
+					default: // mComparator
 						if (typeof input !== "number") {
 							throw new InsightError(`Invalid input type for ${filter}`);
 						}
@@ -60,61 +62,87 @@ export default class QueryEngineFilter {
 		return promise;
 	}
 
+	private async getDataset(): Promise<Object[]> {
+		if (this.currDataset.length !== 0) {
+			return this.currDataset;
+		} else {
+			let dataset: Object[] | undefined = [];
+			if (this.sectionOrRoom === "section") {
+				dataset = this.sectionsDatabase.get(this.queryingIDString);
+			} else if (this.sectionOrRoom === "room") {
+				dataset = this.roomsDatabase.get(this.queryingIDString);
+			} else {
+				throw new InsightError("sections or room not defined in getDataset.");
+			}
+			if (dataset === undefined) {
+				// should not be possible given current implementation of other methods for query
+				throw new InsightError("Can't find querying dataset.");
+			} else {
+				return dataset;
+			}
+		}
+	}
+
 	private async handleNegation(filter: string, value: unknown): Promise<Object[]> {
 		try {
-			const nonNegatedResults = this.handleFilter(filter, value);
-			const datasetSections = this.sectionsDatabase.get(this.queryingIDString);
-			if (datasetSections === undefined) {
-				// should not be possible given current implementation of other methods for query
-				throw new InsightError("Can't find querying dataset");
-			} else {
-				// use a set instead -> faster?
-				const resolvedNonNegatedSet = new Set(await nonNegatedResults);
+			const nonNegatedResults = await this.handleFilter(filter, value);
+			const dataset = await this.getDataset();
+			// use a set instead -> faster?
+			const resolvedNonNegatedSet = new Set(nonNegatedResults);
 
-				// Filter using the Set for faster lookups
-				return datasetSections.filter((section) => !resolvedNonNegatedSet.has(section));
-			}
+			// Filter using the Set for faster lookups
+			return dataset.filter((SOR) => !resolvedNonNegatedSet.has(SOR));
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;
 			}
-			throw new InsightError("Unexpected error.");
+			throw new InsightError("Unexpected error in Negation.");
 		}
 	}
 
 	private async handleSComparison(skey: string, input: string): Promise<Object[]> {
 		try {
-			if (typeof input === "number") {
-				throw new InsightError("Invalid skey type");
-			}
 			// split on underscore
 			const idstring = skey.split("_")[0];
 			const sfield = skey.split("_")[1];
 
 			// check if database contains dataset with idstring
 			//this.utils.checkIDString(this.sectionsDatabase, this.queryingIDString, idstring);
-			this.utils.checkIDString(this.sectionsDatabase, this.queryingIDString, idstring);
+			this.sectionOrRoom = this.utils.checkIDString(
+				this.sDSList,
+				this.rDSList,
+				this.sectionOrRoom,
+				this.queryingIDString,
+				idstring
+			);
 			this.queryingIDString = idstring;
 
 			// query based on idstring
-			const datasetSections = this.sectionsDatabase.get(idstring);
-			if (datasetSections === undefined) {
-				// should not be possible
-				throw new InsightError("Can't find querying dataset");
-			} else {
-				if (this.utils.sFields.includes(sfield)) {
-					const fieldIndex = this.utils.sFields.indexOf(sfield);
-					const inputRegex = this.utils.testRegex(input); // Use case-insensitive matching
-					return datasetSections.filter((section) => inputRegex.test(section.getSFieldByIndex(fieldIndex)));
-				} else {
-					throw new InsightError("Invalid sKey");
+			const dataset = await this.getDataset();
+			const inputRegex = this.utils.testRegex(input); // Use case-insensitive matching
+			if (this.sectionOrRoom === "section") {
+				if (this.utils.sFieldsSection.includes(sfield)) {
+					return dataset.filter((SOR) => inputRegex.test((SOR as Record<string, any>)[sfield]));
+				}
+			} else if (this.sectionOrRoom === "room") {
+				if (this.utils.sFieldsRoom.includes(sfield)) {
+					return dataset.filter((SOR) => inputRegex.test((SOR as Record<string, any>)[sfield]));
 				}
 			}
+			throw new InsightError("Invalid sKey");
+			/*
+			if (this.utils.sFields.includes(sfield)) {
+				const fieldIndex = this.utils.sFields.indexOf(sfield);
+				const inputRegex = this.utils.testRegex(input); // Use case-insensitive matching
+				return datasetSections.filter((section) => inputRegex.test(section.getSFieldByIndex(fieldIndex)));
+			} else {
+				throw new InsightError("Invalid sKey");
+			}*/
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;
 			}
-			throw new InsightError("Unexpected error.");
+			throw new InsightError("Unexpected error in SComparison.");
 		}
 	}
 
@@ -128,21 +156,33 @@ export default class QueryEngineFilter {
 
 			// check if database contains dataset with idstring
 			//this.utils.checkIDString(this.sectionsDatabase, this.queryingIDString, idstring);
-			this.utils.checkIDString(this.sectionsDatabase, this.queryingIDString, idstring);
+			this.sectionOrRoom = this.utils.checkIDString(
+				this.sDSList,
+				this.rDSList,
+				this.sectionOrRoom,
+				this.queryingIDString,
+				idstring
+			);
 			this.queryingIDString = idstring;
 
-			const datasetSections = this.sectionsDatabase.get(idstring);
-			if (datasetSections === undefined) {
-				// should not be possible
-				throw new InsightError("Can't find querying dataset");
-			} else {
-				if (this.utils.mFields.includes(mfield)) {
-					const fieldIndex = this.utils.mFields.indexOf(mfield);
-					return this.utils.filterMCompare(datasetSections, filter, fieldIndex, input);
-				} else {
-					throw new InsightError("Invalid mKey");
+			const dataset = await this.getDataset();
+			if (this.sectionOrRoom === "section") {
+				if (this.utils.mFieldsSection.includes(mfield)) {
+					return this.utils.filterMCompare(dataset, filter, mfield, input);
+				}
+			} else if (this.sectionOrRoom === "room") {
+				if (this.utils.mFieldsRoom.includes(mfield)) {
+					return this.utils.filterMCompare(dataset, filter, mfield, input);
 				}
 			}
+			throw new InsightError("Invalid mKey");
+			/*
+			if (this.utils.mFields.includes(mfield)) {
+				const fieldIndex = this.utils.mFields.indexOf(mfield);
+				return this.utils.filterMCompare(datasetSections, filter, fieldIndex, input);
+			} else {
+				throw new InsightError("Invalid mKey");
+			}*/
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;

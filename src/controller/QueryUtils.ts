@@ -1,6 +1,4 @@
 import { InsightError, InsightResult, ResultTooLargeError } from "./IInsightFacade";
-import Section from "./sections/Section";
-import Room from "./rooms/Room";
 
 export default class QueryUtils {
 	public logicComparator: string[] = ["AND", "OR"];
@@ -48,6 +46,7 @@ export default class QueryUtils {
 		}
 	}
 
+	// helper function for sortByOrder
 	private sortFunction(recordA: InsightResult, recordB: InsightResult, orderKeys: string[], dir: string): number {
 		for (const key of orderKeys) {
 			const valueA = recordA[key];
@@ -109,27 +108,26 @@ export default class QueryUtils {
 		return results;
 	}
 
-	public async filterMCompare(dataset: Section[], filter: string, index: number, input: number): Promise<Section[]> {
-		let results: Section[];
+	// REQUIRES: mfield valid, input is a number, dataset is valid, filter is valid
+	// helper function for handleMCompare
+	public async filterMCompare(dataset: Object[], filter: string, mfield: string, input: number): Promise<Object[]> {
+		let results: Object[];
 		//console.log("FILTER MCOMPARISON WORKING");
-		if (typeof input === "string") {
-			throw new InsightError("Invalid mkey type");
-		}
 		if (filter === "LT") {
-			results = dataset.filter((section) => section.getMFieldByIndex(index) < input);
+			results = dataset.filter((SOR) => (SOR as Record<string, any>)[mfield] < input);
 		} else if (filter === "GT") {
-			results = dataset.filter((section) => section.getMFieldByIndex(index) > input);
+			results = dataset.filter((SOR) => (SOR as Record<string, any>)[mfield] > input);
 		} else if (filter === "EQ") {
-			results = dataset.filter((section) => section.getMFieldByIndex(index) === input);
+			results = dataset.filter((SOR) => (SOR as Record<string, any>)[mfield] === input);
 		} else {
 			throw new InsightError("Invalid MComparator");
 		}
 		return results;
 	}
 
-	public async mergeAndList(andList: Section[][]): Promise<Section[]> {
+	public async mergeAndList(andList: Object[][]): Promise<Object[]> {
 		// make a map
-		const sectionCountMap = new Map<Section, number>();
+		const SORCountMap = new Map<Object, number>();
 
 		// find the shortest list
 		const shortestList = andList.reduce((shortest, currArray) => {
@@ -140,8 +138,8 @@ export default class QueryUtils {
 		const shortestSet = new Set(shortestList);
 
 		// add all section in shortest list to map and increment count by 1
-		shortestSet.forEach((section) => {
-			sectionCountMap.set(section, (sectionCountMap.get(section) || 0) + 1);
+		shortestSet.forEach((SOR) => {
+			SORCountMap.set(SOR, (SORCountMap.get(SOR) || 0) + 1);
 		});
 
 		// iterate through each array of section
@@ -153,16 +151,16 @@ export default class QueryUtils {
 
 			const currSet = new Set(currArray);
 
-			// only keep sections in the shortest list that are also in the current array
-			shortestList.forEach((section) => {
-				if (!currSet.has(section)) {
-					sectionCountMap.delete(section); // Remove sections not found in currArray
+			// only keep sections or rooms in the shortest list that are also in the current array
+			shortestList.forEach((SOR) => {
+				if (!currSet.has(SOR)) {
+					SORCountMap.delete(SOR); // Remove sections not found in currArray
 				}
 			});
 		}
 
 		// filter the shortest list to include only sections present in all arrays
-		return shortestList.filter((section) => sectionCountMap.has(section));
+		return shortestList.filter((SOR) => SORCountMap.has(SOR));
 	}
 
 	public isObject(obj: unknown): void {

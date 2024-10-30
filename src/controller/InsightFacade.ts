@@ -118,6 +118,7 @@ export default class InsightFacade implements IInsightFacade {
 				this.roomsDatabase = await this.roomDiskReader.mapMissingRooms(rIDs, this.roomsDatabase);
 			}
 
+			console.log(currIDs);
 			result = await this.qe.query(query, currIDs);
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {

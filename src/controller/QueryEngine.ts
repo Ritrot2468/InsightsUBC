@@ -34,22 +34,29 @@ export default class QueryEngine {
 		this.datasetValidator = new DatasetValidatorHelper();
 		this.sDSList = Array.from(sectionsDatabase.keys());
 		this.rDSList = Array.from(roomsDatabase.keys());
-		//console.log(this.rDSList)
+		//console.log(this.rDSList);
 		this.newCols = [];
 		this.isGrouped = false;
 		this.dir = "UP"; // default (one key) sorting is UP
 	}
 
-	public async query(query: unknown, currIDs: string[]): Promise<InsightResult[]> {
-		//console.log("QUERY method");
+	private async querySetup(currIDs: string[]): Promise<boolean> {
 		const idRecords = await this.datasetValidator.separateRoomAndCourseIDs(currIDs);
 		this.rDSList = idRecords.rooms;
 		this.sDSList = idRecords.sections;
 		this.QueryEngineFilter.setIDs(this.sDSList, this.rDSList);
+		this.queryingIDString = ""; // restart on every query;
+		return true;
+	}
+
+	public async query(query: unknown, currIDs: string[]): Promise<InsightResult[]> {
+		//console.log("QUERY method");
+		//console.log(this.roomsDatabase.size);
+		await this.querySetup(currIDs);
+		//console.log(this.rDSList);
 		let filteredSOR: Object[] = [];
 		let transformedResults: Object[] = [];
 		let result: InsightResult[] = [];
-		this.queryingIDString = ""; // restart on every query;
 		const queryObj = Object(query);
 		//console.log(queryObj)
 		try {
@@ -66,6 +73,7 @@ export default class QueryEngine {
 			} else {
 				throw new InsightError("Query missing WHERE");
 			}
+			//console.log()
 
 			// If TRANSFORMATIONS key exists, complete transformation on filtered sections
 			if ("TRANSFORMATIONS" in queryObj) {
@@ -137,10 +145,15 @@ export default class QueryEngine {
 			}
 			/*
 			if ("GROUP" in transformationKeys) {
+
 			} else {
-				throw new InsightError("")
+				throw new InsightError("TRANSFORMATIONS missing GROUP key");
 			}
-			if ("")
+			if ("APPLY" in transformationKeys) {
+
+			} else {
+				throw new InsightError("TRANSFORMATIONS missing APPLY key");
+			}
 			*/
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
@@ -182,7 +195,7 @@ export default class QueryEngine {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;
 			}
-			throw new InsightError("Unexpected error.");
+			throw new InsightError("Unexpected error in OPTIONS.");
 		}
 		return results;
 	}
@@ -212,6 +225,7 @@ export default class QueryEngine {
 			}
 		}
 
+		//console.log(transformedResults.length);
 		this.utils.checkSize(transformedResults);
 
 		//TODO

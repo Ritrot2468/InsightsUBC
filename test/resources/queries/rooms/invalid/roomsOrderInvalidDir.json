@@ -1,0 +1,24 @@
+{
+	"title": "rooms order invalid dir",
+	"input": {
+		"WHERE": {
+			"GT": {
+				"rooms_seats": 20
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"rooms_name",
+				"rooms_seats"
+			],
+			"ORDER": {
+				"dir": "up",
+				"keys": [
+					"rooms_seats"
+				]
+			}
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

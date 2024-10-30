@@ -867,8 +867,41 @@ describe("InsightFacade", function () {
 			"[sections/invalid/excessKeysInQuery.json] WHERE OPTIONS and HOW keys in Query",
 		];
 
+		// 364 rooms total
+		const roomTestCases = [
+			// valid room queries
+			"[rooms/valid/allRoomsInUbc.json] room names, no filter",
+			"[rooms/valid/allRoomsAllColumns.json] all room columns, no filter",
+			"[rooms/valid/classroomsFurniture.json] filter by rooms furniture",
+			"[rooms/valid/latitudeQuery.json] filter by latitude",
+			"[rooms/valid/roomQueryExample.json] complex room query example",
+			"[rooms/valid/roomsSimpleOrderDirUp.json] simple order dir up",
+			"[rooms/valid/latitudeQuery.json] filter by latitude",
+			"[rooms/valid/roomsSingleKeyOrder.json] simple order one key",
+			"[rooms/valid/roomsValidOrder2Keys.json] simple order one key",
+
+			// invalid room queries
+			"[rooms/invalid/invalidRoomsAndSectionsQuery.json] room and sections idstrings",
+			"[rooms/invalid/invalidRoomsMkeyFilter.json] invalid room mkey in filter",
+			"[rooms/invalid/invalidRoomsMkeyTypeFilter.json] invalid room mkey type in filter",
+			"[rooms/invalid/invalidRoomsSkeyTypeFilter.json] invalid room skey type in filter",
+			"[rooms/invalid/invalidRoomsSkeyFilter.json] invalid room skey in filter",
+
+			"[rooms/invalid/roomsOrderInvalidDir.json] order invalid dir",
+			"[rooms/invalid/roomsOrderKeysEmptyArray.json] order keys empty arr",
+			"[rooms/invalid/roomsOrderKeysNotAnArray.json] order keys not an arr",
+			"[rooms/invalid/roomsOrderKeysNotInColumns.json] keys not in columns",
+			"[rooms/invalid/roomsOrderMissingDir.json] order missing dir",
+			"[rooms/invalid/roomsOrderMissingKeys.json] order missing keys",
+		];
+
 		// Automated test cases for sections
 		for (const testCase of sectionTestCases) {
+			it(testCase, checkQuery);
+		}
+
+		// Automated test cases for room
+		for (const testCase of roomTestCases) {
 			it(testCase, checkQuery);
 		}
 

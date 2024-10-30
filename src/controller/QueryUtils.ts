@@ -1,13 +1,17 @@
 import { InsightError, InsightResult, ResultTooLargeError } from "./IInsightFacade";
 import Section from "./sections/Section";
+import Room from "./rooms/Room";
 
 export default class QueryUtils {
 	public logicComparator: string[] = ["AND", "OR"];
 	public mComparator: string[] = ["LT", "GT", "EQ"];
-	public sFields: string[] = ["uuid", "id", "title", "instructor", "dept"];
-	public mFields: string[] = ["year", "avg", "pass", "fail", "audit"];
+	public sFieldsSection: string[] = ["uuid", "id", "title", "instructor", "dept"];
+	public mFieldsSection: string[] = ["year", "avg", "pass", "fail", "audit"];
+	public sFieldsRoom: string[] = ["fullname", "shortname", "number", "name", "address", "type", "furniture", "href"];
+	public mFieldsRoom: string[] = ["lat", "lon", "seats"];
 	public validOptions: string[] = ["COLUMNS", "ORDER"];
 	public validQueryKeys: string[] = ["WHERE", "OPTIONS", "TRANSFORMATIONS"];
+	//public validSort: string[] = ["dir", "keys"];
 
 	public coerceToArray(value: unknown): unknown[] {
 		if (Array.isArray(value)) {
@@ -17,9 +21,9 @@ export default class QueryUtils {
 		}
 	}
 
-	public checkSize(sections: Object[]): boolean {
+	public checkSize(transformedResults: Object[]): boolean {
 		const maxQuerySize = 5000;
-		if (sections.length > maxQuerySize) {
+		if (transformedResults.length > maxQuerySize) {
 			throw new ResultTooLargeError(
 				"The result is too big. Only queries with a maximum of 5000 results are supported."
 			);
@@ -28,26 +32,15 @@ export default class QueryUtils {
 		}
 	}
 
-	public async sortByOrder(results: InsightResult[], orderKey: string): Promise<InsightResult[]> {
-		if (orderKey === "") {
+	// DONE?
+	public async sortByOrder(results: InsightResult[], orderKeys: string[]): Promise<InsightResult[]> {
+		if (orderKeys.length === 0) {
 			return results;
 		} else {
 			// Perform the sorting asynchronously
 			return new Promise((resolve) => {
 				setTimeout(() => {
-					results.sort((recordA, recordB) => {
-						const valueA = recordA[orderKey];
-						const valueB = recordB[orderKey];
-
-						if (typeof valueA === "string" && typeof valueB === "string") {
-							return valueA.localeCompare(valueB);
-						} else if (typeof valueA === "number" && typeof valueB === "number") {
-							return valueA - valueB;
-						} else {
-							// Handle mixed types (e.g., string vs number)
-							return String(valueA).localeCompare(String(valueB));
-						}
-					});
+					results.sort((recordA, recordB) => this.sortFunction(recordA, recordB, orderKeys));
 					// Resolve the promise with the sorted results
 					resolve(results);
 				}, 0);
@@ -55,19 +48,53 @@ export default class QueryUtils {
 		}
 	}
 
-	public async selectCOLUMNS(sections: Section[], columns: string[]): Promise<InsightResult[]> {
-		const results = sections.map((section) => {
+	private sortFunction(recordA: InsightResult, recordB: InsightResult, orderKeys: string[]): number {
+		for (const key of orderKeys) {
+			const valueA = recordA[key];
+			const valueB = recordB[key];
+
+			if (valueA === undefined || valueB === undefined) {
+				throw new InsightError(`a record has an undefined value for ${key}`);
+			}
+
+			if (typeof valueA === "string" && typeof valueB === "string") {
+				const comparison = valueA.localeCompare(valueB);
+				if (comparison !== 0) {
+					return comparison;
+				}
+			} else if (typeof valueA === "number" && typeof valueB === "number") {
+				const comparison = valueA - valueB;
+				if (comparison !== 0) {
+					return comparison;
+				}
+			} else {
+				// Handle mixed types (e.g., string vs number)
+				const comparison = String(valueA).localeCompare(String(valueB));
+				if (comparison !== 0) {
+					return comparison;
+				}
+			}
+		}
+		return 0;
+	}
+
+	// select columns of the transformedResults (transformedResults may be a transformed objects, sections, or rooms)
+	public async selectCOLUMNS(
+		transformedResults: Object[],
+		columns: string[],
+		isGrouped: boolean
+	): Promise<InsightResult[]> {
+		const results = transformedResults.map((result) => {
 			const currRecord: InsightResult = {};
+			const resultObj = result as Record<string, any>;
 
 			columns.forEach((column) => {
 				const field = column.split("_")[1];
-
-				if (this.mFields.includes(field)) {
-					const mIndex = this.mFields.indexOf(field);
-					currRecord[column] = section.getMFieldByIndex(mIndex);
+				// using the implementation of individuals fields of rooms and sections
+				if (isGrouped) {
+					currRecord[column] = resultObj[column];
 				} else {
-					const sIndex = this.sFields.indexOf(field);
-					currRecord[column] = section.getSFieldByIndex(sIndex);
+					currRecord[column] = resultObj[field];
 				}
 			});
 
@@ -137,6 +164,7 @@ export default class QueryUtils {
 			throw new InsightError("Invalid object present");
 		}
 	}
+
 	public testRegex(input: string): RegExp {
 		const validInputRegex = /^[*]?[^*]*[*]?$/;
 		if (!validInputRegex.test(input)) {
@@ -147,17 +175,32 @@ export default class QueryUtils {
 		return new RegExp(`^${processedInput}$`); // Use case-insensitive matching
 	}
 
-	public checkIDString(datasets: Map<string, Section[]>, queryingIDString: string, idStr: string): boolean {
-		if (!datasets.has(idStr)) {
-			throw new InsightError(`Dataset with id: ${idStr} not added.`);
-		}
-
-		// check if a dataset has already been referenced if not return true
+	// checks if the idstring is valid, if it is return the type of dataset it refers to
+	public checkIDString(
+		sDSList: string[],
+		rDSList: string[],
+		sectionOrRoom: string,
+		queryingIDString: string,
+		idStr: string
+	): string {
+		// check if a dataset has already been referenced if not return whether its a section or a room DS
 		if (queryingIDString === "") {
-			return true;
+			return this.checkSectionOrRoom(sDSList, rDSList, idStr);
 		} else if (queryingIDString !== idStr) {
 			throw new InsightError("Cannot reference multiple datasets.");
+		} else {
+			return sectionOrRoom;
 		}
-		return true;
+	}
+
+	// checks if the idstr is in sectionsDS or roomsDS, otherwise throw error that the ds is not added
+	public checkSectionOrRoom(sDSList: string[], rDSList: string[], idStr: string): string {
+		if (sDSList.includes(idStr)) {
+			return "section";
+		} else if (rDSList.includes(idStr)) {
+			return "room";
+		} else {
+			throw new InsightError(`Dataset with id: ${idStr} not added.`);
+		}
 	}
 }

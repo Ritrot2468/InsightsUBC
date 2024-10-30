@@ -1,0 +1,15 @@
+{
+	"title": "invalid rooms skey filter",
+	"input": {
+		"WHERE": {
+			"IS": {
+				"rooms_dept": "*"
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": ["rooms_fullname", "rooms_furniture"]
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

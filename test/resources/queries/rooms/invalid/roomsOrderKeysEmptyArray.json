@@ -1,0 +1,22 @@
+{
+	"title": "rooms order keys empty array",
+	"input": {
+		"WHERE": {
+			"GT": {
+				"rooms_seats": 20
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"rooms_name",
+				"rooms_seats"
+			],
+			"ORDER": {
+				"dir": "UP",
+				"keys": []
+			}
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

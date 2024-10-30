@@ -3,22 +3,36 @@ import { QueryOrderHandler } from "./QueryOrderHandler";
 import QueryUtils from "./QueryUtils";
 import QueryEngineFilter from "./QueryEngineFilter";
 import Section from "./sections/Section";
+import Room from "./rooms/Room";
 
 export default class QueryEngine {
 	private queryingIDString: string;
 	private sectionsDatabase: Map<string, Section[]>;
+	private roomsDatabase: Map<string, Room[]>;
 	private noFilter: boolean;
 	private utils: QueryUtils;
 	private QueryOrderHandler: QueryOrderHandler;
 	private QueryEngineFilter: QueryEngineFilter;
+	private sectionOrRoom: string;
+	private sDSList: string[];
+	private rDSList: string[];
+	private newCols: string[];
+	private isGrouped: boolean;
+	private dir = "";
 
-	constructor(sectionsDatabase: Map<string, Section[]>) {
+	constructor(sectionsDatabase: Map<string, Section[]>, roomsDatabase: Map<string, Room[]>) {
 		this.queryingIDString = "";
 		this.sectionsDatabase = sectionsDatabase;
+		this.roomsDatabase = roomsDatabase;
 		this.noFilter = false;
 		this.utils = new QueryUtils();
 		this.QueryOrderHandler = new QueryOrderHandler();
-		this.QueryEngineFilter = new QueryEngineFilter(sectionsDatabase);
+		this.QueryEngineFilter = new QueryEngineFilter(sectionsDatabase, roomsDatabase);
+		this.sectionOrRoom = "";
+		this.sDSList = Array.from(sectionsDatabase.keys());
+		this.rDSList = Array.from(roomsDatabase.keys());
+		this.newCols = [];
+		this.isGrouped = false;
 	}
 
 	public async query(query: unknown): Promise<InsightResult[]> {
@@ -43,7 +57,8 @@ export default class QueryEngine {
 
 			// If TRANSFORMATIONS key exists, complete transformation on filtered sections
 			if ("TRANSFORMATIONS" in queryObj) {
-				transformedResults = await this.handleTransformations(queryObj.TRANSFORMATIONS, filteredSOR);
+				transformedResults = await this.handleTRANSFORMATIONS(queryObj.TRANSFORMATIONS, filteredSOR);
+				//this.isGrouped = true;
 			} else {
 				transformedResults = filteredSOR;
 			}
@@ -65,6 +80,7 @@ export default class QueryEngine {
 		return result;
 	}
 
+	// handling section or room in filter
 	private async handleWHERE(where: object): Promise<Object[]> {
 		let filteredSOR: Object[] = [];
 		this.noFilter = false;
@@ -78,8 +94,11 @@ export default class QueryEngine {
 			} else {
 				const filter = Object.keys(where)[0];
 				const values = Object.values(where)[0];
+
+				//TODO
 				filteredSOR = await this.QueryEngineFilter.handleFilter(filter, values);
 				this.queryingIDString = this.QueryEngineFilter.queryingIDString;
+				this.sectionOrRoom = this.utils.checkSectionOrRoom(this.sDSList, this.rDSList, this.queryingIDString);
 			}
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
@@ -90,11 +109,18 @@ export default class QueryEngine {
 		return filteredSOR;
 	}
 
-	private async handleOPTIONS(options: object, sectionsOrRooms: Object[]): Promise<InsightResult[]> {
+	// TODO
+	private async handleTRANSFORMATIONS(transformations: object, filteredSOR: Object[]): Promise<Object[]> {
+		const transformedResults: Object[] = [];
+		this.isGrouped = true;
+		return transformedResults;
+	}
+
+	private async handleOPTIONS(options: object, transformedResults: Object[]): Promise<InsightResult[]> {
 		//console.log("OPTIONS WORKING");
 		let results: InsightResult[] = [];
 		let columns: string[] = [];
-		let orderKey = "";
+		let orderKeys: string[] = [];
 		try {
 			const optionsKeys = Object.keys(options);
 			const invalidKeys = optionsKeys.filter((key) => !this.utils.validOptions.includes(key));
@@ -102,17 +128,20 @@ export default class QueryEngine {
 				throw new InsightError("Invalid keys in OPTIONS");
 			}
 
+			// Done
 			if ("COLUMNS" in options) {
 				columns = this.handleCOLUMNS(options.COLUMNS);
 			} else {
 				throw new InsightError("Query missing COLUMNS");
 			}
+
 			//console.log(columns);
+			// Done
 			if ("ORDER" in options) {
-				orderKey = await this.QueryOrderHandler.handleORDER(options.ORDER, columns);
+				orderKeys = await this.QueryOrderHandler.handleORDER(options.ORDER, columns);
 			}
 
-			results = await this.completeQuery(sectionsOrRooms, columns, orderKey);
+			results = await this.completeQuery(transformedResults, columns, orderKeys);
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;
@@ -123,27 +152,38 @@ export default class QueryEngine {
 	}
 
 	private async completeQuery(
-		sectionsOrRooms: Object[],
+		transformedResults: Object[],
 		columns: string[],
-		orderKey: string
+		orderKeys: string[]
 	): Promise<InsightResult[]> {
 		let results: InsightResult[] = [];
+		let dataset: Object[] | undefined = [];
 		//console.log("COMPLETE QUERY WORKING");
 		// if no filters have been applied
 		if (this.noFilter) {
-			const datasetSections = this.sectionsDatabase.get(this.queryingIDString);
-			if (datasetSections === undefined) {
+			if (this.sectionOrRoom === "section") {
+				dataset = this.sectionsDatabase.get(this.queryingIDString);
+			} else if (this.sectionOrRoom === "room") {
+				dataset = this.sectionsDatabase.get(this.queryingIDString);
+			} else {
+				throw new InsightError("section or room undefined");
+			}
+			if (dataset === undefined) {
 				// should not be possible given current implementation of other methods for query
 				throw new InsightError("Can't find querying dataset");
 			} else {
-				sectionsOrRooms = datasetSections;
+				transformedResults = dataset;
 			}
 		}
-		this.utils.checkSize(sectionsOrRooms);
-		results = await this.utils.selectCOLUMNS(sectionsOrRooms, columns);
-		results = await this.utils.sortByOrder(results, orderKey);
+
+		this.utils.checkSize(transformedResults);
+
+		//TODO
+		results = await this.utils.selectCOLUMNS(transformedResults, columns, this.isGrouped);
+		results = await this.utils.sortByOrder(results, orderKeys);
 		return results;
 	}
+
 	// returns the columns as an array of strings (WORKING)
 	private handleCOLUMNS(value: unknown): string[] {
 		const columns = this.utils.coerceToArray(value); // checks if is an array, if so, coerce to array type
@@ -151,17 +191,44 @@ export default class QueryEngine {
 		for (const key of columns) {
 			const keyStr = String(key);
 			const field = keyStr.split("_")[1];
-			//this.checkIDString(this.sectionsDatabase, this.queryingIDString, keyStr.split("_")[0]);
 			const idstring = keyStr.split("_")[0];
-			this.utils.checkIDString(this.sectionsDatabase, this.queryingIDString, idstring);
+
+			this.sectionOrRoom = this.utils.checkIDString(
+				this.sDSList,
+				this.rDSList,
+				this.sectionOrRoom,
+				this.queryingIDString,
+				idstring
+			);
 			this.queryingIDString = idstring;
 
-			if (this.utils.mFields.includes(field) || this.utils.sFields.includes(field)) {
+			// checks if the field is a valid field
+			if (this.checkValidColumn(field)) {
 				results.push(keyStr);
 			} else {
 				throw new InsightError(`Invalid key ${keyStr} in COLUMNS`);
 			}
 		}
 		return results;
+	}
+
+	// if the field is valid, return true, if sectionOrRoom is somehow empty throw error
+	private checkValidColumn(field: string): boolean {
+		if (this.isGrouped) {
+			if (this.newCols.includes(field)) {
+				return true;
+			}
+		} else if (this.sectionOrRoom === "section") {
+			if (this.utils.mFieldsSection.includes(field) || this.utils.sFieldsSection.includes(field)) {
+				return true;
+			}
+		} else if (this.sectionOrRoom === "room") {
+			if (this.utils.mFieldsRoom.includes(field) || this.utils.sFieldsRoom.includes(field)) {
+				return true;
+			}
+		} else {
+			throw new InsightError("section or room undefined");
+		}
+		return false;
 	}
 }

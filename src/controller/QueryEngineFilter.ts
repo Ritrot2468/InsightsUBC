@@ -1,20 +1,29 @@
 import { InsightError, ResultTooLargeError } from "./IInsightFacade";
 import QueryUtils from "./QueryUtils";
 import Section from "./sections/Section";
+import Room from "./rooms/Room";
 
 export default class QueryEngineFilter {
 	public queryingIDString: string;
 	private sectionsDatabase: Map<string, Section[]>;
+	private roomsDatabase: Map<string, Room[]>;
 	private utils: QueryUtils;
+	private sectionOrRoom: string;
+	private sDSList: string[];
+	private rDSList: string[];
 
-	constructor(sectionsDatabase: Map<string, Section[]>) {
+	constructor(sectionsDatabase: Map<string, Section[]>, roomsDatabase: Map<string, Room[]>) {
 		this.queryingIDString = "";
 		this.sectionsDatabase = sectionsDatabase;
+		this.roomsDatabase = roomsDatabase;
 		this.utils = new QueryUtils();
+		this.sectionOrRoom = "";
+		this.sDSList = Array.from(sectionsDatabase.keys());
+		this.rDSList = Array.from(roomsDatabase.keys());
 	}
 
-	public async handleFilter(filter: string, value: unknown): Promise<Section[]> {
-		let promise: Promise<Section[]>;
+	public async handleFilter(filter: string, value: unknown): Promise<Object[]> {
+		let promise: Promise<Object[]>;
 		try {
 			//console.log("Filter running");
 			//console.log(filter);
@@ -51,7 +60,7 @@ export default class QueryEngineFilter {
 		return promise;
 	}
 
-	private async handleNegation(filter: string, value: unknown): Promise<Section[]> {
+	private async handleNegation(filter: string, value: unknown): Promise<Object[]> {
 		try {
 			const nonNegatedResults = this.handleFilter(filter, value);
 			const datasetSections = this.sectionsDatabase.get(this.queryingIDString);
@@ -73,7 +82,7 @@ export default class QueryEngineFilter {
 		}
 	}
 
-	private async handleSComparison(skey: string, input: string): Promise<Section[]> {
+	private async handleSComparison(skey: string, input: string): Promise<Object[]> {
 		try {
 			if (typeof input === "number") {
 				throw new InsightError("Invalid skey type");
@@ -109,7 +118,7 @@ export default class QueryEngineFilter {
 		}
 	}
 
-	private async handleMComparison(filter: string, mkey: string, input: number): Promise<Section[]> {
+	private async handleMComparison(filter: string, mkey: string, input: number): Promise<Object[]> {
 		//console.log("HANDLING MCOMPARISON");
 		//console.log("mkey: " + mkey);
 		//console.log("input: " + input);
@@ -142,7 +151,7 @@ export default class QueryEngineFilter {
 		}
 	}
 
-	private async handleLogicComparison(filter: string, value: unknown): Promise<Section[]> {
+	private async handleLogicComparison(filter: string, value: unknown): Promise<Object[]> {
 		try {
 			const comparisonArray: unknown[] = this.utils.coerceToArray(value);
 			if (filter === "AND") {
@@ -160,14 +169,14 @@ export default class QueryEngineFilter {
 		}
 	}
 
-	private async handleAND(value: unknown[]): Promise<Section[]> {
-		const andListPromises: Promise<Section[]>[] = [];
+	private async handleAND(value: unknown[]): Promise<Object[]> {
+		const andListPromises: Promise<Object[]>[] = [];
 		if (value.length === 0) {
 			throw new InsightError("AND must be a non-empty array");
 		}
 		for (const obj of value) {
 			if (typeof obj === "object" && obj !== null) {
-				const key: Promise<Section[]> = this.handleFilter(
+				const key: Promise<Object[]> = this.handleFilter(
 					Object.keys(obj)[0] as string,
 					Object.values(obj)[0] as unknown
 				);
@@ -190,8 +199,8 @@ export default class QueryEngineFilter {
 		return mergedList;
 	}
 
-	private async handleOR(value: unknown[]): Promise<Section[]> {
-		const orList: Promise<Section[]>[] = [];
+	private async handleOR(value: unknown[]): Promise<Object[]> {
+		const orList: Promise<Object[]>[] = [];
 		if (value.length === 0) {
 			throw new InsightError("OR must be a non-empty array");
 		}

@@ -1,0 +1,19 @@
+{
+	"title": "latitude query",
+	"input": {
+		"WHERE": {
+			"LT": {
+				"rooms_lat": 49
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"rooms_name",
+				"rooms_href",
+				"rooms_lat"
+			]
+		}
+	},
+	"errorExpected": false,
+	"expected": []
+}

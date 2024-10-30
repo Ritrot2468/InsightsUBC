@@ -42,7 +42,7 @@ export default class InsightFacade implements IInsightFacade {
 		this.sectionsDatabase = new Map<string, []>();
 		this.roomsDatabase = new Map<string, Room[]>();
 		this.datasetValidatorHelper = new DatasetValidatorHelper();
-		this.qe = new QueryEngine(this.sectionsDatabase);
+		this.qe = new QueryEngine(this.sectionsDatabase, this.roomsDatabase);
 		this.secDiskReader = new SectionDiskReader();
 		this.secDiskWriter = new SectionDiskWriter();
 		this.roomDiskReader = new RoomDiskReader();

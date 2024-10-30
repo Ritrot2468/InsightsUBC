@@ -776,7 +776,7 @@ describe("InsightFacade", function () {
 			await clearDisk();
 		});
 
-		it("[sections/valid/simple.json] SELECT dept, avg WHERE avg > 97", checkQuery)
+		it("[sections/valid/simple.json] SELECT dept, avg WHERE avg > 97", checkQuery);
 		const sectionTestCases = [
 			"[sections/valid/simple.json] SELECT dept, avg WHERE avg > 97",
 			"[sections/valid/simple1.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = cps*",
@@ -880,6 +880,14 @@ describe("InsightFacade", function () {
 			"[rooms/valid/latitudeQuery.json] filter by latitude",
 			"[rooms/valid/roomsSingleKeyOrder.json] simple order one key",
 			"[rooms/valid/roomsValidOrder2Keys.json] simple order one key",
+			"[rooms/valid/roomsGroupByLatOrderByAvgSeats.json] group by lat order by avg seats",
+			"[rooms/valid/roomsGroupByLatOrderByCountName.json]  group by lat order by count names",
+			"[rooms/valid/roomsGroupByLatOrderByCountNameAvgSeats.json] group by lat order by count name, avg seats",
+			"[rooms/valid/roomsGroupByLatOrderByCountSeats.json] group by lat order by count seats",
+			"[rooms/valid/roomsGroupByLatOrderByMaxSeats.json] group by lat order by max seats",
+			"[rooms/valid/roomsGroupByLatOrderByMinSeats.json] group by late order by min seats",
+			"[rooms/valid/roomsGroupByLatOrderBySumSeats.json] group by lat order by sum seats",
+			"[rooms/valid/roomsGroupByLatAndLonOrderByCountseats.json] group by lat and lon order by count seats",
 
 			// invalid room queries
 			"[rooms/invalid/invalidRoomsAndSectionsQuery.json] room and sections idstrings",
@@ -887,13 +895,22 @@ describe("InsightFacade", function () {
 			"[rooms/invalid/invalidRoomsMkeyTypeFilter.json] invalid room mkey type in filter",
 			"[rooms/invalid/invalidRoomsSkeyTypeFilter.json] invalid room skey type in filter",
 			"[rooms/invalid/invalidRoomsSkeyFilter.json] invalid room skey in filter",
-
 			"[rooms/invalid/roomsOrderInvalidDir.json] order invalid dir",
 			"[rooms/invalid/roomsOrderKeysEmptyArray.json] order keys empty arr",
 			"[rooms/invalid/roomsOrderKeysNotAnArray.json] order keys not an arr",
 			"[rooms/invalid/roomsOrderKeysNotInColumns.json] keys not in columns",
 			"[rooms/invalid/roomsOrderMissingDir.json] order missing dir",
 			"[rooms/invalid/roomsOrderMissingKeys.json] order missing keys",
+			"[rooms/invalid/extraKeysInTransformation.json] order missing keys",
+			"[rooms/invalid/invalidApplyRuleTargetKey.json] order missing keys",
+			"[rooms/invalid/invalidTransformationsMissingApply.json] order missing keys",
+			"[rooms/invalid/invalidTransformationsMissingGroup.json] order missing keys",
+			"[rooms/invalid/invalidTransformationsType.json] order missing keys",
+			"[rooms/invalid/roomsApplyRuleTargetKeyInvalidNotNumber.json] order missing keys",
+			"[rooms/invalid/roomsInvalidApplyRule.json] order missing keys",
+			"[rooms/invalid/roomsInvalidApplyRuleMultipleKeys.json] order missing keys",
+			"[rooms/invalid/roomsTransformCOUNTTargetKeyInvalidType.json] order missing keys",
+			"[rooms/invalid/roomsUnderscoreInApplyKey.json] order missing keys",
 		];
 
 		// Automated test cases for sections

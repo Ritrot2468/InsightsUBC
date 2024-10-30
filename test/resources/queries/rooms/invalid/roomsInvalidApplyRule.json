@@ -1,0 +1,23 @@
+{
+	"title": "rooms invalid applyrule",
+	"input": {
+		"WHERE": {
+			"GT": {
+				"rooms_seats": 20
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": ["rooms_lat", "countName"],
+			"ORDER": {
+				"dir": "DOWN",
+				"keys": ["countName"]
+			}
+		},
+		"TRANSFORMATIONS": {
+			"GROUP": ["rooms_lat"],
+			"APPLY": ["COUNT"]
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

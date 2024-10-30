@@ -1,0 +1,1475 @@
+{
+	"title": "ClassroomsFurniture",
+	"input": {
+		"WHERE": {
+			"IS": {
+				"rooms_furniture": "*Classroom*"
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"rooms_fullname",
+				"rooms_furniture"
+			]
+		}
+	},
+	"errorExpected": false,
+	"expected": [
+		{
+			"rooms_fullname": "Allard Hall (LAW)",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Allard Hall (LAW)",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Allard Hall (LAW)",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Allard Hall (LAW)",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Allard Hall (LAW)",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Anthropology and Sociology",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Anthropology and Sociology",
+			"rooms_furniture": "Classroom-Moveable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Anthropology and Sociology",
+			"rooms_furniture": "Classroom-Moveable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Anthropology and Sociology",
+			"rooms_furniture": "Classroom-Moveable Tablets"
+		},
+		{
+			"rooms_fullname": "Aquatic Ecosystems Research Laboratory",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "Auditorium Annex",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Auditorium Annex",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Biological Sciences",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Biological Sciences",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "Biological Sciences",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Biological Sciences",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Brock Hall Annex",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Brock Hall Annex",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Fixed Tables/Fixed Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Fixed Tables/Fixed Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Fixed Tables/Moveable Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Fixed Tables/Moveable Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Moveable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Fixed Tables/Moveable Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Moveable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Moveable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Moveable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Moveable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Buchanan",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Centre for Interactive  Research on Sustainability",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "Chemical and Biological Engineering Building",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Chemical and Biological Engineering Building",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Chemical and Biological Engineering Building",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Chemistry",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "Chemistry",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "Chemistry",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "Chemistry",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "Chemistry",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "Chemistry",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "Civil and Mechanical Engineering",
+			"rooms_furniture": "Classroom-Fixed Tables/Fixed Chairs"
+		},
+		{
+			"rooms_fullname": "Civil and Mechanical Engineering",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Civil and Mechanical Engineering",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Civil and Mechanical Engineering",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Civil and Mechanical Engineering",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Civil and Mechanical Engineering",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Earth and Ocean Sciences - Main",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Earth Sciences Building",
+			"rooms_furniture": "Classroom-Hybrid Furniture"
+		},
+		{
+			"rooms_fullname": "Earth Sciences Building",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "Earth Sciences Building",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Food, Nutrition and Health",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Food, Nutrition and Health",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Food, Nutrition and Health",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Food, Nutrition and Health",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Food, Nutrition and Health",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Food, Nutrition and Health",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "Forest Sciences Centre",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Forest Sciences Centre",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Forest Sciences Centre",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Forest Sciences Centre",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "Forest Sciences Centre",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "Forest Sciences Centre",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Forest Sciences Centre",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Forest Sciences Centre",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Forest Sciences Centre",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Forest Sciences Centre",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Frank Forward",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Frank Forward",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Frank Forward",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Frederic Lasserre",
+			"rooms_furniture": "Classroom-Fixed Tables/Fixed Chairs"
+		},
+		{
+			"rooms_fullname": "Frederic Lasserre",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "Frederic Lasserre",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "Frederic Lasserre",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Frederic Lasserre",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Frederic Lasserre",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Friedman Building",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Geography",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "Geography",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Geography",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Geography",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Geography",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Geography",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Geography",
+			"rooms_furniture": "Classroom-Moveable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Geography",
+			"rooms_furniture": "Classroom-Moveable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Hebb",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Hebb",
+			"rooms_furniture": "Classroom-Fixed Tables/Fixed Chairs"
+		},
+		{
+			"rooms_fullname": "Hebb",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Hebb",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Hennings",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "Hennings",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "Hennings",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "Hennings",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Hennings",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Hennings",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Henry Angus",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Henry Angus",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Henry Angus",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Henry Angus",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Henry Angus",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Henry Angus",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Henry Angus",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Henry Angus",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Henry Angus",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Henry Angus",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Henry Angus",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Henry Angus",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Henry Angus",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Henry Angus",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Henry Angus",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Henry Angus",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Henry Angus",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Henry Angus",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Henry Angus",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Henry Angus",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Henry Angus",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Henry Angus",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Henry Angus",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Henry Angus",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Henry Angus",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Henry Angus",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Henry Angus",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Henry Angus",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Hugh Dempster Pavilion",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Hugh Dempster Pavilion",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Hugh Dempster Pavilion",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Hugh Dempster Pavilion",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Hugh Dempster Pavilion",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Iona Building",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Iona Building",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Irving K Barber Learning Centre",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Irving K Barber Learning Centre",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Irving K Barber Learning Centre",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Irving K Barber Learning Centre",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Irving K Barber Learning Centre",
+			"rooms_furniture": "Classroom-Fixed Tables/Fixed Chairs"
+		},
+		{
+			"rooms_fullname": "Irving K Barber Learning Centre",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Irving K Barber Learning Centre",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Irving K Barber Learning Centre",
+			"rooms_furniture": "Classroom-Moveable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Irving K Barber Learning Centre",
+			"rooms_furniture": "Classroom-Moveable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Irving K Barber Learning Centre",
+			"rooms_furniture": "Classroom-Moveable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Irving K Barber Learning Centre",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Irving K Barber Learning Centre",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Irving K Barber Learning Centre",
+			"rooms_furniture": "Classroom-Moveable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Irving K Barber Learning Centre",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Irving K Barber Learning Centre",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Irving K Barber Learning Centre",
+			"rooms_furniture": "Classroom-Moveable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Irving K Barber Learning Centre",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Irving K Barber Learning Centre",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Jack Bell Building for the School of Social Work",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Jack Bell Building for the School of Social Work",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Jack Bell Building for the School of Social Work",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Jack Bell Building for the School of Social Work",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Jack Bell Building for the School of Social Work",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Jack Bell Building for the School of Social Work",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Jack Bell Building for the School of Social Work",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Leonard S. Klinck (also known as CSCI)",
+			"rooms_furniture": "Classroom-Fixed Tables/Fixed Chairs"
+		},
+		{
+			"rooms_fullname": "Leonard S. Klinck (also known as CSCI)",
+			"rooms_furniture": "Classroom-Fixed Tables/Fixed Chairs"
+		},
+		{
+			"rooms_fullname": "Leonard S. Klinck (also known as CSCI)",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Leonard S. Klinck (also known as CSCI)",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Life Sciences Centre",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Life Sciences Centre",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Life Sciences Centre",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "MacLeod",
+			"rooms_furniture": "Classroom-Fixed Tables/Fixed Chairs"
+		},
+		{
+			"rooms_fullname": "MacLeod",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "MacLeod",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "MacLeod",
+			"rooms_furniture": "Classroom-Fixed Tables/Fixed Chairs"
+		},
+		{
+			"rooms_fullname": "MacLeod",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "MacLeod",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "MacMillan",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "MacMillan",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "MacMillan",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "MacMillan",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "MacMillan",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "MacMillan",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "MacMillan",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "MacMillan",
+			"rooms_furniture": "Classroom-Moveable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "MacMillan",
+			"rooms_furniture": "Classroom-Moveable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "MacMillan",
+			"rooms_furniture": "Classroom-Moveable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "MacMillan",
+			"rooms_furniture": "Classroom-Moveable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "MacMillan",
+			"rooms_furniture": "Classroom-Moveable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "MacMillan",
+			"rooms_furniture": "Classroom-Moveable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "MacMillan",
+			"rooms_furniture": "Classroom-Moveable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "MacMillan",
+			"rooms_furniture": "Classroom-Moveable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "MacMillan",
+			"rooms_furniture": "Classroom-Moveable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "MacMillan",
+			"rooms_furniture": "Classroom-Moveable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "MacMillan",
+			"rooms_furniture": "Classroom-Moveable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "MacMillan",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Mathematics",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "Mathematics",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Mathematics",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Mathematics",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Mathematics",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Mathematics",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Mathematics",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Mathematics",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Mathematics Annex",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "Neville Scarfe",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "Neville Scarfe",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Neville Scarfe",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Neville Scarfe",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Neville Scarfe",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Neville Scarfe",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Neville Scarfe",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Neville Scarfe",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Neville Scarfe",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Neville Scarfe",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Neville Scarfe",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Neville Scarfe",
+			"rooms_furniture": "Classroom-Moveable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Neville Scarfe",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Neville Scarfe",
+			"rooms_furniture": "Classroom-Moveable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Neville Scarfe",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Neville Scarfe",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Neville Scarfe",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Neville Scarfe",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Neville Scarfe",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Neville Scarfe",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Neville Scarfe",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Neville Scarfe",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Orchard Commons",
+			"rooms_furniture": "Classroom-Hybrid Furniture"
+		},
+		{
+			"rooms_fullname": "Orchard Commons",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Orchard Commons",
+			"rooms_furniture": "Classroom-Hybrid Furniture"
+		},
+		{
+			"rooms_fullname": "Orchard Commons",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Orchard Commons",
+			"rooms_furniture": "Classroom-Learn Lab"
+		},
+		{
+			"rooms_fullname": "Orchard Commons",
+			"rooms_furniture": "Classroom-Hybrid Furniture"
+		},
+		{
+			"rooms_fullname": "Orchard Commons",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Orchard Commons",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Orchard Commons",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Orchard Commons",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Orchard Commons",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Orchard Commons",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Orchard Commons",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Orchard Commons",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Orchard Commons",
+			"rooms_furniture": "Classroom-Hybrid Furniture"
+		},
+		{
+			"rooms_fullname": "Orchard Commons",
+			"rooms_furniture": "Classroom-Hybrid Furniture"
+		},
+		{
+			"rooms_fullname": "Orchard Commons",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Orchard Commons",
+			"rooms_furniture": "Classroom-Hybrid Furniture"
+		},
+		{
+			"rooms_fullname": "Orchard Commons",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Orchard Commons",
+			"rooms_furniture": "Classroom-Hybrid Furniture"
+		},
+		{
+			"rooms_fullname": "Orchard Commons",
+			"rooms_furniture": "Classroom-Learn Lab"
+		},
+		{
+			"rooms_fullname": "Pharmaceutical Sciences Building",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Pharmaceutical Sciences Building",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Pharmaceutical Sciences Building",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Pharmaceutical Sciences Building",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Pharmaceutical Sciences Building",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Pharmaceutical Sciences Building",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Pharmaceutical Sciences Building",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Pharmaceutical Sciences Building",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Pharmaceutical Sciences Building",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Pharmaceutical Sciences Building",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Pharmaceutical Sciences Building",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Ponderosa Commons: Oak House",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Ponderosa Commons: Oak House",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Ponderosa Commons: Oak House",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Ponderosa Commons: Oak House",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Ponderosa Commons: Oak House",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Ponderosa Commons: Oak House",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Ponderosa Commons: Oak House",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Ponderosa Commons: Oak House",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Robert F. Osborne Centre",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Robert F. Osborne Centre",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Robert F. Osborne Centre",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "School of Population and Public Health",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "School of Population and Public Health",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "School of Population and Public Health",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "School of Population and Public Health",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "School of Population and Public Health",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "School of Population and Public Health",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Student Recreation Centre",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Student Recreation Centre",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Student Recreation Centre",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "The Leon and Thea Koerner University Centre",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "The Leon and Thea Koerner University Centre",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "The Leon and Thea Koerner University Centre",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "The Leon and Thea Koerner University Centre",
+			"rooms_furniture": "Classroom-Learn Lab"
+		},
+		{
+			"rooms_fullname": "War Memorial Gymnasium",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "War Memorial Gymnasium",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Wesbrook",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "Wesbrook",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "West Mall Swing Space",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "West Mall Swing Space",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "West Mall Swing Space",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "West Mall Swing Space",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "West Mall Swing Space",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "West Mall Swing Space",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "West Mall Swing Space",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "West Mall Swing Space",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "West Mall Swing Space",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "West Mall Swing Space",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "West Mall Swing Space",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "West Mall Swing Space",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "West Mall Swing Space",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "West Mall Swing Space",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "West Mall Swing Space",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "West Mall Swing Space",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "West Mall Swing Space",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "West Mall Swing Space",
+			"rooms_furniture": "Classroom-Moveable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "West Mall Swing Space",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "West Mall Swing Space",
+			"rooms_furniture": "Classroom-Moveable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "West Mall Swing Space",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "West Mall Swing Space",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Woodward (Instructional Resources Centre-IRC)",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Woodward (Instructional Resources Centre-IRC)",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "Woodward (Instructional Resources Centre-IRC)",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Woodward (Instructional Resources Centre-IRC)",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Woodward (Instructional Resources Centre-IRC)",
+			"rooms_furniture": "Classroom-Fixed Tables/Movable Chairs"
+		},
+		{
+			"rooms_fullname": "Woodward (Instructional Resources Centre-IRC)",
+			"rooms_furniture": "Classroom-Fixed Tablets"
+		},
+		{
+			"rooms_fullname": "Woodward (Instructional Resources Centre-IRC)",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Woodward (Instructional Resources Centre-IRC)",
+			"rooms_furniture": "Classroom-Movable Tablets"
+		},
+		{
+			"rooms_fullname": "Woodward (Instructional Resources Centre-IRC)",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Woodward (Instructional Resources Centre-IRC)",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Woodward (Instructional Resources Centre-IRC)",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Woodward (Instructional Resources Centre-IRC)",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Woodward (Instructional Resources Centre-IRC)",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Woodward (Instructional Resources Centre-IRC)",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Woodward (Instructional Resources Centre-IRC)",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		},
+		{
+			"rooms_fullname": "Woodward (Instructional Resources Centre-IRC)",
+			"rooms_furniture": "Classroom-Movable Tables & Chairs"
+		}
+	]
+}

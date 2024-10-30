@@ -1,0 +1,31 @@
+{
+	"title": "rooms apply rule target key invalid not number",
+	"input": {
+		"WHERE": {
+			"GT": {
+				"rooms_seats": 20
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"rooms_lat",
+				"sumName"
+			],
+			"ORDER": "sumName"
+		},
+		"TRANSFORMATIONS": {
+			"GROUP": [
+				"rooms_lat"
+			],
+			"APPLY": [
+				{
+					"sumName": {
+						"SUM": "rooms_name"
+					}
+				}
+			]
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

@@ -1,0 +1,21 @@
+{
+	"title": "invalid transformations type",
+	"input": {
+		"WHERE": {
+			"GT": {
+				"rooms_seats": 20
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"rooms_lat",
+				"rooms_lon",
+				"countSeats"
+			],
+			"ORDER": "countSeats"
+		},
+		"TRANSFORMATIONS": "COUNT"
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

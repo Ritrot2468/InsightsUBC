@@ -1,45 +1,91 @@
 import { InsightError, InsightResult, ResultTooLargeError } from "./IInsightFacade";
 import { QueryOrderHandler } from "./QueryOrderHandler";
 import QueryUtils from "./QueryUtils";
+import QueryEngineFilter from "./QueryEngineFilter";
 import Section from "./sections/Section";
+import Room from "./rooms/Room";
+import DatasetValidatorHelper from "./DatasetValidatorHelper";
 
 export default class QueryEngine {
 	private queryingIDString: string;
 	private sectionsDatabase: Map<string, Section[]>;
+	private roomsDatabase: Map<string, Room[]>;
 	private noFilter: boolean;
 	private utils: QueryUtils;
 	private QueryOrderHandler: QueryOrderHandler;
+	private QueryEngineFilter: QueryEngineFilter;
+	private sectionOrRoom: string;
+	private sDSList: string[];
+	private rDSList: string[];
+	private newCols: string[];
+	private isGrouped: boolean;
+	private dir: string;
+	private datasetValidator: DatasetValidatorHelper;
 
-	constructor(sectionsDatabase: Map<string, Section[]>) {
+	constructor(sectionsDatabase: Map<string, Section[]>, roomsDatabase: Map<string, Room[]>) {
 		this.queryingIDString = "";
 		this.sectionsDatabase = sectionsDatabase;
+		this.roomsDatabase = roomsDatabase;
 		this.noFilter = false;
 		this.utils = new QueryUtils();
 		this.QueryOrderHandler = new QueryOrderHandler();
+		this.QueryEngineFilter = new QueryEngineFilter(sectionsDatabase, roomsDatabase);
+		this.sectionOrRoom = "";
+		this.datasetValidator = new DatasetValidatorHelper();
+		this.sDSList = Array.from(sectionsDatabase.keys());
+		this.rDSList = Array.from(roomsDatabase.keys());
+		//console.log(this.rDSList);
+		this.newCols = [];
+		this.isGrouped = false;
+		this.dir = "UP"; // default (one key) sorting is UP
 	}
 
-	public async query(query: unknown): Promise<InsightResult[]> {
-		//console.log("QUERY method");
-		let filteredSections: Section[] = [];
-		let result: InsightResult[] = [];
+	private async querySetup(currIDs: string[]): Promise<boolean> {
+		const idRecords = await this.datasetValidator.separateRoomAndCourseIDs(currIDs);
+		this.rDSList = idRecords.rooms;
+		this.sDSList = idRecords.sections;
+		this.QueryEngineFilter.setIDs(this.sDSList, this.rDSList);
 		this.queryingIDString = ""; // restart on every query;
+		return true;
+	}
+
+	public async query(query: unknown, currIDs: string[]): Promise<InsightResult[]> {
+		//console.log("QUERY method");
+		//console.log(this.roomsDatabase.size);
+		await this.querySetup(currIDs);
+		//console.log(this.rDSList);
+		let filteredSOR: Object[] = [];
+		let transformedResults: Object[] = [];
+		let result: InsightResult[] = [];
 		const queryObj = Object(query);
+		//console.log(queryObj)
 		try {
 			const queryKeys = Object.keys(queryObj);
+			//console.log(queryKeys)
 			const invalidKeys = queryKeys.filter((key) => !this.utils.validQueryKeys.includes(key));
 			if (invalidKeys.length > 0) {
 				throw new InsightError("Excess keys in query");
 			}
 			// If WHERE key exists, filter all the sections, else throw InsightError
 			if ("WHERE" in queryObj) {
-				filteredSections = await this.handleWHERE(queryObj.WHERE);
+				filteredSOR = await this.handleWHERE(queryObj.WHERE);
+				//console.log(filteredSOR)
 			} else {
 				throw new InsightError("Query missing WHERE");
+			}
+			//console.log()
+
+			// If TRANSFORMATIONS key exists, complete transformation on filtered sections
+			if ("TRANSFORMATIONS" in queryObj) {
+				transformedResults = await this.handleTRANSFORMATIONS(queryObj.TRANSFORMATIONS, filteredSOR);
+				//this.isGrouped = true;
+			} else {
+				transformedResults = filteredSOR;
 			}
 
 			// If OPTIONS key exists, collect InsightResults, else throw InsightError
 			if ("OPTIONS" in queryObj) {
-				result = await this.handleOPTIONS(queryObj.OPTIONS, filteredSections);
+				result = await this.handleOPTIONS(queryObj.OPTIONS, transformedResults);
 			} else {
 				throw new InsightError("Query missing OPTIONS");
 			}
@@ -54,236 +100,75 @@ export default class QueryEngine {
 		return result;
 	}
 
-	private async handleWHERE(where: object): Promise<Section[]> {
-		let filteredSections: Section[] = [];
+	// handling section or room in filter
+	private async handleWHERE(where: object): Promise<Object[]> {
+		let filteredSOR: Object[] = [];
 		this.noFilter = false;
 		//console.log("WHERE WORKING");
 		try {
 			if (Object.keys(where).length === 0) {
 				this.noFilter = true;
-				return filteredSections;
+				return filteredSOR;
 			} else if (Object.keys(where).length > 1) {
 				throw new InsightError("WHERE should only have 1 key");
 			} else {
-				filteredSections = await this.handleFilter(Object.keys(where)[0], Object.values(where)[0]);
+				const filter = Object.keys(where)[0];
+				const values = Object.values(where)[0];
+
+				//TODO;
+				//console.log(filter, values)
+				filteredSOR = await this.QueryEngineFilter.handleFilter(filter, values);
+				//console.log(filteredSOR)
+				this.queryingIDString = this.QueryEngineFilter.queryingIDString;
+
+				this.sectionOrRoom = this.QueryEngineFilter.sectionOrRoom;
 			}
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;
 			}
-			throw new InsightError("Unexpected error.");
+			throw new InsightError("Unexpected error in WHERE.");
 		}
-		return filteredSections;
+		return filteredSOR;
 	}
 
-	private async handleFilter(filter: string, value: unknown): Promise<Section[]> {
-		let promise: Promise<Section[]>;
+	//TODO;
+	private async handleTRANSFORMATIONS(transformations: object, filteredSOR: Object[]): Promise<Object[]> {
+		const transformedResults: Object[] = [];
+		//const groupKeys;
+		this.isGrouped = true;
 		try {
-			//console.log("Filter running");
-			//console.log(filter);
-			if (this.utils.logicComparator.includes(filter)) {
-				promise = this.handleLogicComparison(filter, value);
-			} else if (this.utils.mComparator.includes(filter) || filter === "IS" || filter === "NOT") {
-				this.utils.isObject(value);
-				const [key, input] = Object.entries(value as Record<string, any>)[0];
-				switch (filter) {
-					case "IS":
-						if (typeof input !== "string") {
-							throw new InsightError(`Invalid input type for IS`);
-						}
-						promise = this.handleSComparison(key, input);
-						break;
-					case "NOT":
-						promise = this.handleNegation(key, input);
-						break;
-					default:
-						if (typeof input !== "number") {
-							throw new InsightError(`Invalid input type for ${filter}`);
-						}
-						promise = this.handleMComparison(filter, key, input);
-				}
-			} else {
-				throw new InsightError(`Invalid filter key: ${filter}`);
+			const transformationKeys = Object.keys(transformations);
+			const invalidKeys = transformationKeys.filter((key) => !this.utils.validTransformationKeys.includes(key));
+			if (invalidKeys.length > 0) {
+				throw new InsightError("Invalid keys in TRANSFORMATIONS");
 			}
+			/*
+			if ("GROUP" in transformationKeys) {
+
+			} else {
+				throw new InsightError("TRANSFORMATIONS missing GROUP key");
+			}
+			if ("APPLY" in transformationKeys) {
+
+			} else {
+				throw new InsightError("TRANSFORMATIONS missing APPLY key");
+			}
+			*/
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;
 			}
-			throw new InsightError("Unexpected error.");
+			throw new InsightError("Unexpected error in TRANSFORMATIONS.");
 		}
-		return promise;
+		return transformedResults;
 	}
 
-	private async handleNegation(filter: string, value: unknown): Promise<Section[]> {
-		try {
-			const nonNegatedResults = this.handleFilter(filter, value);
-			const datasetSections = this.sectionsDatabase.get(this.queryingIDString);
-			if (datasetSections === undefined) {
-				// should not be possible given current implementation of other methods for query
-				throw new InsightError("Can't find querying dataset");
-			} else {
-				// use a set instead -> faster?
-				const resolvedNonNegatedSet = new Set(await nonNegatedResults);
-
-				// Filter using the Set for faster lookups
-				return datasetSections.filter((section) => !resolvedNonNegatedSet.has(section));
-			}
-		} catch (err) {
-			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
-				throw err;
-			}
-			throw new InsightError("Unexpected error.");
-		}
-	}
-
-	private async handleSComparison(skey: string, input: string): Promise<Section[]> {
-		try {
-			if (typeof input === "number") {
-				throw new InsightError("Invalid skey type");
-			}
-			// split on underscore
-			const idstring = skey.split("_")[0];
-			const sfield = skey.split("_")[1];
-
-			// check if database contains dataset with idstring
-			this.checkIDString(idstring);
-
-			// query based on idstring
-			const datasetSections = this.sectionsDatabase.get(idstring);
-			if (datasetSections === undefined) {
-				// should not be possible
-				throw new InsightError("Can't find querying dataset");
-			} else {
-				if (this.utils.sFields.includes(sfield)) {
-					const fieldIndex = this.utils.sFields.indexOf(sfield);
-					const inputRegex = this.utils.testRegex(input); // Use case-insensitive matching
-					return datasetSections.filter((section) => inputRegex.test(section.getSFieldByIndex(fieldIndex)));
-				} else {
-					throw new InsightError("Invalid sKey");
-				}
-			}
-		} catch (err) {
-			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
-				throw err;
-			}
-			throw new InsightError("Unexpected error.");
-		}
-	}
-
-	private async handleMComparison(filter: string, mkey: string, input: number): Promise<Section[]> {
-		//console.log("HANDLING MCOMPARISON");
-		//console.log("mkey: " + mkey);
-		//console.log("input: " + input);
-		try {
-			const idstring = mkey.split("_")[0];
-			const mfield = mkey.split("_")[1];
-
-			// check if database contains dataset with idstring
-			this.checkIDString(idstring);
-			const datasetSections = this.sectionsDatabase.get(idstring);
-			if (datasetSections === undefined) {
-				// should not be possible
-				throw new InsightError("Can't find querying dataset");
-			} else {
-				if (this.utils.mFields.includes(mfield)) {
-					const fieldIndex = this.utils.mFields.indexOf(mfield);
-					return this.utils.filterMCompare(datasetSections, filter, fieldIndex, input);
-				} else {
-					throw new InsightError("Invalid mKey");
-				}
-			}
-		} catch (err) {
-			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
-				throw err;
-			}
-			throw new InsightError("Unexpected error.");
-		}
-	}
-
-	private async handleLogicComparison(filter: string, value: unknown): Promise<Section[]> {
-		try {
-			const comparisonArray: unknown[] = this.utils.coerceToArray(value);
-			if (filter === "AND") {
-				return this.handleAND(comparisonArray);
-			} else if (filter === "OR") {
-				return this.handleOR(comparisonArray);
-			} else {
-				throw new InsightError("Invalid Logic Comparator");
-			}
-		} catch (err) {
-			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
-				throw err;
-			}
-			throw new InsightError("Unexpected error.");
-		}
-	}
-
-	private async handleAND(value: unknown[]): Promise<Section[]> {
-		const andListPromises: Promise<Section[]>[] = [];
-		if (value.length === 0) {
-			throw new InsightError("AND must be a non-empty array");
-		}
-		for (const obj of value) {
-			if (typeof obj === "object" && obj !== null) {
-				const key: Promise<Section[]> = this.handleFilter(
-					Object.keys(obj)[0] as string,
-					Object.values(obj)[0] as unknown
-				);
-				andListPromises.push(key);
-			} else {
-				throw new InsightError("Invalid Object");
-			}
-		}
-		const andList = await Promise.all(andListPromises);
-		/*console.log(andList.length);
-		for (const list of andList) {
-			console.log(list.length);
-		}*/
-		// only one filter applied
-		if (andList.length === 1) {
-			return andList[0];
-		}
-		const mergedList = this.utils.mergeAndList(andList);
-		//console.log((await mergedList).length);
-		return mergedList;
-	}
-
-	private async handleOR(value: unknown[]): Promise<Section[]> {
-		const orList: Promise<Section[]>[] = [];
-		if (value.length === 0) {
-			throw new InsightError("OR must be a non-empty array");
-		}
-
-		for (const obj of value) {
-			if (typeof obj === "object" && obj !== null) {
-				orList.push(this.handleFilter(Object.keys(obj)[0] as string, Object.values(obj)[0] as unknown));
-			} else {
-				throw new InsightError("Invalid Object");
-			}
-		}
-		const resolvedOrList = await Promise.all(orList);
-		return resolvedOrList.flat();
-	}
-
-	// check if an id string is already being referenced, if not, return true
-	private checkIDString(idstring: string): boolean {
-		if (!this.sectionsDatabase.has(idstring)) {
-			throw new InsightError(`Dataset with id: ${idstring} not added.`);
-		}
-		// check if a dataset has already been referenced if not set queryingIDString as idstring
-		if (this.queryingIDString === "") {
-			this.queryingIDString = idstring;
-		} else if (this.queryingIDString !== idstring) {
-			throw new InsightError("Cannot reference multiple datasets.");
-		}
-		return true;
-	}
-
-	private async handleOPTIONS(options: object, sections: Section[]): Promise<InsightResult[]> {
+	private async handleOPTIONS(options: object, transformedResults: Object[]): Promise<InsightResult[]> {
 		//console.log("OPTIONS WORKING");
 		let results: InsightResult[] = [];
 		let columns: string[] = [];
-		let orderKey = "";
+		let orderKeys: string[] = [];
 		try {
 			const optionsKeys = Object.keys(options);
 			const invalidKeys = optionsKeys.filter((key) => !this.utils.validOptions.includes(key));
@@ -291,43 +176,64 @@ export default class QueryEngine {
 				throw new InsightError("Invalid keys in OPTIONS");
 			}
 
+			// Done
 			if ("COLUMNS" in options) {
 				columns = this.handleCOLUMNS(options.COLUMNS);
 			} else {
 				throw new InsightError("Query missing COLUMNS");
 			}
+
 			//console.log(columns);
+			// Done
 			if ("ORDER" in options) {
-				orderKey = await this.QueryOrderHandler.handleORDER(options.ORDER, columns);
+				orderKeys = await this.QueryOrderHandler.handleORDER(options.ORDER, columns);
+				this.dir = this.QueryOrderHandler.dir;
 			}
-			results = await this.completeQuery(sections, columns, orderKey);
+
+			results = await this.completeQuery(transformedResults, columns, orderKeys);
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;
 			}
-			throw new InsightError("Unexpected error.");
+			throw new InsightError("Unexpected error in OPTIONS.");
 		}
 		return results;
 	}
 
-	private async completeQuery(sections: Section[], columns: string[], orderKey: string): Promise<InsightResult[]> {
+	private async completeQuery(
+		transformedResults: Object[],
+		columns: string[],
+		orderKeys: string[]
+	): Promise<InsightResult[]> {
 		let results: InsightResult[] = [];
+		let dataset: Object[] | undefined = [];
 		//console.log("COMPLETE QUERY WORKING");
 		// if no filters have been applied
 		if (this.noFilter) {
-			const datasetSections = this.sectionsDatabase.get(this.queryingIDString);
-			if (datasetSections === undefined) {
+			if (this.sectionOrRoom === "section") {
+				dataset = this.sectionsDatabase.get(this.queryingIDString);
+			} else if (this.sectionOrRoom === "room") {
+				dataset = this.roomsDatabase.get(this.queryingIDString);
+			} else {
+				throw new InsightError("section or room undefined");
+			}
+			if (dataset === undefined) {
 				// should not be possible given current implementation of other methods for query
 				throw new InsightError("Can't find querying dataset");
 			} else {
-				sections = datasetSections;
+				transformedResults = dataset;
 			}
 		}
-		this.utils.checkSize(sections);
-		results = await this.utils.selectCOLUMNS(sections, columns);
-		results = await this.utils.sortByOrder(results, orderKey);
+
+		//console.log(transformedResults.length);
+		this.utils.checkSize(transformedResults);
+
+		//TODO
+		results = await this.utils.selectCOLUMNS(transformedResults, columns, this.isGrouped);
+		results = await this.utils.sortByOrder(results, orderKeys, this.dir);
 		return results;
 	}
+
 	// returns the columns as an array of strings (WORKING)
 	private handleCOLUMNS(value: unknown): string[] {
 		const columns = this.utils.coerceToArray(value); // checks if is an array, if so, coerce to array type
@@ -335,13 +241,46 @@ export default class QueryEngine {
 		for (const key of columns) {
 			const keyStr = String(key);
 			const field = keyStr.split("_")[1];
-			this.checkIDString(keyStr.split("_")[0]);
-			if (this.utils.mFields.includes(field) || this.utils.sFields.includes(field)) {
+			const idstring = keyStr.split("_")[0];
+
+			this.sectionOrRoom = this.utils.checkIDString(
+				this.sDSList,
+				this.rDSList,
+				this.sectionOrRoom,
+				this.queryingIDString,
+				idstring
+			);
+			this.queryingIDString = idstring;
+
+			// checks if the field is a valid field
+			if (this.checkValidColumn(field)) {
 				results.push(keyStr);
 			} else {
 				throw new InsightError(`Invalid key ${keyStr} in COLUMNS`);
 			}
 		}
 		return results;
+	}
+
+	// if the field is valid, return true, if sectionOrRoom is somehow empty throw error
+	private checkValidColumn(field: string): boolean {
+		if (this.isGrouped) {
+			if (this.newCols.includes(field)) {
+				return true;
+			} else {
+				throw new InsightError("Keys in COLUMNS must be in GROUP or APPLY when TRANSFORMATIONS is present");
+			}
+		} else if (this.sectionOrRoom === "section") {
+			if (this.utils.mFieldsSection.includes(field) || this.utils.sFieldsSection.includes(field)) {
+				return true;
+			}
+		} else if (this.sectionOrRoom === "room") {
+			if (this.utils.mFieldsRoom.includes(field) || this.utils.sFieldsRoom.includes(field)) {
+				return true;
+			}
+		} else {
+			throw new InsightError("section or room undefined");
+		}
+		return false;
 	}
 }

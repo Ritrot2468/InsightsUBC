@@ -1,0 +1,31 @@
+{
+	"title": "invalid apply rule target key",
+	"input": {
+		"WHERE": {
+			"GT": {
+				"rooms_seats": 20
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"average_lat",
+				"averageSeats"
+			],
+			"ORDER": "averageSeats"
+		},
+		"TRANSFORMATIONS": {
+			"GROUP": [
+				"rooms_lat"
+			],
+			"APPLY": [
+				{
+					"averageSeats": {
+						"AVG": "averageSeats"
+					}
+				}
+			]
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

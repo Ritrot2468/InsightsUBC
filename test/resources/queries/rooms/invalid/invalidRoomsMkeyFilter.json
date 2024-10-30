@@ -1,0 +1,18 @@
+{
+	"title": "Invalid rooms mkey filter",
+	"input": {
+		"WHERE": {
+			"GT": {
+				"rooms_avg": 20
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"rooms_fullname",
+				"rooms_name"
+			]
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

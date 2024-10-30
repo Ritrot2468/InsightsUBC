@@ -28,12 +28,14 @@ interface RoomJSON {
 }
 
 export default class Room extends Building {
-	private id: string;
-	private lat: number;
-	private lon: number;
-	private seats: number;
-	private href: string;
-
+	public name: string;
+	public lat: number;
+	public lon: number;
+	public seats: number;
+	public href: string;
+	public type: string;
+	public furniture: string;
+	public number: string;
 	constructor(
 		id: string,
 		{ lat, lon, seats }: Mfield,
@@ -46,7 +48,7 @@ export default class Room extends Building {
 			address: building.getAddress(),
 			href: building.getbHref(),
 		});
-		this.id = id;
+		this.name = id;
 		this._mfields = { lat, lon, seats };
 		this._sfields = {
 			fullname: sfields.fullname || building.getFullname(),
@@ -58,7 +60,11 @@ export default class Room extends Building {
 		this.lon = lon;
 		this.lat = lat;
 		this.seats = seats;
+		this.type = this._sfields.type;
+		this.furniture = this._sfields.furniture;
 		this.href = this._sfields.href;
+		this.number = this._sfields.number;
+		this.name = this._sfields.name;
 	}
 
 	public getMfields(): Mfield {
@@ -126,10 +132,6 @@ export default class Room extends Building {
 		// -1 if index is not found
 	}
 
-	public getID(): string {
-		return this.id;
-	}
-
 	public getLat(): number {
 		return this.lat;
 	}
@@ -140,6 +142,10 @@ export default class Room extends Building {
 
 	public getSeats(): number {
 		return this.seats;
+	}
+
+	public getID(): string {
+		return this.name;
 	}
 
 	public getHref(): string {

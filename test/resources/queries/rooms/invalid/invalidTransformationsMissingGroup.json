@@ -1,0 +1,30 @@
+{
+	"title": "invalid transformations missing group",
+	"input": {
+		"WHERE": {
+			"GT": {
+				"rooms_seats": 20
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"rooms_lat",
+				"rooms_lon",
+				"countSeats"
+			],
+			"ORDER": "countSeats"
+		},
+		"TRANSFORMATIONS": {
+			"APPLY": [
+				{
+					"countSeats": {
+						"COUNT": "rooms_seats"
+					}
+				}
+			],
+			"ORDER": "countSeats"
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

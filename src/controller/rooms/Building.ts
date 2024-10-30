@@ -1,9 +1,9 @@
 import { Mfield, Sfield } from "./Room";
 
 export default class Building {
-	protected fullname: string;
-	protected shortname: string;
-	protected address: string;
+	public fullname: string;
+	public shortname: string;
+	public address: string;
 	protected bHref: string;
 	protected _mfields: Mfield;
 	protected _sfields: Sfield;

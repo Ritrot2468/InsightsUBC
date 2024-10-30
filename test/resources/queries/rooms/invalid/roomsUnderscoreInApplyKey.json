@@ -1,0 +1,31 @@
+{
+	"title": "rooms underscore in applyKey",
+	"input": {
+		"WHERE": {
+			"GT": {
+				"rooms_seats": 20
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"rooms_lat",
+				"average_Seats"
+			],
+			"ORDER": "average_Seats"
+		},
+		"TRANSFORMATIONS": {
+			"GROUP": [
+				"rooms_lat"
+			],
+			"APPLY": [
+				{
+					"average_Seats": {
+						"AVG": "rooms_seats"
+					}
+				}
+			]
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

@@ -20,7 +20,7 @@ export default class QueryEngine {
 	private newCols: string[];
 	private isGrouped: boolean;
 	private dir: string;
-	private datasetValidator: DatasetValidatorHelper
+	private datasetValidator: DatasetValidatorHelper;
 
 	constructor(sectionsDatabase: Map<string, Section[]>, roomsDatabase: Map<string, Room[]>) {
 		this.queryingIDString = "";
@@ -31,25 +31,34 @@ export default class QueryEngine {
 		this.QueryOrderHandler = new QueryOrderHandler();
 		this.QueryEngineFilter = new QueryEngineFilter(sectionsDatabase, roomsDatabase);
 		this.sectionOrRoom = "";
-		this.datasetValidator = new DatasetValidatorHelper()
+		this.datasetValidator = new DatasetValidatorHelper();
+		//console.log(this.roomsDatabase.size);
+		// sectionsDatabase and roomsDatabase are both empty
 		this.sDSList = Array.from(sectionsDatabase.keys());
 		this.rDSList = Array.from(roomsDatabase.keys());
-		//console.log(this.rDSList)
+		//console.log(this.rDSList);
 		this.newCols = [];
 		this.isGrouped = false;
 		this.dir = "UP"; // default (one key) sorting is UP
 	}
 
+	private async querySetup(currIDs: string[]): Promise<boolean> {
+		const idRecords = await this.datasetValidator.separateRoomAndCourseIDs(currIDs);
+		this.rDSList = idRecords.rooms;
+		this.sDSList = idRecords.sections;
+		this.QueryEngineFilter.setIDs(this.sDSList, this.rDSList);
+		this.queryingIDString = ""; // restart on every query;
+		return true;
+	}
+
 	public async query(query: unknown, currIDs: string[]): Promise<InsightResult[]> {
 		//console.log("QUERY method");
-		const idRecords = await this.datasetValidator.separateRoomAndCourseIDs(currIDs);
-		this.rDSList = idRecords.rooms
-		this.sDSList = idRecords.sections
-		this.QueryEngineFilter.setIDs(this.sDSList, this.rDSList)
+		//console.log(this.roomsDatabase.size);
+		await this.querySetup(currIDs);
+		//console.log(this.rDSList);
 		let filteredSOR: Object[] = [];
 		let transformedResults: Object[] = [];
 		let result: InsightResult[] = [];
-		this.queryingIDString = ""; // restart on every query;
 		const queryObj = Object(query);
 		//console.log(queryObj)
 		try {
@@ -66,6 +75,7 @@ export default class QueryEngine {
 			} else {
 				throw new InsightError("Query missing WHERE");
 			}
+			//console.log()
 
 			// If TRANSFORMATIONS key exists, complete transformation on filtered sections
 			if ("TRANSFORMATIONS" in queryObj) {
@@ -182,7 +192,7 @@ export default class QueryEngine {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;
 			}
-			throw new InsightError("Unexpected error.");
+			throw new InsightError("Unexpected error in OPTIONS.");
 		}
 		return results;
 	}

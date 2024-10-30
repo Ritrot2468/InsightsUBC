@@ -28,7 +28,7 @@ interface RoomJSON {
 }
 
 export default class Room extends Building {
-	public id: string;
+	public name: string;
 	public lat: number;
 	public lon: number;
 	public seats: number;
@@ -46,7 +46,7 @@ export default class Room extends Building {
 			address: building.getAddress(),
 			href: building.getbHref(),
 		});
-		this.id = id;
+		this.name = id;
 		this._mfields = { lat, lon, seats };
 		this._sfields = {
 			fullname: sfields.fullname || building.getFullname(),
@@ -139,7 +139,7 @@ export default class Room extends Building {
 	}
 
 	public getID(): string {
-		return this.id;
+		return this.name;
 	}
 
 	public getHref(): string {

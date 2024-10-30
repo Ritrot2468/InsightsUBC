@@ -278,7 +278,7 @@ describe("InsightFacade", function () {
 		// 	const result = await facade.addDataset("room3", rooms2, InsightDatasetKind.Rooms);
 		// 	return expect(result).to.have.members(["room3"]);
 		// });
-		//TODO
+
 		// it("building field not in index file -> valid rooms - rooms", async function () {
 		// 	const result = await facade.addDataset("room4", missingFields2, InsightDatasetKind.Rooms);
 		// 	return expect(result).to.have.members(["room4"]);
@@ -776,6 +776,7 @@ describe("InsightFacade", function () {
 			await clearDisk();
 		});
 
+		it("[sections/valid/simple.json] SELECT dept, avg WHERE avg > 97", checkQuery)
 		const sectionTestCases = [
 			"[sections/valid/simple.json] SELECT dept, avg WHERE avg > 97",
 			"[sections/valid/simple1.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = cps*",

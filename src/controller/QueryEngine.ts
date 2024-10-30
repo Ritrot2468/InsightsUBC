@@ -4,6 +4,7 @@ import QueryUtils from "./QueryUtils";
 import QueryEngineFilter from "./QueryEngineFilter";
 import Section from "./sections/Section";
 import Room from "./rooms/Room";
+import DatasetValidatorHelper from "./DatasetValidatorHelper";
 
 export default class QueryEngine {
 	private queryingIDString: string;
@@ -19,6 +20,7 @@ export default class QueryEngine {
 	private newCols: string[];
 	private isGrouped: boolean;
 	private dir: string;
+	private datasetValidator: DatasetValidatorHelper
 
 	constructor(sectionsDatabase: Map<string, Section[]>, roomsDatabase: Map<string, Room[]>) {
 		this.queryingIDString = "";
@@ -29,22 +31,30 @@ export default class QueryEngine {
 		this.QueryOrderHandler = new QueryOrderHandler();
 		this.QueryEngineFilter = new QueryEngineFilter(sectionsDatabase, roomsDatabase);
 		this.sectionOrRoom = "";
+		this.datasetValidator = new DatasetValidatorHelper()
 		this.sDSList = Array.from(sectionsDatabase.keys());
 		this.rDSList = Array.from(roomsDatabase.keys());
+		//console.log(this.rDSList)
 		this.newCols = [];
 		this.isGrouped = false;
 		this.dir = "UP"; // default (one key) sorting is UP
 	}
 
-	public async query(query: unknown): Promise<InsightResult[]> {
+	public async query(query: unknown, currIDs: string[]): Promise<InsightResult[]> {
 		//console.log("QUERY method");
+		const idRecords = await this.datasetValidator.separateRoomAndCourseIDs(currIDs);
+		this.rDSList = idRecords.rooms
+		this.sDSList = idRecords.sections
+		this.QueryEngineFilter.setIDs(this.sDSList, this.rDSList)
 		let filteredSOR: Object[] = [];
 		let transformedResults: Object[] = [];
 		let result: InsightResult[] = [];
 		this.queryingIDString = ""; // restart on every query;
 		const queryObj = Object(query);
+		//console.log(queryObj)
 		try {
 			const queryKeys = Object.keys(queryObj);
+			//console.log(queryKeys)
 			const invalidKeys = queryKeys.filter((key) => !this.utils.validQueryKeys.includes(key));
 			if (invalidKeys.length > 0) {
 				throw new InsightError("Excess keys in query");
@@ -52,6 +62,7 @@ export default class QueryEngine {
 			// If WHERE key exists, filter all the sections, else throw InsightError
 			if ("WHERE" in queryObj) {
 				filteredSOR = await this.handleWHERE(queryObj.WHERE);
+				//console.log(filteredSOR)
 			} else {
 				throw new InsightError("Query missing WHERE");
 			}
@@ -97,8 +108,11 @@ export default class QueryEngine {
 				const values = Object.values(where)[0];
 
 				//TODO;
+				//console.log(filter, values)
 				filteredSOR = await this.QueryEngineFilter.handleFilter(filter, values);
+				//console.log(filteredSOR)
 				this.queryingIDString = this.QueryEngineFilter.queryingIDString;
+
 				this.sectionOrRoom = this.QueryEngineFilter.sectionOrRoom;
 			}
 		} catch (err) {

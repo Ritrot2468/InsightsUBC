@@ -31,26 +31,35 @@ export default class DatasetValidatorHelper {
 		}
 	}
 
-	public async separateRoomAndCourseIDs(allIds: string[]): Promise<{ courses: string[]; rooms: string[] }> {
+	public async separateRoomAndCourseIDs(allIds: string[]): Promise<{ sections: string[]; rooms: string[] }> {
 		const setIds = new Set(allIds);
-		const courseIDs: string[] = [];
+		const sectionIDs: string[] = [];
 		const roomIDs: string[] = [];
-		setIds.forEach((id) => {
-			const coursePath = `./data/${id}/courses`;
 
-			fs.pathExists(coursePath)
-				.then((pathExists) => {
-					if (pathExists) {
-						courseIDs.push(id);
-					} else {
-						roomIDs.push(id);
-					}
-				})
-				.catch((err) => {
+		const results = await Promise.all(
+			Array.from(setIds).map(async (id) => {
+				const coursePath = `./data/${id}/courses`;
+
+				return fs.pathExists(coursePath).then((pathExists) => ({
+					id,
+					isCourse: pathExists
+				})).catch((err) => {
 					throw err;
 				});
+			})
+		);
+
+		results.forEach(({ id, isCourse }) => {
+			if (isCourse) {
+				sectionIDs.push(id);
+			} else {
+				roomIDs.push(id);
+			}
 		});
 
-		return { courses: courseIDs, rooms: roomIDs };
+		// console.log('Final Course IDs:', courseIDs);
+		// console.log('Final Room IDs:', roomIDs);
+
+		return { sections: sectionIDs, rooms: roomIDs };
 	}
 }

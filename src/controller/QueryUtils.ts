@@ -189,6 +189,7 @@ export default class QueryUtils {
 	): string {
 		// check if a dataset has already been referenced if not return whether its a section or a room DS
 		if (queryingIDString === "") {
+			//console.log(sDSList, rDSList)
 			return this.checkSectionOrRoom(sDSList, rDSList, idStr);
 		} else if (queryingIDString !== idStr) {
 			throw new InsightError("Cannot reference multiple datasets.");

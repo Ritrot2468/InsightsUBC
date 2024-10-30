@@ -105,17 +105,20 @@ export default class InsightFacade implements IInsightFacade {
 		let result: InsightResult[] = [];
 		try {
 			const currIDs = await fs.readdir("./data");
+			//console.log(currIDs)
 			const idRecords = await this.datasetValidatorHelper.separateRoomAndCourseIDs(currIDs);
+			//console.log(idRecords.rooms, idRecords.courses)
 
-			if (this.sectionsDatabase.size + this.roomsDatabase.size !== currIDs.length) {
-				const cIDs = idRecords.courses;
+			if ((this.sectionsDatabase.size + this.roomsDatabase.size) < currIDs.length) {
+				const cIDs = idRecords.sections;
 				const rIDs = idRecords.rooms;
-
+				//console.log(rIDs)
 				this.sectionsDatabase = await this.secDiskReader.mapMissingSections(cIDs, this.sectionsDatabase);
+				//console.log((this.sectionsDatabase.keys))
 				this.roomsDatabase = await this.roomDiskReader.mapMissingRooms(rIDs, this.roomsDatabase);
 			}
 
-			result = await this.qe.query(query);
+			result = await this.qe.query(query, currIDs);
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;

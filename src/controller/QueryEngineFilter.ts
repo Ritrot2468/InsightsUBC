@@ -24,16 +24,22 @@ export default class QueryEngineFilter {
 		this.currDataset = [];
 	}
 
+	public setIDs(sDSList: string[], rDSList: string[]): void {
+		this.rDSList = rDSList
+		this.sDSList = sDSList
+	}
 	public async handleFilter(filter: string, value: unknown): Promise<Object[]> {
 		let promise: Promise<Object[]>;
 		try {
 			//console.log("Filter running");
 			//console.log(filter);
+			//console.log(this.sDSList, this.rDSList)
 			if (this.utils.logicComparator.includes(filter)) {
 				promise = this.handleLogicComparison(filter, value);
 			} else if (this.utils.mComparator.includes(filter) || filter === "IS" || filter === "NOT") {
 				this.utils.isObject(value);
 				const [key, input] = Object.entries(value as Record<string, any>)[0];
+				//console.log(key)
 				switch (filter) {
 					case "IS":
 						if (typeof input !== "string") {

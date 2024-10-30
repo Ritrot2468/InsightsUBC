@@ -31,28 +31,15 @@ export default class RoomsParser {
 	];
 	// parses through index.htm file to return a map with associated populated fields of all buildings in the file
 	protected async parseIndexFile(zip: JSZip): Promise<Map<string, Building>> {
-		const allPromises: Promise<Map<string, Building>>[] = [];
-
-		if (zip.files["index.htm"]) {
-			const promiseContent = zip.files["index.htm"].async("string").then(async (content0) => {
-				const document = parse5.parse(content0);
-				return this.findTdElemsInIndexFile(document);
-			});
-			allPromises.push(promiseContent);
+		if (!zip.files["index.htm"]) {
+			throw new InsightError("index.htm not found");
 		}
 
-		// wait for all promises
-		const results = await Promise.all(allPromises);
-		const combinedMap = new Map<string, Building>();
+		const content = await zip.files["index.htm"].async("string");
+		const document = parse5.parse(content);
+		const buildingsMap = await this.findTdElemsInIndexFile(document);
 
-		// combine all maps
-		results.forEach((buildingMap) => {
-			buildingMap.forEach((building, shortname) => {
-				combinedMap.set(shortname, building);
-			});
-		});
-
-		return combinedMap;
+		return buildingsMap;
 	}
 
 	private async getAllTables(doc: any): Promise<any[]> {
@@ -142,102 +129,6 @@ export default class RoomsParser {
 
 		return null;
 	}
-
-	// protected async findTdElemsInIndexFile(doc: any): Promise<Map<string, Building>> {
-	// 	const buildingsMap = new Map<string, Building>();
-	// 	let foundTable = false;
-	//
-	// 	const tables = await this.getAllTables(doc);
-	//
-	// 	// Process each table
-	// 	tables.forEach((table: any) => {
-	// 		// Find the <tbody> in the <table>
-	// 		if (foundTable) {
-	// 			return buildingsMap;
-	// 		}
-	// 		const tbody = table.childNodes.find((child: any) => child.nodeName === "tbody");
-	//
-	// 		// if <tbody> exists, process its <tr> elements
-	// 		if (tbody) {
-	// 			tbody.childNodes.forEach((child: any) => {
-	// 				if (child.nodeName === "tr") {
-	// 					const currClassNames: string[] = [];
-	// 					const tdElems = child.childNodes.filter((grandchild: any) => grandchild.nodeName === "td");
-	//
-	// 					// process each <td> element
-	// 					tdElems.forEach((tdElem: any) => {
-	// 						const classAttr = tdElem.attrs.find((attr: any) => attr.name === "class");
-	// 						const classList = classAttr ? classAttr.value : "";
-	// 						currClassNames.push(classList);
-	// 					});
-	//
-	// 					if (this.compareClassNames(this.buildingTdClassNames, currClassNames)) {
-	// 						foundTable = true;
-	// 						const newBuilding: Building = this.parseBuildingInfo(tdElems);
-	// 						const codeKey: string[] = newBuilding.getHref().split("/");
-	// 						const buildingCode: string = codeKey[codeKey.length - 1].split(".")[0];
-	//
-	// 						buildingsMap.set(buildingCode, newBuilding);
-	// 					}
-	// 				}
-	// 			});
-	// 		}
-	// 	});
-	//
-	// 	if (buildingsMap.size === 0) {
-	// 		throw new InsightError("No <td> elements found or valid buildings detected.");
-	// 	}
-	//
-	// 	return buildingsMap;
-	// }
-
-	// // finds all the td elems associated with the index table of
-	// protected findTdElemsInIndexFile(doc: any): Map<string, Building> {
-	// 	const buildingsMap = new Map<string, Building>();
-	// 	// Function to traverse the parsed tree
-	// 	const traverse = (node: any): any => {
-	// 		// Check if the current node is a <tr> element
-	// 		const currClassNames: string[] = [];
-	// 		if (node.nodeName === "tr" && node.childNodes) {
-	// 			// Gather all <td> elements within this <tr>
-	// 			const tdElems = node.childNodes.filter((child: any) => child.nodeName === "td");
-	// 			//console.log(tdElems)
-	//
-	// 			// Process each <td> element
-	// 			tdElems.forEach((tdElem: any) => {
-	// 				const classAttr = tdElem.attrs.find((attr: any) => attr.name === "class");
-	// 				//console.log(classAttr)
-	// 				const classList = classAttr.value;
-	// 				currClassNames.push(classList);
-	// 			});
-	//
-	// 			if (this.compareClassNames(this.buildingTdClassNames, currClassNames)) {
-	// 				const newBuilding: Building = this.parseBuildingInfo(tdElems);
-	// 				const codeKey: string[] = newBuilding.getHref().split("/");
-	// 				// get from href in the case shortname on index file is empty string
-	// 				const buildingCode: string = codeKey[codeKey.length - 1].split(".")[0];
-	// 				//console.log(buildingCode)
-	//
-	// 				buildingsMap.set(buildingCode, newBuilding);
-	// 			}
-	// 		}
-	//
-	// 		// Recursively traverse child nodes
-	// 		if (node.childNodes) {
-	// 			node.childNodes.forEach((child: any) => traverse(child));
-	// 		}
-	// 	};
-	//
-	// 	traverse(doc); // Start traversing from the root document
-	//
-	// 	//console.log(buildingsMap.size)
-	//
-	// 	if (buildingsMap.size === 0) {
-	// 		throw new InsightError("No <td> elements found or valid buildings detected.");
-	// 	}
-	//
-	// 	return buildingsMap;
-	// }
 
 	protected async parseRoomInfo(tdElems: any, building: Building, id: string): Promise<Room | null> {
 		let number = "";

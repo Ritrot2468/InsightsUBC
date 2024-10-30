@@ -32,8 +32,6 @@ export default class QueryEngine {
 		this.QueryEngineFilter = new QueryEngineFilter(sectionsDatabase, roomsDatabase);
 		this.sectionOrRoom = "";
 		this.datasetValidator = new DatasetValidatorHelper();
-		//console.log(this.roomsDatabase.size);
-		// sectionsDatabase and roomsDatabase are both empty
 		this.sDSList = Array.from(sectionsDatabase.keys());
 		this.rDSList = Array.from(roomsDatabase.keys());
 		//console.log(this.rDSList);

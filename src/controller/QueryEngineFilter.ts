@@ -25,8 +25,8 @@ export default class QueryEngineFilter {
 	}
 
 	public setIDs(sDSList: string[], rDSList: string[]): void {
-		this.rDSList = rDSList
-		this.sDSList = sDSList
+		this.rDSList = rDSList;
+		this.sDSList = sDSList;
 	}
 	public async handleFilter(filter: string, value: unknown): Promise<Object[]> {
 		let promise: Promise<Object[]>;

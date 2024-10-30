@@ -40,12 +40,15 @@ export default class DatasetValidatorHelper {
 			Array.from(setIds).map(async (id) => {
 				const coursePath = `./data/${id}/courses`;
 
-				return fs.pathExists(coursePath).then((pathExists) => ({
-					id,
-					isCourse: pathExists
-				})).catch((err) => {
-					throw err;
-				});
+				return fs
+					.pathExists(coursePath)
+					.then((pathExists) => ({
+						id,
+						isCourse: pathExists,
+					}))
+					.catch((err) => {
+						throw err;
+					});
 			})
 		);
 

@@ -29,6 +29,10 @@ interface RoomJSON {
 
 export default class Room extends Building {
 	private id: string;
+	private lat: number;
+	private lon: number;
+	private seats: number;
+	private href: string;
 
 	constructor(
 		id: string,
@@ -44,7 +48,17 @@ export default class Room extends Building {
 		});
 		this.id = id;
 		this._mfields = { lat, lon, seats };
-		this._sfields = { ...this.getSfields(), ...sfields } as Sfield;
+		this._sfields = {
+			fullname: sfields.fullname || building.getFullname(),
+			shortname: sfields.shortname || building.getShortname(),
+			address: sfields.address || building.getAddress(),
+			href: sfields.href || building.getbHref(),
+			...sfields,
+		} as Sfield;
+		this.lon = lon;
+		this.lat = lat;
+		this.seats = seats;
+		this.href = this._sfields.href;
 	}
 
 	public getMfields(): Mfield {
@@ -57,6 +71,7 @@ export default class Room extends Building {
 
 	public setHref(newHref: string): void {
 		this._sfields.href = newHref;
+		this.href = newHref;
 	}
 
 	public setMfield(index: number, newVal: number): void {
@@ -115,6 +130,21 @@ export default class Room extends Building {
 		return this.id;
 	}
 
+	public getLat(): number {
+		return this.lat;
+	}
+
+	public getLon(): number {
+		return this.lon;
+	}
+
+	public getSeats(): number {
+		return this.seats;
+	}
+
+	public getHref(): string {
+		return this.href;
+	}
 	public convertToJSON(): { setID: string; sFields: Sfield; mFields: Mfield } {
 		return {
 			setID: this.getID(),

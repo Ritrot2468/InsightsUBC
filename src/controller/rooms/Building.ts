@@ -12,6 +12,8 @@ export default class Building {
 		this.fullname = params.fullname;
 		this.shortname = params.shortname;
 		this.address = params.address;
+
+		// the BUILDING href link NOT the room href Link
 		this.bHref = params.href;
 
 		// Initialize Mfield and Sfield with default values
@@ -40,6 +42,7 @@ export default class Building {
 		return this.address;
 	}
 
+	// the BUILDING href link NOT the room href Link
 	public getbHref(): string {
 		return this.bHref;
 	}

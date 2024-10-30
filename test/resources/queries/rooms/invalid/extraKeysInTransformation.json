@@ -1,0 +1,34 @@
+{
+	"title": "extra keys in transformation",
+	"input": {
+		"WHERE": {
+			"GT": {
+				"rooms_seats": 20
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"rooms_lat",
+				"rooms_lon",
+				"countSeats"
+			],
+			"ORDER": "countSeats"
+		},
+		"TRANSFORMATIONS": {
+			"GROUP": [
+				"rooms_lat",
+				"rooms_lon"
+			],
+			"APPLY": [
+				{
+					"countSeats": {
+						"COUNT": "rooms_seats"
+					}
+				}
+			],
+			"ORDER": "countSeats"
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

@@ -105,7 +105,7 @@ export default class QueryEngine {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;
 			}
-			throw new InsightError("Unexpected error.");
+			throw new InsightError("Unexpected error in WHERE.");
 		}
 		return filteredSOR;
 	}
@@ -113,7 +113,27 @@ export default class QueryEngine {
 	//TODO;
 	private async handleTRANSFORMATIONS(transformations: object, filteredSOR: Object[]): Promise<Object[]> {
 		const transformedResults: Object[] = [];
+		//const groupKeys;
 		this.isGrouped = true;
+		try {
+			const transformationKeys = Object.keys(transformations);
+			const invalidKeys = transformationKeys.filter((key) => !this.utils.validTransformationKeys.includes(key));
+			if (invalidKeys.length > 0) {
+				throw new InsightError("Invalid keys in TRANSFORMATIONS");
+			}
+			/*
+			if ("GROUP" in transformationKeys) {
+			} else {
+				throw new InsightError("")
+			}
+			if ("")
+			*/
+		} catch (err) {
+			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
+				throw err;
+			}
+			throw new InsightError("Unexpected error in TRANSFORMATIONS.");
+		}
 		return transformedResults;
 	}
 
@@ -166,7 +186,7 @@ export default class QueryEngine {
 			if (this.sectionOrRoom === "section") {
 				dataset = this.sectionsDatabase.get(this.queryingIDString);
 			} else if (this.sectionOrRoom === "room") {
-				dataset = this.sectionsDatabase.get(this.queryingIDString);
+				dataset = this.roomsDatabase.get(this.queryingIDString);
 			} else {
 				throw new InsightError("section or room undefined");
 			}
@@ -219,6 +239,8 @@ export default class QueryEngine {
 		if (this.isGrouped) {
 			if (this.newCols.includes(field)) {
 				return true;
+			} else {
+				throw new InsightError("Keys in COLUMNS must be in GROUP or APPLY when TRANSFORMATIONS is present");
 			}
 		} else if (this.sectionOrRoom === "section") {
 			if (this.utils.mFieldsSection.includes(field) || this.utils.sFieldsSection.includes(field)) {

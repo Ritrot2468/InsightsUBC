@@ -9,6 +9,7 @@ export default class QueryUtils {
 	public mFieldsRoom: string[] = ["lat", "lon", "seats"];
 	public validOptions: string[] = ["COLUMNS", "ORDER"];
 	public validQueryKeys: string[] = ["WHERE", "OPTIONS", "TRANSFORMATIONS"];
+	public validTransformationKeys: string[] = ["GROUP", "APPLY"];
 	//public validSort: string[] = ["dir", "keys"];
 
 	public coerceToArray(value: unknown): unknown[] {

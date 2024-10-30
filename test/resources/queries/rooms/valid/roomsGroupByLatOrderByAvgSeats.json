@@ -1,0 +1,200 @@
+{
+	"title": "rooms group by lat order by avg seats",
+	"input": {
+		"WHERE": {
+			"GT": {
+				"rooms_seats": 20
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"rooms_lat",
+				"averageSeats"
+			],
+			"ORDER": "averageSeats"
+		},
+		"TRANSFORMATIONS": {
+			"GROUP": [
+				"rooms_lat"
+			],
+			"APPLY": [
+				{
+					"averageSeats": {
+						"AVG": "rooms_seats"
+					}
+				}
+			]
+		}
+	},
+	"errorExpected": false,
+	"expected": [
+		{
+			"rooms_lat": 49.2666,
+			"averageSeats": 21
+		},
+		{
+			"rooms_lat": 49.264,
+			"averageSeats": 30
+		},
+		{
+			"rooms_lat": 49.2663,
+			"averageSeats": 32.5
+		},
+		{
+			"rooms_lat": 49.26048,
+			"averageSeats": 37.47
+		},
+		{
+			"rooms_lat": 49.2643,
+			"averageSeats": 39.25
+		},
+		{
+			"rooms_lat": 49.26867,
+			"averageSeats": 40.75
+		},
+		{
+			"rooms_lat": 49.2642,
+			"averageSeats": 41.33
+		},
+		{
+			"rooms_lat": 49.26958,
+			"averageSeats": 46.5
+		},
+		{
+			"rooms_lat": 49.26862,
+			"averageSeats": 47
+		},
+		{
+			"rooms_lat": 49.26273,
+			"averageSeats": 48.17
+		},
+		{
+			"rooms_lat": 49.26414,
+			"averageSeats": 50.2
+		},
+		{
+			"rooms_lat": 49.26398,
+			"averageSeats": 51.33
+		},
+		{
+			"rooms_lat": 49.26826,
+			"averageSeats": 52.87
+		},
+		{
+			"rooms_lat": 49.26766,
+			"averageSeats": 53.56
+		},
+		{
+			"rooms_lat": 49.26486,
+			"averageSeats": 61.58
+		},
+		{
+			"rooms_lat": 49.266463,
+			"averageSeats": 61.88
+		},
+		{
+			"rooms_lat": 49.2699,
+			"averageSeats": 62.67
+		},
+		{
+			"rooms_lat": 49.26293,
+			"averageSeats": 64.59
+		},
+		{
+			"rooms_lat": 49.26114,
+			"averageSeats": 68.71
+		},
+		{
+			"rooms_lat": 49.26767,
+			"averageSeats": 71.25
+		},
+		{
+			"rooms_lat": 49.26176,
+			"averageSeats": 71.67
+		},
+		{
+			"rooms_lat": 49.27106,
+			"averageSeats": 75
+		},
+		{
+			"rooms_lat": 49.26605,
+			"averageSeats": 77.38
+		},
+		{
+			"rooms_lat": 49.26044,
+			"averageSeats": 80.43
+		},
+		{
+			"rooms_lat": 49.26125,
+			"averageSeats": 88
+		},
+		{
+			"rooms_lat": 49.26228,
+			"averageSeats": 101
+		},
+		{
+			"rooms_lat": 49.266089,
+			"averageSeats": 106
+		},
+		{
+			"rooms_lat": 49.26627,
+			"averageSeats": 109.67
+		},
+		{
+			"rooms_lat": 49.26545,
+			"averageSeats": 126.25
+		},
+		{
+			"rooms_lat": 49.2661,
+			"averageSeats": 134.25
+		},
+		{
+			"rooms_lat": 49.26478,
+			"averageSeats": 134.78
+		},
+		{
+			"rooms_lat": 49.26372,
+			"averageSeats": 144
+		},
+		{
+			"rooms_lat": 49.26479,
+			"averageSeats": 152
+		},
+		{
+			"rooms_lat": 49.2659,
+			"averageSeats": 152.17
+		},
+		{
+			"rooms_lat": 49.26229,
+			"averageSeats": 158.33
+		},
+		{
+			"rooms_lat": 49.26541,
+			"averageSeats": 160
+		},
+		{
+			"rooms_lat": 49.26047,
+			"averageSeats": 173.67
+		},
+		{
+			"rooms_lat": 49.26274,
+			"averageSeats": 193.33
+		},
+		{
+			"rooms_lat": 49.26517,
+			"averageSeats": 213.5
+		},
+		{
+			"rooms_lat": 49.26236,
+			"averageSeats": 275
+		},
+		{
+			"rooms_lat": 49.2683,
+			"averageSeats": 299
+		},
+		{
+			"rooms_lat": 49.26207,
+			"averageSeats": 426
+		}
+	]
+}

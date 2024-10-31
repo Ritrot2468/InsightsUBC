@@ -10,6 +10,7 @@ export default class QueryUtils {
 	public validOptions: string[] = ["COLUMNS", "ORDER"];
 	public validQueryKeys: string[] = ["WHERE", "OPTIONS", "TRANSFORMATIONS"];
 	public validTransformationKeys: string[] = ["GROUP", "APPLY"];
+	public validApplyTokens: string[] = ["MAX", "MIN", "AVG", "SUM", "COUNT"];
 	//public validSort: string[] = ["dir", "keys"];
 
 	public coerceToArray(value: unknown): unknown[] {
@@ -189,8 +190,8 @@ export default class QueryUtils {
 		idStr: string
 	): string {
 		// check if a dataset has already been referenced if not return whether its a section or a room DS
+		//console.log(queryingIDString);
 		if (queryingIDString === "") {
-			//console.log(sDSList, rDSList)
 			return this.checkSectionOrRoom(sDSList, rDSList, idStr);
 		} else if (queryingIDString !== idStr) {
 			throw new InsightError("Cannot reference multiple datasets.");
@@ -208,5 +209,10 @@ export default class QueryUtils {
 		} else {
 			throw new InsightError(`Dataset with id: ${idStr} not added.`);
 		}
+	}
+
+	// checks if the array is a string array
+	public isStringArray(value: unknown): boolean {
+		return Array.isArray(value) && value.every((item) => typeof item === "string");
 	}
 }

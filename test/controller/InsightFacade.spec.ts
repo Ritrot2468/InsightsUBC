@@ -28,6 +28,7 @@ describe("InsightFacade", function () {
 	let sections: string;
 	let rooms: string;
 
+	///*
 	describe("AddDataset - Sections", function () {
 		let sections2: string;
 		let empty: string;
@@ -709,6 +710,7 @@ describe("InsightFacade", function () {
 			}
 		});
 	});
+	//*/
 
 	describe("PerformQuery", function () {
 		/**
@@ -730,7 +732,7 @@ describe("InsightFacade", function () {
 			let result: InsightResult[];
 			try {
 				result = await facade.performQuery(input);
-				console.log(result)
+				//console.log(result);
 				if (errorExpected) {
 					expect.fail(`performQuery resolved when it should have rejected with ${expected}`);
 				}
@@ -760,7 +762,8 @@ describe("InsightFacade", function () {
 			facade = new InsightFacade();
 			//facade2 = new InsightFacade()
 			sections = await getContentFromArchives("sections/pair.zip");
-			rooms = await getContentFromArchives("rooms/test1.zip");
+			//rooms = await getContentFromArchives("rooms/test1.zip");
+			rooms = await getContentFromArchives("rooms/campus.zip");
 
 			// Add the datasets to InsightFacade once.
 			// Will *fail* if there is a problem reading ANY dataset.
@@ -782,7 +785,10 @@ describe("InsightFacade", function () {
 		});
 
 		//it("[sections/valid/simple.json] SELECT dept, avg WHERE avg > 97", checkQuery);
+		//it("[sections/valid/orderByTitle.json] order by title", checkQuery);
+		//it("[sections/valid/yearTest.json] order by year", checkQuery);
 
+		///*
 		const sectionTestCases = [
 			"[sections/valid/simple.json] SELECT dept, avg WHERE avg > 97",
 			"[sections/valid/simple1.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = cps*",
@@ -875,7 +881,6 @@ describe("InsightFacade", function () {
 			"[sections/invalid/invalidOrObject.json] invalid or object",
 			"[sections/invalid/nonEmptyOrArray.json] non empty or array",
 			"[sections/invalid/orWith2Keys.json] or with 2 keys",
-
 		];
 
 		// Automated test cases for sections
@@ -883,6 +888,25 @@ describe("InsightFacade", function () {
 			it(testCase, checkQuery);
 		}
 
+		//*/
+
+		//it("[rooms/valid/classroomsFurniture.json] filter by rooms furniture", checkQuery);
+		//it("[rooms/valid/roomsSimpleOrderDirUp.json] simple order dir up", checkQuery);
+		/*it(
+			"[rooms/valid/roomsGroupByLatOrderByCountNameAvgSeats.json] group by lat order by count name, avg seats",
+			checkQuery
+		);*/
+
+		//it("[rooms/valid/roomsGroupByLatOrderByAvgSeats.json] group by lat order by avg seats", checkQuery);
+
+		it("[rooms/valid/multipleApplyTypes.json] multiple apply types", checkQuery);
+		/*it(
+			"[rooms/valid/roomsGroupByLatAndLonOrderByCountseats.json] group by lat and lon order by count seats",
+			checkQuery
+		);*/
+		//it("[rooms/invalid/roomsUnderscoreInApplyKey.json] order underscore in apply key keys", checkQuery);
+
+		///*
 		// 364 rooms total
 		const roomTestCases = [
 			// valid room queries
@@ -894,7 +918,7 @@ describe("InsightFacade", function () {
 			"[rooms/valid/roomsSimpleOrderDirUp.json] simple order dir up",
 			"[rooms/valid/latitudeQuery.json] filter by latitude",
 			"[rooms/valid/roomsSingleKeyOrder.json] simple order one key",
-			"[rooms/valid/roomsValidOrder2Keys.json] simple order one key",
+			"[rooms/valid/roomsValidOrder2Keys.json] simple order two key",
 			"[rooms/valid/roomsGroupByLatOrderByAvgSeats.json] group by lat order by avg seats",
 			"[rooms/valid/roomsGroupByLatOrderByCountName.json]  group by lat order by count names",
 			"[rooms/valid/roomsGroupByLatOrderByCountNameAvgSeats.json] group by lat order by count name, avg seats",
@@ -907,7 +931,6 @@ describe("InsightFacade", function () {
 			"[rooms/valid/multipleApplyTypes.json] multiple apply types",
 			"[rooms/valid/allOrderKeysExactlyInColumns.json] all order keys exactly in columns",
 			"[rooms/valid/validOrderKeyList.json] valid order key list",
-
 
 			// invalid room queries
 			"[rooms/invalid/invalidRoomsAndSectionsQuery.json] room and sections idstrings",
@@ -953,20 +976,16 @@ describe("InsightFacade", function () {
 			"[rooms/invalid/allOrderKeysIncludingMoreThanColumns.json] all order keys including more than column",
 			"[rooms/invalid/invalidOrderKey.json] invalid order key",
 			"[rooms/invalid/invalidOrderKey2.json] invalid order key 2",
-			"[rooms/invalid/emptyOrderKeys.json] empty order keys"
-
+			"[rooms/invalid/emptyOrderKeys.json] empty order keys",
 		];
 
 		// Automated test cases for room
 		for (const testCase of roomTestCases) {
 			it(testCase, checkQuery);
 		}
+		//*/
 
 		//const roomTestCases = ["[rooms/valid/allRoomsInUbc.json] all rooms in ubc"]
-		// Automated test cases for rooms
-		for (const testCase of roomTestCases) {
-			it(testCase, checkQuery);
-		}
 	});
 
 	describe("ListDataset - rooms", function () {
@@ -977,6 +996,7 @@ describe("InsightFacade", function () {
 			facade = new InsightFacade();
 		});
 
+		///*
 		it("list all ubc rooms ", async function () {
 			sections = await getContentFromArchives("rooms/campus.zip");
 			await facade.addDataset("ubc1", sections, InsightDatasetKind.Rooms);
@@ -1076,6 +1096,7 @@ describe("InsightFacade", function () {
 				expect.fail(`you failed to load the right sets: ${err}`);
 			}
 		});
+		//*/
 
 		// TODO
 		// it("check rooms with bad address - rooms", async function () {

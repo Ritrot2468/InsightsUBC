@@ -27,7 +27,6 @@ export default class AddSectionDataset {
 			await this.secDiskWriter.logSectionsDatasetOnDisk(content, id);
 			await this.secDiskReader.logNewDatasetFromDiskToMap(id, sectionsDatabase);
 			await this.secDiskWriter.logInsightKindToDisk(id, kind, sectionsDatabase.get(id)?.length as number);
-
 			return fs.readdir("./data");
 		} catch (err) {
 			if (err instanceof InsightError) {

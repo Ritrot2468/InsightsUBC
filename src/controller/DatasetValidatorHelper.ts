@@ -21,7 +21,6 @@ export default class DatasetValidatorHelper {
 		}
 	}
 
-
 	public async validateSectionAddition(
 		id: string,
 		sectionsDatabase: Map<string, Section[]>,

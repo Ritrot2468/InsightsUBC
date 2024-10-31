@@ -24,10 +24,18 @@ export default class QueryEngineFilter {
 		this.currDataset = [];
 	}
 
-	public setIDs(sDSList: string[], rDSList: string[]): void {
+	public setDBs(
+		sectionsDatabase: Map<string, Section[]>,
+		roomsDatabase: Map<string, Room[]>,
+		sDSList: string[],
+		rDSList: string[]
+	): void {
+		this.sectionsDatabase = sectionsDatabase;
+		this.roomsDatabase = roomsDatabase;
 		this.rDSList = rDSList;
 		this.sDSList = sDSList;
 	}
+
 	public async handleFilter(filter: string, value: unknown): Promise<Object[]> {
 		let promise: Promise<Object[]>;
 		try {
@@ -84,6 +92,7 @@ export default class QueryEngineFilter {
 				// should not be possible given current implementation of other methods for query
 				throw new InsightError("Can't find querying dataset.");
 			} else {
+				//console.log(dataset.length);
 				return dataset;
 			}
 		}

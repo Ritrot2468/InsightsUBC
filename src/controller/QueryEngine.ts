@@ -4,55 +4,68 @@ import QueryUtils from "./QueryUtils";
 import QueryEngineFilter from "./QueryEngineFilter";
 import Section from "./sections/Section";
 import Room from "./rooms/Room";
-import DatasetValidatorHelper from "./DatasetValidatorHelper";
+//import DatasetValidatorHelper from "./DatasetValidatorHelper";
+import QueryAggregation from "./QueryAggregation";
 
 export default class QueryEngine {
-	private queryingIDString: string;
 	private sectionsDatabase: Map<string, Section[]>;
 	private roomsDatabase: Map<string, Room[]>;
-	private noFilter: boolean;
 	private utils: QueryUtils;
 	private QueryOrderHandler: QueryOrderHandler;
 	private QueryEngineFilter: QueryEngineFilter;
-	private sectionOrRoom: string;
+	private QueryAggregation: QueryAggregation;
 	private sDSList: string[];
 	private rDSList: string[];
-	private newCols: string[];
-	private isGrouped: boolean;
-	private dir: string;
-	private datasetValidator: DatasetValidatorHelper;
+	private newCols: string[] = [];
+	private queryingIDString = "";
+	private sectionOrRoom = "";
+	private isGrouped = false;
+	private dir = "UP";
+	private noFilter = false;
+	//private datasetValidator: DatasetValidatorHelper;
 
 	constructor(sectionsDatabase: Map<string, Section[]>, roomsDatabase: Map<string, Room[]>) {
-		this.queryingIDString = "";
 		this.sectionsDatabase = sectionsDatabase;
 		this.roomsDatabase = roomsDatabase;
-		this.noFilter = false;
 		this.utils = new QueryUtils();
 		this.QueryOrderHandler = new QueryOrderHandler();
-		this.QueryEngineFilter = new QueryEngineFilter(sectionsDatabase, roomsDatabase);
+		this.QueryEngineFilter = new QueryEngineFilter(this.sectionsDatabase, this.roomsDatabase);
+		this.QueryAggregation = new QueryAggregation(this.sectionsDatabase, this.roomsDatabase);
 		this.sectionOrRoom = "";
-		this.datasetValidator = new DatasetValidatorHelper();
-		this.sDSList = Array.from(sectionsDatabase.keys());
-		this.rDSList = Array.from(roomsDatabase.keys());
+		//this.datasetValidator = new DatasetValidatorHelper();
+		this.sDSList = [];
+		this.rDSList = [];
 		//console.log(this.rDSList);
-		this.newCols = [];
-		this.isGrouped = false;
-		this.dir = "UP"; // default (one key) sorting is UP
 	}
 
-	private async querySetup(currIDs: string[]): Promise<boolean> {
+	private async querySetup(
+		sectionsDatabase: Map<string, Section[]>,
+		roomsDatabase: Map<string, Room[]>
+	): Promise<boolean> {
+		/*
 		const idRecords = await this.datasetValidator.separateRoomAndCourseIDs(currIDs);
 		this.rDSList = idRecords.rooms;
 		this.sDSList = idRecords.sections;
-		this.QueryEngineFilter.setIDs(this.sDSList, this.rDSList);
+		*/
+		this.sectionsDatabase = sectionsDatabase;
+		this.roomsDatabase = roomsDatabase;
+		this.sDSList = Array.from(sectionsDatabase.keys());
+		this.rDSList = Array.from(roomsDatabase.keys());
+		this.QueryEngineFilter = new QueryEngineFilter(this.sectionsDatabase, this.roomsDatabase);
+		this.QueryAggregation = new QueryAggregation(this.sectionsDatabase, this.roomsDatabase);
+		this.sectionOrRoom = "";
 		this.queryingIDString = ""; // restart on every query;
+		this.isGrouped = false;
+		this.dir = "UP";
+		this.newCols = [];
+		this.noFilter = false;
 		return true;
 	}
 
-	public async query(query: unknown, currIDs: string[]): Promise<InsightResult[]> {
+	public async query(query: unknown, sD: Map<string, Section[]>, rD: Map<string, Room[]>): Promise<InsightResult[]> {
 		//console.log("QUERY method");
 		//console.log(this.roomsDatabase.size);
-		await this.querySetup(currIDs);
+		await this.querySetup(sD, rD);
 		//console.log(this.rDSList);
 		let filteredSOR: Object[] = [];
 		let transformedResults: Object[] = [];
@@ -73,7 +86,7 @@ export default class QueryEngine {
 			} else {
 				throw new InsightError("Query missing WHERE");
 			}
-			//console.log()
+			//console.log(filteredSOR);
 
 			// If TRANSFORMATIONS key exists, complete transformation on filtered sections
 			if ("TRANSFORMATIONS" in queryObj) {
@@ -82,6 +95,7 @@ export default class QueryEngine {
 			} else {
 				transformedResults = filteredSOR;
 			}
+			//console.log(transformedResults);
 
 			// If OPTIONS key exists, collect InsightResults, else throw InsightError
 			if ("OPTIONS" in queryObj) {
@@ -134,7 +148,8 @@ export default class QueryEngine {
 
 	//TODO;
 	private async handleTRANSFORMATIONS(transformations: object, filteredSOR: Object[]): Promise<Object[]> {
-		const transformedResults: Object[] = [];
+		let transformedResults: Object[] = [];
+		let groupedResults: Record<string, any>;
 		//const groupKeys;
 		this.isGrouped = true;
 		try {
@@ -143,18 +158,25 @@ export default class QueryEngine {
 			if (invalidKeys.length > 0) {
 				throw new InsightError("Invalid keys in TRANSFORMATIONS");
 			}
-			/*
-			if ("GROUP" in transformationKeys) {
-
+			if ("GROUP" in transformations) {
+				groupedResults = await this.QueryAggregation.handleGroupBy(
+					transformations.GROUP,
+					filteredSOR,
+					this.noFilter,
+					this.queryingIDString,
+					this.sectionOrRoom
+				);
 			} else {
 				throw new InsightError("TRANSFORMATIONS missing GROUP key");
 			}
-			if ("APPLY" in transformationKeys) {
 
+			if ("APPLY" in transformations) {
+				transformedResults = await this.QueryAggregation.handleApply(transformations.APPLY, groupedResults);
+				this.updateVar();
+				//console.log("Promise resolved with:", transformedResults);
 			} else {
 				throw new InsightError("TRANSFORMATIONS missing APPLY key");
 			}
-			*/
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;
@@ -162,6 +184,14 @@ export default class QueryEngine {
 			throw new InsightError("Unexpected error in TRANSFORMATIONS.");
 		}
 		return transformedResults;
+	}
+
+	private updateVar(): boolean {
+		this.queryingIDString = this.QueryAggregation.queryingIDString;
+		this.sectionOrRoom = this.QueryAggregation.sectionOrRoom;
+		this.newCols = this.QueryAggregation.groupKeys.concat(this.QueryAggregation.applyKeys);
+		//console.log(this.newCols);
+		return true;
 	}
 
 	private async handleOPTIONS(options: object, transformedResults: Object[]): Promise<InsightResult[]> {
@@ -187,7 +217,7 @@ export default class QueryEngine {
 			// Done
 			if ("ORDER" in options) {
 				orderKeys = await this.QueryOrderHandler.handleORDER(options.ORDER, columns);
-				this.dir = this.QueryOrderHandler.dir;
+				this.dir = this.QueryOrderHandler.getDir();
 			}
 
 			results = await this.completeQuery(transformedResults, columns, orderKeys);
@@ -209,7 +239,7 @@ export default class QueryEngine {
 		let dataset: Object[] | undefined = [];
 		//console.log("COMPLETE QUERY WORKING");
 		// if no filters have been applied
-		if (this.noFilter) {
+		if (this.noFilter && !this.isGrouped) {
 			if (this.sectionOrRoom === "section") {
 				dataset = this.sectionsDatabase.get(this.queryingIDString);
 			} else if (this.sectionOrRoom === "room") {
@@ -236,6 +266,7 @@ export default class QueryEngine {
 
 	// returns the columns as an array of strings (WORKING)
 	private handleCOLUMNS(value: unknown): string[] {
+		//console.log("COLUMNS WORKING");
 		const columns = this.utils.coerceToArray(value); // checks if is an array, if so, coerce to array type
 		const results: string[] = [];
 		for (const key of columns) {
@@ -243,34 +274,45 @@ export default class QueryEngine {
 			const field = keyStr.split("_")[1];
 			const idstring = keyStr.split("_")[0];
 
-			this.sectionOrRoom = this.utils.checkIDString(
-				this.sDSList,
-				this.rDSList,
-				this.sectionOrRoom,
-				this.queryingIDString,
-				idstring
-			);
-			this.queryingIDString = idstring;
-
-			// checks if the field is a valid field
-			if (this.checkValidColumn(field)) {
+			if (this.checkValidTransformColumn(keyStr)) {
 				results.push(keyStr);
 			} else {
-				throw new InsightError(`Invalid key ${keyStr} in COLUMNS`);
+				this.sectionOrRoom = this.utils.checkIDString(
+					this.sDSList,
+					this.rDSList,
+					this.sectionOrRoom,
+					this.queryingIDString,
+					idstring
+				);
+				this.queryingIDString = idstring;
+
+				// checks if the field is a valid field
+				if (this.checkValidColumn(field)) {
+					results.push(keyStr);
+				} else {
+					throw new InsightError(`Invalid key ${keyStr} in COLUMNS`);
+				}
 			}
 		}
 		return results;
 	}
 
-	// if the field is valid, return true, if sectionOrRoom is somehow empty throw error
-	private checkValidColumn(field: string): boolean {
+	private checkValidTransformColumn(keyStr: string): boolean {
 		if (this.isGrouped) {
-			if (this.newCols.includes(field)) {
+			if (this.newCols.includes(keyStr)) {
 				return true;
 			} else {
 				throw new InsightError("Keys in COLUMNS must be in GROUP or APPLY when TRANSFORMATIONS is present");
 			}
-		} else if (this.sectionOrRoom === "section") {
+		} else {
+			return false;
+		}
+	}
+
+	// if the field is valid, return true, if sectionOrRoom is somehow empty throw error
+	private checkValidColumn(field: string): boolean {
+		//const field = keyStr.split("_")[1];
+		if (this.sectionOrRoom === "section") {
 			if (this.utils.mFieldsSection.includes(field) || this.utils.sFieldsSection.includes(field)) {
 				return true;
 			}

@@ -117,9 +117,9 @@ export default class InsightFacade implements IInsightFacade {
 				//console.log((this.sectionsDatabase.keys))
 				this.roomsDatabase = await this.roomDiskReader.mapMissingRooms(rIDs, this.roomsDatabase);
 			}
-
-			console.log(currIDs);
-			result = await this.qe.query(query, currIDs);
+			//console.log(currIDs);
+			// on query, passes updated sectionsDatabase and roomsDatabase
+			result = await this.qe.query(query, this.sectionsDatabase, this.roomsDatabase);
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;

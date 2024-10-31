@@ -28,6 +28,7 @@ export default class QueryEngineFilter {
 		this.rDSList = rDSList;
 		this.sDSList = sDSList;
 	}
+
 	public async handleFilter(filter: string, value: unknown): Promise<Object[]> {
 		let promise: Promise<Object[]>;
 		try {

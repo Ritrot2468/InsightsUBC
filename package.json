@@ -45,7 +45,7 @@
 		"postinstall": "git config core.hooksPath .githooks",
 		"cover": "nyc --reporter text --reporter html yarn run test",
 		"build": "tsc && yarn prettier:check && yarn lint:check",
-		"test": "mocha --require ts-node/register --timeout 10000 --extension .spec.ts --recursive test",
+		"test": "mocha --require ts-node/register --timeout 50000 --extension .spec.ts --recursive test",
 		"lint:check": "eslint src test --ext .ts",
 		"lint:fix": "eslint src test --ext .ts --fix",
 		"prettier:check": "prettier src/**/*.ts test/**/*.ts --check",

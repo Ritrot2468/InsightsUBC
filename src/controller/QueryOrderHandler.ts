@@ -3,6 +3,7 @@ import { InsightError } from "./IInsightFacade";
 export class QueryOrderHandler {
 	// returns the order key as a string (WORKING)
 	private validSort: string[] = ["dir", "keys"];
+	private validDir: string[] = ["UP", "DOWN"];
 	public dir = "";
 
 	public async handleORDER(value: unknown, columns: string[]): Promise<string[]> {
@@ -22,7 +23,11 @@ export class QueryOrderHandler {
 			}
 
 			if ("dir" in sortObj) {
-				this.dir = sortObj.dir;
+				if ("dir" in this.validDir) {
+					this.dir = sortObj.dir;
+				} else {
+					throw new InsightError("Invalid 'dir' value");
+				}
 			} else {
 				throw new InsightError("ORDER missing 'dir' key");
 			}
@@ -42,6 +47,9 @@ export class QueryOrderHandler {
 		const orderKeys: string[] = [];
 		if (this.isStringArray(value)) {
 			const keys = value as string[];
+			if (keys.length === 0) {
+				throw new InsightError("ORDER keys must be a non-empty array");
+			}
 			for (const key of keys) {
 				orderKeys.push(this.checkKeyInColumns(key, columns));
 			}

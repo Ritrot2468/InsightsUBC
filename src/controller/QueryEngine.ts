@@ -7,52 +7,61 @@ import Room from "./rooms/Room";
 import DatasetValidatorHelper from "./DatasetValidatorHelper";
 
 export default class QueryEngine {
-	private queryingIDString: string;
 	private sectionsDatabase: Map<string, Section[]>;
 	private roomsDatabase: Map<string, Room[]>;
-	private noFilter: boolean;
 	private utils: QueryUtils;
 	private QueryOrderHandler: QueryOrderHandler;
 	private QueryEngineFilter: QueryEngineFilter;
-	private sectionOrRoom: string;
 	private sDSList: string[];
 	private rDSList: string[];
-	private newCols: string[];
-	private isGrouped: boolean;
-	private dir: string;
+	private newCols: string[] = [];
+	private queryingIDString = "";
+	private sectionOrRoom = "";
+	private isGrouped = false;
+	private dir = "UP";
+	private noFilter = false;
 	private datasetValidator: DatasetValidatorHelper;
 
 	constructor(sectionsDatabase: Map<string, Section[]>, roomsDatabase: Map<string, Room[]>) {
-		this.queryingIDString = "";
 		this.sectionsDatabase = sectionsDatabase;
 		this.roomsDatabase = roomsDatabase;
-		this.noFilter = false;
 		this.utils = new QueryUtils();
 		this.QueryOrderHandler = new QueryOrderHandler();
 		this.QueryEngineFilter = new QueryEngineFilter(sectionsDatabase, roomsDatabase);
 		this.sectionOrRoom = "";
 		this.datasetValidator = new DatasetValidatorHelper();
-		this.sDSList = Array.from(sectionsDatabase.keys());
-		this.rDSList = Array.from(roomsDatabase.keys());
+		this.sDSList = [];
+		this.rDSList = [];
 		//console.log(this.rDSList);
-		this.newCols = [];
-		this.isGrouped = false;
-		this.dir = "UP"; // default (one key) sorting is UP
 	}
 
-	private async querySetup(currIDs: string[]): Promise<boolean> {
+	private async querySetup(
+		sectionsDatabase: Map<string, Section[]>,
+		roomsDatabase: Map<string, Room[]>
+	): Promise<boolean> {
+		/*
 		const idRecords = await this.datasetValidator.separateRoomAndCourseIDs(currIDs);
 		this.rDSList = idRecords.rooms;
 		this.sDSList = idRecords.sections;
+		*/
+		this.sectionsDatabase = sectionsDatabase;
+		this.roomsDatabase = roomsDatabase;
+		this.sDSList = Array.from(sectionsDatabase.keys());
+		this.rDSList = Array.from(roomsDatabase.keys());
 		this.QueryEngineFilter.setIDs(this.sDSList, this.rDSList);
+		this.sectionOrRoom = "";
 		this.queryingIDString = ""; // restart on every query;
+		this.isGrouped = false;
+		this.dir = "UP";
+		this.newCols = [];
+		this.noFilter = false;
 		return true;
 	}
 
-	public async query(query: unknown, currIDs: string[]): Promise<InsightResult[]> {
+	public async query(query: unknown, sD: Map<string, Section[]>, rD: Map<string, Room[]>): Promise<InsightResult[]> {
 		//console.log("QUERY method");
 		//console.log(this.roomsDatabase.size);
-		await this.querySetup(currIDs);
+		await this.querySetup(sD, rD);
 		//console.log(this.rDSList);
 		let filteredSOR: Object[] = [];
 		let transformedResults: Object[] = [];
@@ -73,7 +82,7 @@ export default class QueryEngine {
 			} else {
 				throw new InsightError("Query missing WHERE");
 			}
-			//console.log()
+			//console.log(filteredSOR);
 
 			// If TRANSFORMATIONS key exists, complete transformation on filtered sections
 			if ("TRANSFORMATIONS" in queryObj) {
@@ -89,8 +98,8 @@ export default class QueryEngine {
 			} else {
 				throw new InsightError("Query missing OPTIONS");
 			}
-			//console.log("End result");
-			//console.log(result);
+			console.log("End result");
+			console.log(result.length);
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;

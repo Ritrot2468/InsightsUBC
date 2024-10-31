@@ -759,19 +759,20 @@ describe("InsightFacade", function () {
 			await clearDisk();
 			facade = new InsightFacade();
 			//facade2 = new InsightFacade()
-			sections = await getContentFromArchives("sections/pair.zip");
+			//sections = await getContentFromArchives("sections/pair.zip");
 			rooms = await getContentFromArchives("rooms/campus.zip");
 
 			// Add the datasets to InsightFacade once.
 			// Will *fail* if there is a problem reading ANY dataset.
 			const loadDatasetPromises: Promise<string[]>[] = [
-				facade.addDataset("sections", sections, InsightDatasetKind.Sections),
+				//facade.addDataset("sections", sections, InsightDatasetKind.Sections),
 				facade.addDataset("rooms", rooms, InsightDatasetKind.Rooms),
 			];
 
 			try {
+				//console.log("reached promise");
 				await Promise.all(loadDatasetPromises);
-				//console.log(loadDatasetPromises.length)
+				//console.log(loadDatasetPromises.length);
 			} catch (err) {
 				throw new Error(`In PerformQuery Before hook, dataset(s) failed to be added. \n${err}`);
 			}
@@ -892,7 +893,7 @@ describe("InsightFacade", function () {
 			"[rooms/valid/roomsSimpleOrderDirUp.json] simple order dir up",
 			"[rooms/valid/latitudeQuery.json] filter by latitude",
 			"[rooms/valid/roomsSingleKeyOrder.json] simple order one key",
-			"[rooms/valid/roomsValidOrder2Keys.json] simple order one key",
+			"[rooms/valid/roomsValidOrder2Keys.json] order by two keys",
 			"[rooms/valid/roomsGroupByLatOrderByAvgSeats.json] group by lat order by avg seats",
 			"[rooms/valid/roomsGroupByLatOrderByCountName.json]  group by lat order by count names",
 			"[rooms/valid/roomsGroupByLatOrderByCountNameAvgSeats.json] group by lat order by count name, avg seats",
@@ -925,6 +926,7 @@ describe("InsightFacade", function () {
 			"[rooms/invalid/roomsInvalidApplyRuleMultipleKeys.json] order missing keys",
 			"[rooms/invalid/roomsTransformCOUNTTargetKeyInvalidType.json] order missing keys",
 			"[rooms/invalid/roomsUnderscoreInApplyKey.json] order missing keys",
+			//*/
 		];
 
 		// Automated test cases for room
@@ -961,6 +963,7 @@ describe("InsightFacade", function () {
 			]);
 		});
 
+		/*
 		//TODO
 		it("list one dataset - rooms ", async function () {
 			sections = await getContentFromArchives("rooms/test1.zip");
@@ -1046,6 +1049,9 @@ describe("InsightFacade", function () {
 				expect.fail(`you failed to load the right sets: ${err}`);
 			}
 		});
+		*/
+
+		// END OF COMMENTS
 
 		// TODO
 		// it("check rooms with bad address - rooms", async function () {

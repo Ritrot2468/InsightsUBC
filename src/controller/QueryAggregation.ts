@@ -338,13 +338,23 @@ checkTargetKey(key): string {
 	private makeNewObject(SORArr: Object[], keyList: string[], applyRules: Record<string, [string, string]>): Object {
 		const group: Record<string, any> = {};
 		for (let i = 0; i < this.groupKeys.length; i++) {
-			group[this.groupKeys[i]] = keyList[i];
+			group[this.groupKeys[i]] = this.checkNumberOrStringField(keyList[i], this.groupKeys[i]);
 		}
 		for (const applyKey of Object.keys(applyRules)) {
 			group[applyKey] = this.applyAFunction(applyRules[applyKey][0], applyRules[applyKey][1], SORArr);
 		}
 		//console.log(group);
 		return group;
+	}
+
+	private checkNumberOrStringField(groupVal: string, groupKey: string): string | number {
+		//const field = groupKey.split("_")[1];
+		// Use this to debug
+		if (this.checkTargetKey(groupKey) === "number") {
+			return Number(groupVal);
+		} else {
+			return groupVal;
+		}
 	}
 
 	private applyAFunction(token: string, targetKey: string, SORArr: Object[]): Object {
@@ -386,6 +396,18 @@ checkTargetKey(key): string {
 		}
 	}
 
+	/*
+	private calculateAVG(targetFieldList: number[]): number {
+		const total = new Decimal(0);
+		const numRows = targetFieldList.length;
+		for (let i = 0; i < targetFieldList.length; i++) {
+			Decimal.add(total);
+		}
+	}
+
+	private calculateSUM(targetFieldList: number[]): number {}
+
+	*/
 	private checkTargetKey(targetKey: string): string {
 		const targetField = targetKey.split("_")[1];
 		if (this.sectionOrRoom === "section") {

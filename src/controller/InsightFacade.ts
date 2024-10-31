@@ -51,6 +51,7 @@ export default class InsightFacade implements IInsightFacade {
 		this.sectionHelper = new AddSectionDataset();
 		// initialize dictionary for the fields
 	}
+
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
 		try {
 			await this.datasetValidatorHelper.validateIdStructure(id);

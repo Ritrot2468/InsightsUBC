@@ -1,0 +1,25 @@
+{
+	"title": "or with 2 keys",
+	"input": {
+		"WHERE": {
+			"OR": [
+				{
+					"IS": {
+						"courses_pass": 40
+					},
+					"GT": {
+						"courses_avg": 90
+					}
+				}
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				""
+			],
+			"ORDER": "courses_pass"
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

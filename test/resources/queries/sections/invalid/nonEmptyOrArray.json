@@ -1,0 +1,20 @@
+{
+	"title": "non empty or array",
+	"input": {
+		"WHERE": {
+			"OR": {
+				"IS": {
+					"courses_dept": "adhe"
+				}
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				""
+			],
+			"ORDER": "courses_pass"
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

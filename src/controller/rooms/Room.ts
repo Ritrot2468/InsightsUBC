@@ -67,49 +67,12 @@ export default class Room extends Building {
 		this.name = this._sfields.name;
 	}
 
-	public getMfields(): Mfield {
-		return this._mfields;
-	}
-
-	public setMfields(value: Mfield): void {
-		this._mfields = value;
-	}
-
-	public setHref(newHref: string): void {
-		this._sfields.href = newHref;
-		this.href = newHref;
-	}
-
-	public setMfield(index: number, newVal: number): void {
-		const keys: (keyof Mfield)[] = ["lat", "lon", "seats"];
-		if (index < 0 || index > keys.length) {
-			throw new Error("Out of bounds");
-		}
-		this._mfields[keys[index]] = newVal;
-	}
-
-	public setSField(index: number, newVal: string): void {
-		const keys: (keyof Sfield)[] = ["fullname", "shortname", "number", "name", "address", "type", "furniture", "href"];
-		if (index < 0 || index > keys.length) {
-			throw new Error("Out of bounds");
-		}
-		this._sfields[keys[index]] = newVal;
-	}
-
 	public getSfields(): Sfield {
 		return this._sfields;
 	}
 
-	public setSfields(value: Sfield): void {
-		this._sfields = value;
-	}
-
-	public getMFieldByIndex(index: number): number {
-		const keys: (keyof Mfield)[] = ["lat", "lon", "seats"];
-		if (index < 0 || index > keys.length) {
-			throw new Error("Out of bounds");
-		}
-		return this._mfields[keys[index]];
+	public getMfields(): Mfield {
+		return this._mfields;
 	}
 
 	public getSFieldByIndex(index: number): string {
@@ -120,37 +83,10 @@ export default class Room extends Building {
 		return this._sfields[keys[index]];
 	}
 
-	public getSFieldIndex(sfield: string): number {
-		const keys: (keyof Sfield)[] = ["fullname", "shortname", "number", "name", "address", "type", "furniture", "href"];
-		return keys.indexOf(sfield as keyof Sfield);
-		// -1 if index is not found
-	}
-
-	public getMFieldIndex(mfield: string): number {
-		const keys: (keyof Mfield)[] = ["lat", "lon", "seats"];
-		return keys.indexOf(mfield as keyof Mfield);
-		// -1 if index is not found
-	}
-
-	public getLat(): number {
-		return this.lat;
-	}
-
-	public getLon(): number {
-		return this.lon;
-	}
-
-	public getSeats(): number {
-		return this.seats;
-	}
-
 	public getID(): string {
 		return this.name;
 	}
 
-	public getHref(): string {
-		return this.href;
-	}
 	public convertToJSON(): { setID: string; sFields: Sfield; mFields: Mfield } {
 		return {
 			setID: this.getID(),
@@ -204,4 +140,69 @@ export default class Room extends Building {
 		// instantiate and return the Room object
 		return new Room(setID, mfields, sfields, building);
 	}
+
+	// public setMfield(index: number, newVal: number): void {
+	// 	const keys: (keyof Mfield)[] = ["lat", "lon", "seats"];
+	// 	if (index < 0 || index > keys.length) {
+	// 		throw new Error("Out of bounds");
+	// 	}
+	// 	this._mfields[keys[index]] = newVal;
+	// }
+
+	// public getSFieldIndex(sfield: string): number {
+	// 	const keys: (keyof Sfield)[] = ["fullname", "shortname", "number", "name", "address", "type", "furniture", "href"];
+	// 	return keys.indexOf(sfield as keyof Sfield);
+	// 	// -1 if index is not found
+	// }
+
+	// public getMFieldIndex(mfield: string): number {
+	// 	const keys: (keyof Mfield)[] = ["lat", "lon", "seats"];
+	// 	return keys.indexOf(mfield as keyof Mfield);
+	// 	// -1 if index is not found
+	// }
+	// public getMFieldByIndex(index: number): number {
+	// 	const keys: (keyof Mfield)[] = ["lat", "lon", "seats"];
+	// 	if (index < 0 || index > keys.length) {
+	// 		throw new Error("Out of bounds");
+	// 	}
+	// 	return this._mfields[keys[index]];
+	// }
+
+	// public setMfields(value: Mfield): void {
+	// 	this._mfields = value;
+	// }
+
+	// public setHref(newHref: string): void {
+	// 	this._sfields.href = newHref;
+	// 	this.href = newHref;
+	// }
+
+	// public setSField(index: number, newVal: string): void {
+	// 	const keys: (keyof Sfield)[] = ["fullname", "shortname", "number", "name", "address", "type", "furniture", "href"];
+	// 	if (index < 0 || index > keys.length) {
+	// 		throw new Error("Out of bounds");
+	// 	}
+	// 	this._sfields[keys[index]] = newVal;
+	// }
+	//
+	// public setSfields(value: Sfield): void {
+	// 	this._sfields = value;
+	// }
+
+	//
+	// public getLat(): number {
+	// 	return this.lat;
+	// }
+	//
+	// public getLon(): number {
+	// 	return this.lon;
+	// }
+	//
+	// public getSeats(): number {
+	// 	return this.seats;
+	// }
+	//
+	// public getHref(): string {
+	// 	return this.href;
+	// }
 }

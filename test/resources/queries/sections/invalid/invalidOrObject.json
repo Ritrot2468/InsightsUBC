@@ -1,0 +1,18 @@
+{
+	"title": "invalid or object",
+	"input": {
+		"WHERE": {
+			"OR": [
+				""
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				""
+			],
+			"ORDER": "courses_pass"
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

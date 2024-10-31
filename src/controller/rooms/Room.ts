@@ -57,8 +57,8 @@ export default class Room extends Building {
 			href: sfields.href || building.getbHref(),
 			...sfields,
 		} as Sfield;
-		this.lon = lon;
-		this.lat = lat;
+		this.lon = Number(lon);
+		this.lat = Number(lat);
 		this.seats = Number(seats);
 		this.type = this._sfields.type;
 		this.furniture = this._sfields.furniture;

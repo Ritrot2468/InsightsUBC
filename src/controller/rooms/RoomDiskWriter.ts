@@ -36,29 +36,38 @@ export default class RoomDiskWriter extends RoomsParser {
 	protected async logAllRoomFilesOnDisk(zip: JSZip, buildingMap: Map<string, Building>, id: string): Promise<Room[]> {
 		const allPromises: Promise<Room[]>[] = [];
 		const dirs = Array.from(buildingMap.keys());
-		let numRows = 0;
-		//console.log(dirs)
+		const numRows = 0;
 
 		const folder = zip.folder("campus/discover/buildings-and-classrooms");
 		if (!folder) {
-			throw new Error("Folder not found in zip file");
+			throw new InsightError("Folder not found in zip file");
 		}
 		folder.forEach((relativePath, file) => {
 			const buildingCode = relativePath.split(".")[0]; // Extract dir or file name
 			//console.log(buildingCode)
 			if (dirs.includes(buildingCode)) {
 				//console.log("File object:", file);
-
 				const promiseContent = file.async("text").then(async (content0) => {
 					const document = parse5.parse(content0);
 					const building: Building = buildingMap.get(buildingCode) as Building;
 					return this.findTdElemsOfRooms(document, building, id);
 				});
+
 				allPromises.push(promiseContent);
 			}
 		});
 		const roomArrays = await Promise.all(allPromises);
 		const allRooms: Room[] = [];
+		await this.writeToDisk(roomArrays, allRooms, numRows, id);
+		return allRooms;
+	}
+
+	private async writeToDisk(
+		roomArrays: Awaited<Room[]>[],
+		allRooms: Room[],
+		numRows: number,
+		id: string
+	): Promise<number> {
 		roomArrays.forEach((rooms) => {
 			if (rooms.length > 0) {
 				allRooms.push(...rooms);
@@ -70,9 +79,8 @@ export default class RoomDiskWriter extends RoomsParser {
 		}
 		//console.log(numRows)
 		await this.storeRoomsOnDisk(allRooms, id);
-
 		await this.logRoomInsightKindToDisk(id, InsightDatasetKind.Rooms, numRows);
-		return allRooms;
+		return numRows;
 	}
 
 	protected async findTdElemsOfRooms(doc: any, building: Building, id: string): Promise<Room[]> {

@@ -1,0 +1,25 @@
+{
+	"title": "set not added yet",
+	"input": {
+		"WHERE": {},
+		"OPTIONS": {
+			"COLUMNS": [
+				"courses_title"
+			]
+		},
+		"TRANSFORMATIONS": {
+			"GROUP": [
+				"courses_name"
+			],
+			"APPLY": [
+				{
+					"overallCount": {
+						"MIN": "courses_fullname"
+					}
+				}
+			]
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

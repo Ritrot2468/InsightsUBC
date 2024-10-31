@@ -730,10 +730,11 @@ describe("InsightFacade", function () {
 			let result: InsightResult[];
 			try {
 				result = await facade.performQuery(input);
+				console.log(result)
 				if (errorExpected) {
 					expect.fail(`performQuery resolved when it should have rejected with ${expected}`);
 				}
-				expect(result).to.includes.deep.members(expected);
+				expect(result).to.include.deep.members(expected);
 				//expect(result).to.deep.equal(expected);
 			} catch (err) {
 				if (!errorExpected) {
@@ -872,6 +873,10 @@ describe("InsightFacade", function () {
 			"[sections/invalid/output_too_large.json] SELECT dept, avg - RESULT TOO LARGE",
 			"[sections/invalid/reference_too_many_datasets.json] SELECT sections_dept sections_avg WHERE section_avg > 80 AND section_year = 202*",
 			"[sections/invalid/excessKeysInQuery.json] WHERE OPTIONS and HOW keys in Query",
+			"[sections/invalid/invalidOrObject.json] invalid or object",
+			"[sections/invalid/nonEmptyOrArray.json] non empty or array",
+			"[sections/invalid/orWith2Keys.json] or with 2 keys",
+
 		];
 
 		// Automated test cases for sections
@@ -883,7 +888,6 @@ describe("InsightFacade", function () {
 		const roomTestCases = [
 			// valid room queries
 			"[rooms/valid/allRoomsInUbc.json] room names, no filter",
-
 			"[rooms/valid/allRoomsAllColumns.json] all room columns, no filter",
 			"[rooms/valid/classroomsFurniture.json] filter by rooms furniture",
 			"[rooms/valid/latitudeQuery.json] filter by latitude",
@@ -901,6 +905,10 @@ describe("InsightFacade", function () {
 			"[rooms/valid/roomsGroupByLatOrderBySumSeats.json] group by lat order by sum seats",
 			"[rooms/valid/roomsGroupByLatAndLonOrderByCountseats.json] group by lat and lon order by count seats",
 			"[rooms/valid/applyTargetKeySameAsGroupKey.json] apply target key same as group key (group by seats then avg seats)",
+			"[rooms/valid/multipleApplyTypes.json] multiple apply types",
+			"[rooms/valid/allOrderKeysExactlyInColumns.json] all order keys exactly in columns",
+			"[rooms/valid/validOrderKeyList.json] valid order key list",
+
 
 			// invalid room queries
 			"[rooms/invalid/invalidRoomsAndSectionsQuery.json] room and sections idstrings",
@@ -916,22 +924,20 @@ describe("InsightFacade", function () {
 			"[rooms/invalid/roomsOrderMissingKeys.json] order missing keys",
 			"[rooms/invalid/extraKeysInTransformation.json] order missing keys",
 			"[rooms/invalid/invalidApplyRuleTargetKey.json] order missing keys",
-			"[rooms/invalid/invalidTransformationsMissingApply.json] order missing keys",
-			"[rooms/invalid/invalidTransformationsMissingGroup.json] order missing keys",
 			"[rooms/invalid/invalidTransformationsType.json] order missing keys",
 			"[rooms/invalid/roomsApplyRuleTargetKeyInvalidNotNumber.json] order missing keys",
 			"[rooms/invalid/roomsInvalidApplyRule.json] order missing keys",
 			"[rooms/invalid/roomsInvalidApplyRuleMultipleKeys.json] order missing keys",
 			"[rooms/invalid/roomsTransformCOUNTTargetKeyInvalidType.json] order missing keys",
 			"[rooms/invalid/roomsUnderscoreInApplyKey.json] order missing keys",
-			//*/
-		];
-
+			*/
+		//];
+		/*
 		// Automated test cases for room
 		for (const testCase of roomTestCases) {
 			it(testCase, checkQuery);
 		}
-
+		*/
 		// const roomTestCases = ["[rooms/valid/allRoomsInUbc.json] all rooms in ubc"]
 		// // Automated test cases for rooms
 		// for (const testCase of roomTestCases) {

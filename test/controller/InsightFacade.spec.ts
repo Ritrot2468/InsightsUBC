@@ -730,7 +730,7 @@ describe("InsightFacade", function () {
 			let result: InsightResult[];
 			try {
 				result = await facade.performQuery(input);
-				console.log(result)
+				console.log(result);
 				if (errorExpected) {
 					expect.fail(`performQuery resolved when it should have rejected with ${expected}`);
 				}
@@ -876,7 +876,6 @@ describe("InsightFacade", function () {
 			"[sections/invalid/invalidOrObject.json] invalid or object",
 			"[sections/invalid/nonEmptyOrArray.json] non empty or array",
 			"[sections/invalid/orWith2Keys.json] or with 2 keys",
-
 		];
 
 		// Automated test cases for sections
@@ -909,7 +908,6 @@ describe("InsightFacade", function () {
 			"[rooms/valid/allOrderKeysExactlyInColumns.json] all order keys exactly in columns",
 			"[rooms/valid/validOrderKeyList.json] valid order key list",
 
-
 			// invalid room queries
 			"[rooms/invalid/invalidRoomsAndSectionsQuery.json] room and sections idstrings",
 			"[rooms/invalid/invalidRoomsMkeyFilter.json] invalid room mkey in filter",
@@ -930,14 +928,13 @@ describe("InsightFacade", function () {
 			"[rooms/invalid/roomsInvalidApplyRuleMultipleKeys.json] order missing keys",
 			"[rooms/invalid/roomsTransformCOUNTTargetKeyInvalidType.json] order missing keys",
 			"[rooms/invalid/roomsUnderscoreInApplyKey.json] order missing keys",
-			*/
-		//];
-		/*
+		];
+
 		// Automated test cases for room
 		for (const testCase of roomTestCases) {
 			it(testCase, checkQuery);
 		}
-		*/
+
 		// const roomTestCases = ["[rooms/valid/allRoomsInUbc.json] all rooms in ubc"]
 		// // Automated test cases for rooms
 		// for (const testCase of roomTestCases) {

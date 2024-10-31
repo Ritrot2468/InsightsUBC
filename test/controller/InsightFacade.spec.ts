@@ -732,7 +732,9 @@ describe("InsightFacade", function () {
 			let result: InsightResult[];
 			try {
 				result = await facade.performQuery(input);
-				//console.log(result);
+				//console.log("Result: ", result);
+				//console.log("Expected: ", expected);
+
 				if (errorExpected) {
 					expect.fail(`performQuery resolved when it should have rejected with ${expected}`);
 				}

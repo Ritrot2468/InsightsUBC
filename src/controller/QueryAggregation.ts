@@ -381,7 +381,7 @@ checkTargetKey(key): string {
 				return Number(avg.toFixed(decimals));
 			} else if (token === "SUM") {
 				const sum = Number(targetFieldList.reduce((acc, num) => Decimal.add(acc, num), new Decimal(0)));
-				return sum.toFixed(decimals);
+				return Number(sum.toFixed(decimals));
 			} else if (token === "COUNT") {
 				return Array.from(new Set(targetFieldList)).length;
 			} else {

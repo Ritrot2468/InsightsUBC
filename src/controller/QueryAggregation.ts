@@ -2,6 +2,7 @@ import Room from "./rooms/Room";
 import Section from "./sections/Section";
 import QueryUtils from "./QueryUtils";
 import { InsightError } from "./IInsightFacade";
+import Decimal from "decimal.js";
 
 export default class QueryAggregation {
 	private sectionsDatabase: Map<string, Section[]>;
@@ -364,12 +365,13 @@ checkTargetKey(key): string {
 			} else if (token === "MIN") {
 				return Math.min(...targetFieldList);
 			} else if (token === "AVG") {
-				const sum = targetFieldList.reduce((acc, num) => acc + num, 0);
-				const avg = Number((sum / targetFieldList.length).toFixed(decimals));
-				return avg;
+				const total: Decimal = targetFieldList.reduce((acc, num) => Decimal.add(acc, num), new Decimal(0));
+				const numRows: number = targetFieldList.length;
+				const avg = total.toNumber() / numRows;
+				return Number(avg.toFixed(decimals));
 			} else if (token === "SUM") {
-				const sum = targetFieldList.reduce((acc, num) => acc + num, 0);
-				return sum;
+				const sum = Number(targetFieldList.reduce((acc, num) => Decimal.add(acc, num), new Decimal(0)));
+				return sum.toFixed(decimals);
 			} else if (token === "COUNT") {
 				return Array.from(new Set(targetFieldList)).length;
 			} else {

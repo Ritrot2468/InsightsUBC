@@ -53,7 +53,7 @@ export default class QueryAggregation {
 
 		// get the group keys from group in query
 		this.groupKeys = await this.checkGroupKeys(group);
-		console.log(this.groupKeys);
+		//console.log(this.groupKeys);
 		// if no filter has been applied,
 		if (noFilter) {
 			dataset = await this.getDataset();
@@ -62,7 +62,7 @@ export default class QueryAggregation {
 		}
 
 		groupedResults = await this.groupByKeys(dataset);
-		console.log(groupedResults);
+		//console.log(groupedResults);
 		return groupedResults;
 	}
 

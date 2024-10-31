@@ -95,6 +95,7 @@ export default class QueryEngine {
 			} else {
 				transformedResults = filteredSOR;
 			}
+			//console.log(transformedResults);
 
 			// If OPTIONS key exists, collect InsightResults, else throw InsightError
 			if ("OPTIONS" in queryObj) {
@@ -102,8 +103,8 @@ export default class QueryEngine {
 			} else {
 				throw new InsightError("Query missing OPTIONS");
 			}
-			console.log("End result");
-			console.log(result);
+			//console.log("End result");
+			//console.log(result);
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;
@@ -238,7 +239,7 @@ export default class QueryEngine {
 		let dataset: Object[] | undefined = [];
 		//console.log("COMPLETE QUERY WORKING");
 		// if no filters have been applied
-		if (this.noFilter) {
+		if (this.noFilter && !this.isGrouped) {
 			if (this.sectionOrRoom === "section") {
 				dataset = this.sectionsDatabase.get(this.queryingIDString);
 			} else if (this.sectionOrRoom === "room") {

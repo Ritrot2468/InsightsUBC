@@ -28,7 +28,6 @@ describe("InsightFacade", function () {
 	let sections: string;
 	let rooms: string;
 
-	/*
 	describe("AddDataset - Sections", function () {
 		let sections2: string;
 		let empty: string;
@@ -710,7 +709,7 @@ describe("InsightFacade", function () {
 			}
 		});
 	});
-	*/
+
 	describe("PerformQuery", function () {
 		/**
 		 * Loads the TestQuery specified in the test name and asserts the behaviour of performQuery.
@@ -782,7 +781,7 @@ describe("InsightFacade", function () {
 		});
 
 		//it("[sections/valid/simple.json] SELECT dept, avg WHERE avg > 97", checkQuery);
-		/*
+
 		const sectionTestCases = [
 			"[sections/valid/simple.json] SELECT dept, avg WHERE avg > 97",
 			"[sections/valid/simple1.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = cps*",
@@ -878,14 +877,11 @@ describe("InsightFacade", function () {
 		for (const testCase of sectionTestCases) {
 			it(testCase, checkQuery);
 		}
-		*/
 
-		/*
 		// 364 rooms total
 		const roomTestCases = [
 			// valid room queries
 			"[rooms/valid/allRoomsInUbc.json] room names, no filter",
-			/*
 			"[rooms/valid/allRoomsAllColumns.json] all room columns, no filter",
 			"[rooms/valid/classroomsFurniture.json] filter by rooms furniture",
 			"[rooms/valid/latitudeQuery.json] filter by latitude",
@@ -926,19 +922,18 @@ describe("InsightFacade", function () {
 			"[rooms/invalid/roomsInvalidApplyRuleMultipleKeys.json] order missing keys",
 			"[rooms/invalid/roomsTransformCOUNTTargetKeyInvalidType.json] order missing keys",
 			"[rooms/invalid/roomsUnderscoreInApplyKey.json] order missing keys",
-			*/
-		//];
-		/*
+		];
+
 		// Automated test cases for room
 		for (const testCase of roomTestCases) {
 			it(testCase, checkQuery);
 		}
-		*/
-		// const roomTestCases = ["[rooms/valid/allRoomsInUbc.json] all rooms in ubc"]
-		// // Automated test cases for rooms
-		// for (const testCase of roomTestCases) {
-		// 	it(testCase, checkQuery);
-		// }
+
+		//const roomTestCases = ["[rooms/valid/allRoomsInUbc.json] all rooms in ubc"]
+		// Automated test cases for rooms
+		for (const testCase of roomTestCases) {
+			it(testCase, checkQuery);
+		}
 	});
 
 	describe("ListDataset - rooms", function () {
@@ -1111,7 +1106,6 @@ describe("InsightFacade", function () {
 		// });
 	});
 
-	/*
 	describe("ListDataset - Sections", function () {
 		beforeEach(async function () {
 			// This section resets the insightFacade instance
@@ -1257,5 +1251,5 @@ describe("InsightFacade", function () {
 				expect.fail(`you failed to load the right sets ${err}`);
 			}
 		});
-	});*/
+	});
 });

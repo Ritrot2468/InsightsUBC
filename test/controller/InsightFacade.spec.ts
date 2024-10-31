@@ -28,7 +28,6 @@ describe("InsightFacade", function () {
 	let sections: string;
 	let rooms: string;
 
-	/*
 	describe("AddDataset - Sections", function () {
 		let sections2: string;
 		let empty: string;
@@ -710,7 +709,7 @@ describe("InsightFacade", function () {
 			}
 		});
 	});
-	*/
+
 	describe("PerformQuery", function () {
 		/**
 		 * Loads the TestQuery specified in the test name and asserts the behaviour of performQuery.
@@ -783,7 +782,7 @@ describe("InsightFacade", function () {
 		});
 
 		//it("[sections/valid/simple.json] SELECT dept, avg WHERE avg > 97", checkQuery);
-		/*
+
 		const sectionTestCases = [
 			"[sections/valid/simple.json] SELECT dept, avg WHERE avg > 97",
 			"[sections/valid/simple1.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = cps*",
@@ -879,7 +878,6 @@ describe("InsightFacade", function () {
 		for (const testCase of sectionTestCases) {
 			it(testCase, checkQuery);
 		}
-		*/
 
 		// 364 rooms total
 		const roomTestCases = [
@@ -963,7 +961,6 @@ describe("InsightFacade", function () {
 			]);
 		});
 
-		/*
 		//TODO
 		it("list one dataset - rooms ", async function () {
 			sections = await getContentFromArchives("rooms/test1.zip");
@@ -1049,7 +1046,6 @@ describe("InsightFacade", function () {
 				expect.fail(`you failed to load the right sets: ${err}`);
 			}
 		});
-		*/
 
 		// END OF COMMENTS
 
@@ -1115,7 +1111,6 @@ describe("InsightFacade", function () {
 		// });
 	});
 
-	/*
 	describe("ListDataset - Sections", function () {
 		beforeEach(async function () {
 			// This section resets the insightFacade instance
@@ -1261,5 +1256,5 @@ describe("InsightFacade", function () {
 				expect.fail(`you failed to load the right sets ${err}`);
 			}
 		});
-	});*/
+	});
 });

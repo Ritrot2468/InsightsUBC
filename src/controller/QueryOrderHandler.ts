@@ -1,9 +1,11 @@
 import { InsightError } from "./IInsightFacade";
+import QueryUtils from "./QueryUtils";
 
 export class QueryOrderHandler {
 	// returns the order key as a string (WORKING)
 	private validSort: string[] = ["dir", "keys"];
 	private validDir: string[] = ["UP", "DOWN"];
+	private utils = new QueryUtils();
 	public dir = "";
 
 	public async handleORDER(value: unknown, columns: string[]): Promise<string[]> {
@@ -45,7 +47,7 @@ export class QueryOrderHandler {
 
 	private async handleOrderKeys(value: unknown, columns: string[]): Promise<string[]> {
 		const orderKeys: string[] = [];
-		if (this.isStringArray(value)) {
+		if (this.utils.isStringArray(value)) {
 			const keys = value as string[];
 			if (keys.length === 0) {
 				throw new InsightError("ORDER keys must be a non-empty array");
@@ -57,10 +59,6 @@ export class QueryOrderHandler {
 			throw new InsightError("ORDER keys must be an array of strings");
 		}
 		return orderKeys;
-	}
-
-	private isStringArray(value: unknown): boolean {
-		return Array.isArray(value) && value.every((item) => typeof item === "string");
 	}
 
 	// checks if the key is in columns, if not, throw error

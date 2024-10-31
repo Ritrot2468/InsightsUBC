@@ -5,6 +5,7 @@ import QueryEngineFilter from "./QueryEngineFilter";
 import Section from "./sections/Section";
 import Room from "./rooms/Room";
 import DatasetValidatorHelper from "./DatasetValidatorHelper";
+import QueryAggregation from "./QueryAggregation";
 
 export default class QueryEngine {
 	private sectionsDatabase: Map<string, Section[]>;
@@ -12,6 +13,7 @@ export default class QueryEngine {
 	private utils: QueryUtils;
 	private QueryOrderHandler: QueryOrderHandler;
 	private QueryEngineFilter: QueryEngineFilter;
+	private QueryAggregation: QueryAggregation;
 	private sDSList: string[];
 	private rDSList: string[];
 	private newCols: string[] = [];
@@ -27,7 +29,8 @@ export default class QueryEngine {
 		this.roomsDatabase = roomsDatabase;
 		this.utils = new QueryUtils();
 		this.QueryOrderHandler = new QueryOrderHandler();
-		this.QueryEngineFilter = new QueryEngineFilter(sectionsDatabase, roomsDatabase);
+		this.QueryEngineFilter = new QueryEngineFilter(this.sectionsDatabase, this.roomsDatabase);
+		this.QueryAggregation = new QueryAggregation(this.sectionsDatabase, this.roomsDatabase);
 		this.sectionOrRoom = "";
 		this.datasetValidator = new DatasetValidatorHelper();
 		this.sDSList = [];
@@ -49,6 +52,7 @@ export default class QueryEngine {
 		this.sDSList = Array.from(sectionsDatabase.keys());
 		this.rDSList = Array.from(roomsDatabase.keys());
 		this.QueryEngineFilter.setIDs(this.sDSList, this.rDSList);
+		this.QueryAggregation.setIDs(this.sDSList, this.rDSList);
 		this.sectionOrRoom = "";
 		this.queryingIDString = ""; // restart on every query;
 		this.isGrouped = false;
@@ -98,8 +102,8 @@ export default class QueryEngine {
 			} else {
 				throw new InsightError("Query missing OPTIONS");
 			}
-			console.log("End result");
-			console.log(result.length);
+			//console.log("End result");
+			//console.log(result.length);
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;
@@ -143,7 +147,8 @@ export default class QueryEngine {
 
 	//TODO;
 	private async handleTRANSFORMATIONS(transformations: object, filteredSOR: Object[]): Promise<Object[]> {
-		const transformedResults: Object[] = [];
+		let transformedResults: Object[] = [];
+		let groupedResults: Record<string, any>;
 		//const groupKeys;
 		this.isGrouped = true;
 		try {
@@ -152,18 +157,24 @@ export default class QueryEngine {
 			if (invalidKeys.length > 0) {
 				throw new InsightError("Invalid keys in TRANSFORMATIONS");
 			}
-			/*
-			if ("GROUP" in transformationKeys) {
-
+			if ("GROUP" in transformations) {
+				groupedResults = await this.QueryAggregation.handleGroupBy(
+					transformations.GROUP,
+					filteredSOR,
+					this.noFilter,
+					this.queryingIDString,
+					this.sectionOrRoom
+				);
 			} else {
 				throw new InsightError("TRANSFORMATIONS missing GROUP key");
 			}
-			if ("APPLY" in transformationKeys) {
 
+			if ("APPLY" in transformations) {
+				transformedResults = await this.QueryAggregation.handleApply(transformations.APPLY, groupedResults);
 			} else {
 				throw new InsightError("TRANSFORMATIONS missing APPLY key");
 			}
-			*/
+			this.updateQueryingIDAndSectionOrRoom();
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;
@@ -171,6 +182,12 @@ export default class QueryEngine {
 			throw new InsightError("Unexpected error in TRANSFORMATIONS.");
 		}
 		return transformedResults;
+	}
+
+	private updateQueryingIDAndSectionOrRoom(): boolean {
+		this.queryingIDString = this.QueryAggregation.queryingIDString;
+		this.sectionOrRoom = this.QueryAggregation.sectionOrRoom;
+		return true;
 	}
 
 	private async handleOPTIONS(options: object, transformedResults: Object[]): Promise<InsightResult[]> {

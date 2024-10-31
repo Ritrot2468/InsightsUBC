@@ -55,31 +55,20 @@ export default class QueryUtils {
 			const valueB = recordB[key];
 			let comparison = 0;
 
-			if (valueA === undefined || valueB === undefined) {
-				throw new InsightError(`a record has an undefined value for ${key}`);
+			if (
+				(typeof valueA === "string" && typeof valueB === "string") ||
+				(typeof valueA === "number" && typeof valueB === "number")
+			) {
+				comparison = valueA === valueB ? 0 : valueA < valueB ? -1 : 1;
+			} else {
+				const strA = String(valueA);
+				const strB = String(valueB);
+				comparison = strA === strB ? 0 : strA < strB ? -1 : 1;
 			}
 
-			if (typeof valueA === "string" && typeof valueB === "string") {
-				comparison =
-					dir === "UP" ? (comparison = valueA.localeCompare(valueB)) : (comparison = valueB.localeCompare(valueA));
-				if (comparison !== 0) {
-					return comparison;
-				}
-			} else if (typeof valueA === "number" && typeof valueB === "number") {
-				comparison = dir === "UP" ? (comparison = valueA - valueB) : (comparison = valueB - valueA);
-
-				if (comparison !== 0) {
-					return comparison;
-				}
-			} else {
-				// Handle mixed types (e.g., string vs number)
-				comparison =
-					dir === "UP"
-						? (comparison = String(valueA).localeCompare(String(valueB)))
-						: (comparison = String(valueB).localeCompare(String(valueA)));
-				if (comparison !== 0) {
-					return comparison;
-				}
+			// if there’s a difference --> apply the sorting direction and move to the next key to break tie
+			if (comparison !== 0) {
+				return dir === "UP" ? comparison : -comparison;
 			}
 		}
 		return 0;

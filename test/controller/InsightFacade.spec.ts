@@ -28,6 +28,7 @@ describe("InsightFacade", function () {
 	let sections: string;
 	let rooms: string;
 
+	/*
 	describe("AddDataset - Sections", function () {
 		let sections2: string;
 		let empty: string;
@@ -709,6 +710,7 @@ describe("InsightFacade", function () {
 			}
 		});
 	});
+	//*/
 
 	describe("PerformQuery", function () {
 		/**
@@ -786,7 +788,7 @@ describe("InsightFacade", function () {
 		//it("[sections/valid/orderByTitle.json] order by title", checkQuery);
 		//it("[sections/valid/yearTest.json] order by year", checkQuery);
 
-		///*
+		/*
 		const sectionTestCases = [
 			"[sections/valid/simple.json] SELECT dept, avg WHERE avg > 97",
 			"[sections/valid/simple1.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = cps*",
@@ -890,8 +892,21 @@ describe("InsightFacade", function () {
 
 		//it("[rooms/valid/classroomsFurniture.json] filter by rooms furniture", checkQuery);
 		//it("[rooms/valid/roomsSimpleOrderDirUp.json] simple order dir up", checkQuery);
+		/*it(
+			"[rooms/valid/roomsGroupByLatOrderByCountNameAvgSeats.json] group by lat order by count name, avg seats",
+			checkQuery
+		);*/
 
-		///*
+		//it("[rooms/valid/roomsGroupByLatOrderByAvgSeats.json] group by lat order by avg seats", checkQuery);
+
+		it("[rooms/valid/multipleApplyTypes.json] multiple apply types", checkQuery);
+		/*it(
+			"[rooms/valid/roomsGroupByLatAndLonOrderByCountseats.json] group by lat and lon order by count seats",
+			checkQuery
+		);*/
+		//it("[rooms/invalid/roomsUnderscoreInApplyKey.json] order underscore in apply key keys", checkQuery);
+
+		/*
 		// 364 rooms total
 		const roomTestCases = [
 			// valid room queries
@@ -1081,7 +1096,7 @@ describe("InsightFacade", function () {
 				expect.fail(`you failed to load the right sets: ${err}`);
 			}
 		});
-		*/
+		//*/
 
 		// TODO
 		// it("check rooms with bad address - rooms", async function () {

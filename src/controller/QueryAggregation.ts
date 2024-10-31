@@ -62,7 +62,7 @@ export default class QueryAggregation {
 		}
 
 		groupedResults = await this.groupByKeys(dataset);
-		//console.log(groupedResults);
+		console.log(groupedResults);
 		return groupedResults;
 	}
 
@@ -111,6 +111,7 @@ export default class QueryAggregation {
 			// should not be possible given current implementation of other methods for query
 			throw new InsightError("Can't find querying dataset.");
 		} else {
+			//console.log(dataset.length);
 			return dataset;
 		}
 	}
@@ -118,7 +119,7 @@ export default class QueryAggregation {
 	private async checkGroupKeys(group: unknown): Promise<string[]> {
 		const groupKeys: string[] = [];
 		if (this.utils.isStringArray(group)) {
-			const groupArr = Array(group);
+			const groupArr = this.utils.coerceToArray(group);
 			if (groupArr.length === 0) {
 				throw new InsightError("GROUP must be a non-empty array");
 			} else {
@@ -136,6 +137,7 @@ export default class QueryAggregation {
 					);
 					this.queryingIDString = idstring;
 
+					//console.log(field);
 					if (this.checkValidKey(field)) {
 						groupKeys.push(keyStr);
 					} else {
@@ -173,7 +175,7 @@ export default class QueryAggregation {
 		applyRules = await this.checkApplyRules(apply);
 		this.applyKeys = Object.keys(applyRules);
 
-		transformedResults = await this.applyRulesRecursive(groupedResults, applyRules, 0, []);
+		transformedResults = this.applyRulesRecursive(groupedResults, applyRules, 0, []);
 		//console.log(transformedResults);
 		return transformedResults;
 	}
@@ -281,23 +283,23 @@ checkTargetKey(key): string {
 
 */
 
-	private async applyRulesRecursive(
+	private applyRulesRecursive(
 		groupedResults: Record<string, any> | Object[],
 		applyRules: Record<string, [string, string]>,
 		groupKeyIterator: number,
 		keyList: string[]
-	): Promise<Object[]> {
-		let results: Object[] = [];
+	): Object[] {
+		const results: Object[] = [];
 		if (groupKeyIterator === this.groupKeys.length) {
 			const SORArr: Object[] = groupedResults as Object[];
 			const group = this.makeNewObject(SORArr, keyList, applyRules);
 			results.push(group);
 		} else {
-			const resultsPromises: Promise<Object[]>[] = [];
+			//const resultsPromises: Promise<Object[]>[] = [];
 			for (const currkey of Object.keys(groupedResults)) {
 				const newKeyList = keyList.concat(currkey);
-				resultsPromises.push(
-					this.applyRulesRecursive(
+				results.push(
+					...this.applyRulesRecursive(
 						(groupedResults as Record<string, any>)[currkey],
 						applyRules,
 						groupKeyIterator + 1,
@@ -305,18 +307,22 @@ checkTargetKey(key): string {
 					)
 				);
 			}
+			/*
 			try {
 				//console.log("reached promise");
+
 				const promises = await Promise.allSettled(resultsPromises);
 				results = this.checkAllFulfilled(promises);
 				//console.log(loadDatasetPromises.length);
 			} catch (err) {
 				throw new Error(`Failed apply rules recursively, error: ${err}`);
 			}
+			*/
 		}
 		return results;
 	}
 
+	/*
 	private checkAllFulfilled(promises: PromiseSettledResult<Object[]>[]): Object[] {
 		const allFulfilled = promises.every((promise) => promise.status === "fulfilled");
 		if (allFulfilled) {
@@ -326,13 +332,9 @@ checkTargetKey(key): string {
 		} else {
 			throw new InsightError("One of the recursives failed");
 		}
-	}
+	}*/
 
-	private async makeNewObject(
-		SORArr: Object[],
-		keyList: string[],
-		applyRules: Record<string, [string, string]>
-	): Promise<Object> {
+	private makeNewObject(SORArr: Object[], keyList: string[], applyRules: Record<string, [string, string]>): Object {
 		const group: Record<string, any> = {};
 		for (let i = 0; i < this.groupKeys.length; i++) {
 			group[this.groupKeys[i]] = keyList[i];
@@ -340,12 +342,14 @@ checkTargetKey(key): string {
 		for (const applyKey of Object.keys(applyRules)) {
 			group[applyKey] = this.applyAFunction(applyRules[applyKey][0], applyRules[applyKey][1], SORArr);
 		}
-		return [Object];
+		//console.log(group);
+		return group;
 	}
 
 	private applyAFunction(token: string, targetKey: string, SORArr: Object[]): Object {
 		const field = targetKey.split("_")[1];
 		const targetFieldList: any[] = [];
+		const decimals = 2;
 
 		for (const SOR of SORArr) {
 			//console.log(SOR);
@@ -353,6 +357,7 @@ checkTargetKey(key): string {
 		}
 		//console.log("apply a function, token:");
 		//console.log(token);
+		//console.log(targetKey);
 		if (this.checkTargetKey(targetKey) === "number") {
 			if (token === "MAX") {
 				return Math.max(...targetFieldList);
@@ -360,19 +365,19 @@ checkTargetKey(key): string {
 				return Math.min(...targetFieldList);
 			} else if (token === "AVG") {
 				const sum = targetFieldList.reduce((acc, num) => acc + num, 0);
-				const avg = sum / targetFieldList.length;
+				const avg = Number((sum / targetFieldList.length).toFixed(decimals));
 				return avg;
 			} else if (token === "SUM") {
 				const sum = targetFieldList.reduce((acc, num) => acc + num, 0);
 				return sum;
 			} else if (token === "COUNT") {
-				return Array.from(new Set(targetFieldList));
+				return Array.from(new Set(targetFieldList)).length;
 			} else {
 				throw new InsightError("Invalid apply token");
 			}
 		} else {
 			if (token === "COUNT") {
-				return Array.from(new Set(targetFieldList));
+				return Array.from(new Set(targetFieldList)).length;
 			} else {
 				throw new InsightError("Invalid apply token");
 			}
@@ -380,14 +385,15 @@ checkTargetKey(key): string {
 	}
 
 	private checkTargetKey(targetKey: string): string {
+		const targetField = targetKey.split("_")[1];
 		if (this.sectionOrRoom === "section") {
-			if (targetKey in this.utils.mFieldsSection) {
+			if (this.utils.mFieldsSection.includes(targetField)) {
 				return "number";
 			} else {
 				return "string";
 			}
 		} else if (this.sectionOrRoom === "room") {
-			if (targetKey in this.utils.mFieldsRoom) {
+			if (this.utils.mFieldsRoom.includes(targetField)) {
 				return "number";
 			} else {
 				return "string";
@@ -400,7 +406,7 @@ checkTargetKey(key): string {
 	private async checkApplyRules(apply: unknown): Promise<Record<string, [string, string]>> {
 		const applyRules: Record<string, [string, string]> = {};
 		const applyArr = this.utils.coerceToArray(apply);
-		const validApplyKeyRegex = /[^_]+/;
+		const validApplyKeyRegex = /^[^_]+$/;
 
 		for (const rule of applyArr) {
 			if (typeof rule !== "object") {
@@ -435,8 +441,8 @@ checkTargetKey(key): string {
 
 			const token = this.checkValidToken(Object.keys(applyTokenAndKeyObj)[0]);
 			const key = Object.values(applyTokenAndKeyObj)[0];
-			console.log(token);
-			console.log(key);
+			//console.log(token);
+			//console.log(key);
 
 			if (typeof key !== "string") {
 				throw new InsightError("APPLY invalid target key type");

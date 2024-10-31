@@ -92,6 +92,7 @@ export default class QueryEngineFilter {
 				// should not be possible given current implementation of other methods for query
 				throw new InsightError("Can't find querying dataset.");
 			} else {
+				//console.log(dataset.length);
 				return dataset;
 			}
 		}

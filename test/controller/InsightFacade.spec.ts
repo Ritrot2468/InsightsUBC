@@ -28,7 +28,6 @@ describe("InsightFacade", function () {
 	let sections: string;
 	let rooms: string;
 
-	/*
 	describe("AddDataset - Sections", function () {
 		let sections2: string;
 		let empty: string;
@@ -711,8 +710,6 @@ describe("InsightFacade", function () {
 		});
 	});
 
-	*/
-
 	describe("PerformQuery", function () {
 		/**
 		 * Loads the TestQuery specified in the test name and asserts the behaviour of performQuery.
@@ -759,23 +756,23 @@ describe("InsightFacade", function () {
 		}
 
 		before(async function () {
-			//await clearDisk();
+			await clearDisk();
 			facade = new InsightFacade();
 			//facade2 = new InsightFacade()
 			sections = await getContentFromArchives("sections/pair.zip");
-			//rooms = await getContentFromArchives("rooms/campus.zip");
+			//rooms = await getContentFromArchives("rooms/test1.zip");
+			rooms = await getContentFromArchives("rooms/campus.zip");
 
 			// Add the datasets to InsightFacade once.
 			// Will *fail* if there is a problem reading ANY dataset.
 			const loadDatasetPromises: Promise<string[]>[] = [
 				facade.addDataset("sections", sections, InsightDatasetKind.Sections),
-				//facade.addDataset("rooms", rooms, InsightDatasetKind.Rooms),
+				facade.addDataset("rooms", rooms, InsightDatasetKind.Rooms),
 			];
 
 			try {
-				//console.log("reached promise");
 				await Promise.all(loadDatasetPromises);
-				//console.log(loadDatasetPromises.length);
+				//console.log(loadDatasetPromises.length)
 			} catch (err) {
 				throw new Error(`In PerformQuery Before hook, dataset(s) failed to be added. \n${err}`);
 			}
@@ -785,9 +782,11 @@ describe("InsightFacade", function () {
 			await clearDisk();
 		});
 
-		it("[sections/valid/simple.json] SELECT dept, avg WHERE avg > 97", checkQuery);
+		//it("[sections/valid/simple.json] SELECT dept, avg WHERE avg > 97", checkQuery);
+		//it("[sections/valid/orderByTitle.json] order by title", checkQuery);
+		//it("[sections/valid/yearTest.json] order by year", checkQuery);
 
-		/*
+		///*
 		const sectionTestCases = [
 			"[sections/valid/simple.json] SELECT dept, avg WHERE avg > 97",
 			"[sections/valid/simple1.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = cps*",
@@ -887,6 +886,12 @@ describe("InsightFacade", function () {
 			it(testCase, checkQuery);
 		}
 
+		//*/
+
+		//it("[rooms/valid/classroomsFurniture.json] filter by rooms furniture", checkQuery);
+		//it("[rooms/valid/roomsSimpleOrderDirUp.json] simple order dir up", checkQuery);
+
+		///*
 		// 364 rooms total
 		const roomTestCases = [
 			// valid room queries
@@ -898,7 +903,7 @@ describe("InsightFacade", function () {
 			"[rooms/valid/roomsSimpleOrderDirUp.json] simple order dir up",
 			"[rooms/valid/latitudeQuery.json] filter by latitude",
 			"[rooms/valid/roomsSingleKeyOrder.json] simple order one key",
-			"[rooms/valid/roomsValidOrder2Keys.json] order by two keys",
+			"[rooms/valid/roomsValidOrder2Keys.json] simple order one key",
 			"[rooms/valid/roomsGroupByLatOrderByAvgSeats.json] group by lat order by avg seats",
 			"[rooms/valid/roomsGroupByLatOrderByCountName.json]  group by lat order by count names",
 			"[rooms/valid/roomsGroupByLatOrderByCountNameAvgSeats.json] group by lat order by count name, avg seats",
@@ -932,23 +937,42 @@ describe("InsightFacade", function () {
 			"[rooms/invalid/roomsInvalidApplyRuleMultipleKeys.json] order missing keys",
 			"[rooms/invalid/roomsTransformCOUNTTargetKeyInvalidType.json] order missing keys",
 			"[rooms/invalid/roomsUnderscoreInApplyKey.json] order missing keys",
+			"[rooms/invalid/setNotAddedYet.json] set not added yet",
+			"[rooms/invalid/applyWith2Keys.json] apply with 2 keys",
+			"[rooms/invalid/invalidTransformationsMissingGroup.json] transformations missing group",
+			"[rooms/invalid/invalidTransformationsMissingApply.json] transformations missing apply",
+			"[rooms/invalid/emptyArrayInGroup.json] empty array in group",
+			"[rooms/invalid/applyNoKey.json] apply no key",
+			"[rooms/invalid/invalidKeyInColumns.json] invalid key in columns",
+			"[rooms/invalid/keysInColumnsMustBeInGroupOrApply.json] keys in columns must be in group or apply",
+			"[rooms/invalid/nonNumericTypeForMax.json] non numeric type for max",
+			"[rooms/invalid/duplicateApplyTypes.json] duplicate apply types",
+			"[rooms/invalid/invalidApplyKey.json] invalid applykey",
+			"[rooms/invalid/invalidGroupKey.json] invalid group key",
+			"[rooms/invalid/misspeltApplyKey.json] misspelt apply key",
+			"[rooms/invalid/emptyStringApplyKey.json] empty string apply key",
+			"[rooms/invalid/invalidApplyToken.json] invalid apply token",
+			"[rooms/invalid/invalidApplyTokenKey.json] invalid apply token key",
+			"[rooms/invalid/invalidColumnKeyAsterisk.json] invalid column key asterisk",
+			"[rooms/invalid/mispeltTransformationsName.json] mispelt transformation name",
+			"[rooms/invalid/invalidColumnKey.json] invalid column key",
+			"[rooms/invalid/mispeltOrderKey.json] mispelt order key",
+			"[rooms/invalid/allOrderKeysNotInColumns.json] all order keys not in columns",
+			"[rooms/invalid/allOrderKeysIncludingMoreThanColumns.json] all order keys including more than column",
+			"[rooms/invalid/invalidOrderKey.json] invalid order key",
+			"[rooms/invalid/invalidOrderKey2.json] invalid order key 2",
+			"[rooms/invalid/emptyOrderKeys.json] empty order keys",
 		];
 
 		// Automated test cases for room
 		for (const testCase of roomTestCases) {
 			it(testCase, checkQuery);
 		}
+		//*/
 
-		// const roomTestCases = ["[rooms/valid/allRoomsInUbc.json] all rooms in ubc"]
-		// // Automated test cases for rooms
-		// for (const testCase of roomTestCases) {
-		// 	it(testCase, checkQuery);
-		// }
-
-		*/
+		//const roomTestCases = ["[rooms/valid/allRoomsInUbc.json] all rooms in ubc"]
 	});
 
-	/*
 	describe("ListDataset - rooms", function () {
 		beforeEach(async function () {
 			// This section resets the insightFacade instance
@@ -957,14 +981,15 @@ describe("InsightFacade", function () {
 			facade = new InsightFacade();
 		});
 
+		/*
 		it("list all ubc rooms ", async function () {
-			rooms = await getContentFromArchives("rooms/campus.zip");
-			await facade.addDataset("rooms", rooms, InsightDatasetKind.Rooms);
+			sections = await getContentFromArchives("rooms/campus.zip");
+			await facade.addDataset("ubc1", sections, InsightDatasetKind.Rooms);
 			const datasets = await facade.listDatasets();
 
 			expect(datasets).to.deep.equal([
 				{
-					id: "rooms",
+					id: "ubc1",
 					kind: InsightDatasetKind.Rooms,
 					numRows: 364,
 				},
@@ -1056,8 +1081,7 @@ describe("InsightFacade", function () {
 				expect.fail(`you failed to load the right sets: ${err}`);
 			}
 		});
-
-		// END OF COMMENTS
+		*/
 
 		// TODO
 		// it("check rooms with bad address - rooms", async function () {
@@ -1267,5 +1291,4 @@ describe("InsightFacade", function () {
 			}
 		});
 	});
-	*/
 });

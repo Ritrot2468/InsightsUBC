@@ -6,28 +6,45 @@ export class QueryOrderHandler {
 	private validSort: string[] = ["dir", "keys"];
 	private validDir: string[] = ["UP", "DOWN"];
 	private utils = new QueryUtils();
-	public dir = "";
+	private dir = "";
+
+	public getDir(): string {
+		return this.dir;
+	}
 
 	public async handleORDER(value: unknown, columns: string[]): Promise<string[]> {
 		let orderKeys: string[] = [];
+		this.dir = "UP";
 
 		// if only one order key
 		if (typeof value === "string") {
+			//console.log(value);
+			//console.log("order as a string");
 			const valueStr = String(value);
 			orderKeys.push(this.checkKeyInColumns(valueStr, columns));
 		} else if (typeof value === "object") {
+			//console.log("order as an object");
+			//console.log(value);
 			const sortObj = Object(value);
 			const sortKeys = Object.keys(sortObj);
 			const invalidKeys = sortKeys.filter((key) => !this.validSort.includes(key));
 
+			//console.log(sortKeys);
 			if (invalidKeys.length > 0) {
 				throw new InsightError("Invalid keys in ORDER");
 			}
 
 			if ("dir" in sortObj) {
-				if ("dir" in this.validDir) {
+				//console.log(typeof sortObj.dir);
+				//console.log("reached dir in sorKeys");
+				//console.log(sortObj.dir);
+				// changed from sortObj.dir in this.validDir
+				if (this.validDir.includes(sortObj.dir)) {
+					//console.log("WORKING");
 					this.dir = sortObj.dir;
 				} else {
+					//console.log("Test");
+					//console.log(sortObj.dir);
 					throw new InsightError("Invalid 'dir' value");
 				}
 			} else {

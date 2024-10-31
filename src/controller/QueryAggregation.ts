@@ -11,7 +11,8 @@ export default class QueryAggregation {
 	public queryingIDString: string;
 	private sDSList: string[];
 	private rDSList: string[];
-	private groupKeys: string[];
+	public groupKeys: string[];
+	public applyKeys: string[];
 
 	constructor(sectionsDatabase: Map<string, Section[]>, roomsDatabase: Map<string, Room[]>) {
 		this.sectionsDatabase = sectionsDatabase;
@@ -22,6 +23,7 @@ export default class QueryAggregation {
 		this.sDSList = Array.from(sectionsDatabase.keys());
 		this.rDSList = Array.from(roomsDatabase.keys());
 		this.groupKeys = [];
+		this.applyKeys = [];
 	}
 
 	public setDBs(
@@ -164,6 +166,7 @@ export default class QueryAggregation {
 
 		// campus explorer allows empty applyarrays, so no rules is okay
 		applyRules = await this.checkApplyRules(apply);
+		this.applyKeys = Object.keys(applyRules);
 		transformedResults = await this.applyRulesRecursive(groupedResults, applyRules, 0, []);
 		return transformedResults;
 	}

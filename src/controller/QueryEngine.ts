@@ -51,8 +51,8 @@ export default class QueryEngine {
 		this.roomsDatabase = roomsDatabase;
 		this.sDSList = Array.from(sectionsDatabase.keys());
 		this.rDSList = Array.from(roomsDatabase.keys());
-		this.QueryEngineFilter.setDBs(this.sectionsDatabase, this.roomsDatabase, this.sDSList, this.rDSList);
-		this.QueryAggregation.setDBs(this.sectionsDatabase, this.roomsDatabase, this.sDSList, this.rDSList);
+		this.QueryEngineFilter = new QueryEngineFilter(this.sectionsDatabase, this.roomsDatabase);
+		this.QueryAggregation = new QueryAggregation(this.sectionsDatabase, this.roomsDatabase);
 		this.sectionOrRoom = "";
 		this.queryingIDString = ""; // restart on every query;
 		this.isGrouped = false;
@@ -103,7 +103,7 @@ export default class QueryEngine {
 				throw new InsightError("Query missing OPTIONS");
 			}
 			//console.log("End result");
-			//console.log(result.length);
+			//console.log(result);
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;
@@ -171,10 +171,10 @@ export default class QueryEngine {
 
 			if ("APPLY" in transformations) {
 				transformedResults = await this.QueryAggregation.handleApply(transformations.APPLY, groupedResults);
+				this.updateVar();
 			} else {
 				throw new InsightError("TRANSFORMATIONS missing APPLY key");
 			}
-			this.updateQueryingIDAndSectionOrRoom();
 		} catch (err) {
 			if (err instanceof InsightError || err instanceof ResultTooLargeError) {
 				throw err;
@@ -184,9 +184,10 @@ export default class QueryEngine {
 		return transformedResults;
 	}
 
-	private updateQueryingIDAndSectionOrRoom(): boolean {
+	private updateVar(): boolean {
 		this.queryingIDString = this.QueryAggregation.queryingIDString;
 		this.sectionOrRoom = this.QueryAggregation.sectionOrRoom;
+		this.newCols = this.QueryAggregation.groupKeys.concat(this.QueryAggregation.applyKeys);
 		return true;
 	}
 
@@ -213,7 +214,7 @@ export default class QueryEngine {
 			// Done
 			if ("ORDER" in options) {
 				orderKeys = await this.QueryOrderHandler.handleORDER(options.ORDER, columns);
-				this.dir = this.QueryOrderHandler.dir;
+				this.dir = this.QueryOrderHandler.getDir();
 			}
 
 			results = await this.completeQuery(transformedResults, columns, orderKeys);

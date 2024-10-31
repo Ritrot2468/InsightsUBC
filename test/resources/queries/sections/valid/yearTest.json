@@ -7,10 +7,7 @@
 			}
 		},
 		"OPTIONS": {
-			"COLUMNS": [
-				"sections_year",
-				"sections_avg"
-			],
+			"COLUMNS": ["sections_year", "sections_avg"],
 			"ORDER": "sections_year"
 		}
 	},

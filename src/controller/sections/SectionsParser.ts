@@ -73,6 +73,7 @@ export default class SectionsParser {
 						if (section.Section === "overall") {
 							const newSection = this.createSection(section, id);
 							newSection.setMfield(newSection.getMFieldIndex("year"), SectionsParser.OVERALL_SECTION_YEAR);
+							newSection.year = SectionsParser.OVERALL_SECTION_YEAR;
 							sections.push(newSection);
 						} else {
 							sections.push(this.createSection(section, id));

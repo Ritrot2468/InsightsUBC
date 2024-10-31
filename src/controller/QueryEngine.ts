@@ -172,6 +172,7 @@ export default class QueryEngine {
 			if ("APPLY" in transformations) {
 				transformedResults = await this.QueryAggregation.handleApply(transformations.APPLY, groupedResults);
 				this.updateVar();
+				console.log("Promise resolved with:", transformedResults);
 			} else {
 				throw new InsightError("TRANSFORMATIONS missing APPLY key");
 			}
@@ -188,6 +189,7 @@ export default class QueryEngine {
 		this.queryingIDString = this.QueryAggregation.queryingIDString;
 		this.sectionOrRoom = this.QueryAggregation.sectionOrRoom;
 		this.newCols = this.QueryAggregation.groupKeys.concat(this.QueryAggregation.applyKeys);
+		console.log(this.newCols);
 		return true;
 	}
 
@@ -267,7 +269,7 @@ export default class QueryEngine {
 		const results: string[] = [];
 		for (const key of columns) {
 			const keyStr = String(key);
-			const field = keyStr.split("_")[1];
+			//const field = keyStr.split("_")[1];
 			const idstring = keyStr.split("_")[0];
 
 			this.sectionOrRoom = this.utils.checkIDString(
@@ -280,7 +282,7 @@ export default class QueryEngine {
 			this.queryingIDString = idstring;
 
 			// checks if the field is a valid field
-			if (this.checkValidColumn(field)) {
+			if (this.checkValidColumn(keyStr)) {
 				results.push(keyStr);
 			} else {
 				throw new InsightError(`Invalid key ${keyStr} in COLUMNS`);
@@ -290,23 +292,26 @@ export default class QueryEngine {
 	}
 
 	// if the field is valid, return true, if sectionOrRoom is somehow empty throw error
-	private checkValidColumn(field: string): boolean {
+	private checkValidColumn(keyStr: string): boolean {
 		if (this.isGrouped) {
-			if (this.newCols.includes(field)) {
+			if (this.newCols.includes(keyStr)) {
 				return true;
 			} else {
 				throw new InsightError("Keys in COLUMNS must be in GROUP or APPLY when TRANSFORMATIONS is present");
 			}
-		} else if (this.sectionOrRoom === "section") {
-			if (this.utils.mFieldsSection.includes(field) || this.utils.sFieldsSection.includes(field)) {
-				return true;
-			}
-		} else if (this.sectionOrRoom === "room") {
-			if (this.utils.mFieldsRoom.includes(field) || this.utils.sFieldsRoom.includes(field)) {
-				return true;
-			}
 		} else {
-			throw new InsightError("section or room undefined");
+			const field = keyStr.split("_")[1];
+			if (this.sectionOrRoom === "section") {
+				if (this.utils.mFieldsSection.includes(field) || this.utils.sFieldsSection.includes(field)) {
+					return true;
+				}
+			} else if (this.sectionOrRoom === "room") {
+				if (this.utils.mFieldsRoom.includes(field) || this.utils.sFieldsRoom.includes(field)) {
+					return true;
+				}
+			} else {
+				throw new InsightError("section or room undefined");
+			}
 		}
 		return false;
 	}

@@ -903,7 +903,7 @@ describe("InsightFacade", function () {
 			"[rooms/valid/roomsSimpleOrderDirUp.json] simple order dir up",
 			"[rooms/valid/latitudeQuery.json] filter by latitude",
 			"[rooms/valid/roomsSingleKeyOrder.json] simple order one key",
-			"[rooms/valid/roomsValidOrder2Keys.json] simple order one key",
+			"[rooms/valid/roomsValidOrder2Keys.json] simple order two key",
 			"[rooms/valid/roomsGroupByLatOrderByAvgSeats.json] group by lat order by avg seats",
 			"[rooms/valid/roomsGroupByLatOrderByCountName.json]  group by lat order by count names",
 			"[rooms/valid/roomsGroupByLatOrderByCountNameAvgSeats.json] group by lat order by count name, avg seats",

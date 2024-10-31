@@ -53,7 +53,7 @@ export default class QueryAggregation {
 
 		// get the group keys from group in query
 		this.groupKeys = await this.checkGroupKeys(group);
-
+		console.log(this.groupKeys);
 		// if no filter has been applied,
 		if (noFilter) {
 			dataset = await this.getDataset();
@@ -62,6 +62,7 @@ export default class QueryAggregation {
 		}
 
 		groupedResults = await this.groupByKeys(dataset);
+		//console.log(groupedResults);
 		return groupedResults;
 	}
 
@@ -70,23 +71,27 @@ export default class QueryAggregation {
 		return dataset.reduce((acc, SOR) => {
 			// Create nested structure based on keys
 			this.groupKeys.reduce((nestedAcc, key, index) => {
-				const groupKey = (SOR as Record<string, any>)[key];
+				// key is a groupkey
+				const field = key.split("_")[1];
+				//console.log(SOR);
+				//console.log(key);
+				const keyGrouping = (SOR as Record<string, any>)[field];
 				const nestedAccObj = Object(nestedAcc);
 
 				// If this is the last key, store the array of items
 				if (index === this.groupKeys.length - 1) {
-					if (!nestedAccObj[groupKey]) {
-						nestedAccObj[groupKey] = [];
+					if (!nestedAccObj[keyGrouping]) {
+						nestedAccObj[keyGrouping] = [];
 					}
-					nestedAccObj[groupKey].push(SOR);
+					nestedAccObj[keyGrouping].push(SOR);
 				} else {
 					// Create an empty object if key doesn't exist yet
-					if (!nestedAccObj[groupKey]) {
-						nestedAccObj[groupKey] = {};
+					if (!nestedAccObj[keyGrouping]) {
+						nestedAccObj[keyGrouping] = {};
 					}
 				}
 
-				return nestedAccObj[groupKey];
+				return nestedAccObj[keyGrouping];
 			}, acc);
 
 			return acc;
@@ -167,7 +172,9 @@ export default class QueryAggregation {
 		// campus explorer allows empty applyarrays, so no rules is okay
 		applyRules = await this.checkApplyRules(apply);
 		this.applyKeys = Object.keys(applyRules);
+
 		transformedResults = await this.applyRulesRecursive(groupedResults, applyRules, 0, []);
+		//console.log(transformedResults);
 		return transformedResults;
 	}
 
@@ -300,13 +307,25 @@ checkTargetKey(key): string {
 			}
 			try {
 				//console.log("reached promise");
-				results = (await Promise.all(resultsPromises)).flat();
+				const promises = await Promise.allSettled(resultsPromises);
+				results = this.checkAllFulfilled(promises);
 				//console.log(loadDatasetPromises.length);
 			} catch (err) {
 				throw new Error(`Failed apply rules recursively, error: ${err}`);
 			}
 		}
 		return results;
+	}
+
+	private checkAllFulfilled(promises: PromiseSettledResult<Object[]>[]): Object[] {
+		const allFulfilled = promises.every((promise) => promise.status === "fulfilled");
+		if (allFulfilled) {
+			const objectArr = promises.map((promise) => (promise as PromiseFulfilledResult<any>).value);
+			console.log(objectArr);
+			return objectArr;
+		} else {
+			throw new InsightError("One of the recursives failed");
+		}
 	}
 
 	private async makeNewObject(
@@ -325,13 +344,15 @@ checkTargetKey(key): string {
 	}
 
 	private applyAFunction(token: string, targetKey: string, SORArr: Object[]): Object {
-		const key = targetKey.split("_")[1];
+		const field = targetKey.split("_")[1];
 		const targetFieldList: any[] = [];
 
 		for (const SOR of SORArr) {
-			targetFieldList.push((SOR as Record<string, any>)[key]);
+			//console.log(SOR);
+			targetFieldList.push((SOR as Record<string, any>)[field]);
 		}
-
+		//console.log("apply a function, token:");
+		//console.log(token);
 		if (this.checkTargetKey(targetKey) === "number") {
 			if (token === "MAX") {
 				return Math.max(...targetFieldList);
@@ -414,11 +435,14 @@ checkTargetKey(key): string {
 
 			const token = this.checkValidToken(Object.keys(applyTokenAndKeyObj)[0]);
 			const key = Object.values(applyTokenAndKeyObj)[0];
+			console.log(token);
+			console.log(key);
 
 			if (typeof key !== "string") {
 				throw new InsightError("APPLY invalid target key type");
 			}
-			if (this.checkValidKey(String(key))) {
+			const field = key.split("_")[1];
+			if (this.checkValidKey(field)) {
 				return [token, String(key)];
 			} else {
 				throw new InsightError("APPLY invalid target key");
@@ -431,7 +455,7 @@ checkTargetKey(key): string {
 			throw new InsightError("APPLY invalid applytoken type");
 		} else {
 			const tokenStr = String(token);
-			if (tokenStr in this.utils.validApplyTokens) {
+			if (this.utils.validApplyTokens.includes(tokenStr)) {
 				return tokenStr;
 			} else {
 				throw new InsightError("APPLY invalid applytoken");

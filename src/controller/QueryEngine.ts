@@ -22,7 +22,7 @@ export default class QueryEngine {
 	private isGrouped = false;
 	private dir = "UP";
 	private noFilter = false;
-	private datasetValidator: DatasetValidatorHelper;
+	//private datasetValidator: DatasetValidatorHelper;
 
 	constructor(sectionsDatabase: Map<string, Section[]>, roomsDatabase: Map<string, Room[]>) {
 		this.sectionsDatabase = sectionsDatabase;
@@ -32,7 +32,7 @@ export default class QueryEngine {
 		this.QueryEngineFilter = new QueryEngineFilter(this.sectionsDatabase, this.roomsDatabase);
 		this.QueryAggregation = new QueryAggregation(this.sectionsDatabase, this.roomsDatabase);
 		this.sectionOrRoom = "";
-		this.datasetValidator = new DatasetValidatorHelper();
+		//this.datasetValidator = new DatasetValidatorHelper();
 		this.sDSList = [];
 		this.rDSList = [];
 		//console.log(this.rDSList);
@@ -51,8 +51,8 @@ export default class QueryEngine {
 		this.roomsDatabase = roomsDatabase;
 		this.sDSList = Array.from(sectionsDatabase.keys());
 		this.rDSList = Array.from(roomsDatabase.keys());
-		this.QueryEngineFilter.setIDs(this.sDSList, this.rDSList);
-		this.QueryAggregation.setIDs(this.sDSList, this.rDSList);
+		this.QueryEngineFilter.setDBs(this.sectionsDatabase, this.roomsDatabase, this.sDSList, this.rDSList);
+		this.QueryAggregation.setDBs(this.sectionsDatabase, this.roomsDatabase, this.sDSList, this.rDSList);
 		this.sectionOrRoom = "";
 		this.queryingIDString = ""; // restart on every query;
 		this.isGrouped = false;

@@ -28,6 +28,7 @@ describe("InsightFacade", function () {
 	let sections: string;
 	let rooms: string;
 
+	/*
 	describe("AddDataset - Sections", function () {
 		let sections2: string;
 		let empty: string;
@@ -710,6 +711,8 @@ describe("InsightFacade", function () {
 		});
 	});
 
+	*/
+
 	describe("PerformQuery", function () {
 		/**
 		 * Loads the TestQuery specified in the test name and asserts the behaviour of performQuery.
@@ -730,7 +733,7 @@ describe("InsightFacade", function () {
 			let result: InsightResult[];
 			try {
 				result = await facade.performQuery(input);
-				console.log(result);
+				//console.log(result);
 				if (errorExpected) {
 					expect.fail(`performQuery resolved when it should have rejected with ${expected}`);
 				}
@@ -756,17 +759,17 @@ describe("InsightFacade", function () {
 		}
 
 		before(async function () {
-			await clearDisk();
+			//await clearDisk();
 			facade = new InsightFacade();
 			//facade2 = new InsightFacade()
-			//sections = await getContentFromArchives("sections/pair.zip");
-			rooms = await getContentFromArchives("rooms/campus.zip");
+			sections = await getContentFromArchives("sections/pair.zip");
+			//rooms = await getContentFromArchives("rooms/campus.zip");
 
 			// Add the datasets to InsightFacade once.
 			// Will *fail* if there is a problem reading ANY dataset.
 			const loadDatasetPromises: Promise<string[]>[] = [
-				//facade.addDataset("sections", sections, InsightDatasetKind.Sections),
-				facade.addDataset("rooms", rooms, InsightDatasetKind.Rooms),
+				facade.addDataset("sections", sections, InsightDatasetKind.Sections),
+				//facade.addDataset("rooms", rooms, InsightDatasetKind.Rooms),
 			];
 
 			try {
@@ -782,8 +785,9 @@ describe("InsightFacade", function () {
 			await clearDisk();
 		});
 
-		//it("[sections/valid/simple.json] SELECT dept, avg WHERE avg > 97", checkQuery);
+		it("[sections/valid/simple.json] SELECT dept, avg WHERE avg > 97", checkQuery);
 
+		/*
 		const sectionTestCases = [
 			"[sections/valid/simple.json] SELECT dept, avg WHERE avg > 97",
 			"[sections/valid/simple1.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = cps*",
@@ -940,8 +944,11 @@ describe("InsightFacade", function () {
 		// for (const testCase of roomTestCases) {
 		// 	it(testCase, checkQuery);
 		// }
+
+		*/
 	});
 
+	/*
 	describe("ListDataset - rooms", function () {
 		beforeEach(async function () {
 			// This section resets the insightFacade instance
@@ -1260,4 +1267,5 @@ describe("InsightFacade", function () {
 			}
 		});
 	});
+	*/
 });

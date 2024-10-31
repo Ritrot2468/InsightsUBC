@@ -24,7 +24,14 @@ export default class QueryEngineFilter {
 		this.currDataset = [];
 	}
 
-	public setIDs(sDSList: string[], rDSList: string[]): void {
+	public setDBs(
+		sectionsDatabase: Map<string, Section[]>,
+		roomsDatabase: Map<string, Room[]>,
+		sDSList: string[],
+		rDSList: string[]
+	): void {
+		this.sectionsDatabase = sectionsDatabase;
+		this.roomsDatabase = roomsDatabase;
 		this.rDSList = rDSList;
 		this.sDSList = sDSList;
 	}

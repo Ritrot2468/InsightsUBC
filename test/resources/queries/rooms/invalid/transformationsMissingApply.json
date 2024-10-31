@@ -1,0 +1,19 @@
+{
+	"title": "transformations missing apply",
+	"input": {
+		"WHERE": {},
+		"OPTIONS": {
+			"COLUMNS": [
+				"courses_title",
+				"overallAvg"
+			]
+		},
+		"TRANSFORMATIONS": {
+			"GROUP": [
+				"courses_title"
+			]
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

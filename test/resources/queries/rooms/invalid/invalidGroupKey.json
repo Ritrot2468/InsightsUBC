@@ -1,0 +1,30 @@
+{
+	"title": "invalid group key",
+	"input": {
+		"WHERE": {
+			"GT": {
+				"rooms_seats": 20
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"rooms_lat"
+			],
+			"ORDER": "countSeats"
+		},
+		"TRANSFORMATIONS": {
+			"GROUP": [
+				"roomslat"
+			],
+			"APPLY": [
+				{
+					"countSeats": {
+						"COUNT": "rooms_seats"
+					}
+				}
+			]
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

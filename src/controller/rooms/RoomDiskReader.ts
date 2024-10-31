@@ -1,5 +1,4 @@
 import RoomsParser from "./RoomsParser";
-import { InsightError } from "../IInsightFacade";
 import fs from "fs-extra";
 import Room from "./Room";
 import { DatasetRecord } from "../rooms/RoomsParser";
@@ -14,16 +13,16 @@ export default class RoomDiskReader extends RoomsParser {
 	// EFFECTS: Retrieves the sections associated with the dataset id on disk and turned into Sections objects and maps
 	//          them to sectionsDatabase with their associated id.
 	// OUTPUT: VOID
-	public async logNewDatasetFromDiskToMap(id: string, roomsDatabase: Map<string, Room[]>): Promise<void> {
-		const newDataset = await this.turnDatasetToRoom(id);
-		const numRows = newDataset.rooms.length;
-
-		if (numRows === 0) {
-			throw new InsightError("No valid Section");
-		}
-		// update member variables
-		roomsDatabase.set(newDataset.id, newDataset.rooms);
-	}
+	// public async logNewDatasetFromDiskToMap(id: string, roomsDatabase: Map<string, Room[]>): Promise<void> {
+	// 	const newDataset = await this.turnDatasetToRoom(id);
+	// 	const numRows = newDataset.rooms.length;
+	//
+	// 	if (numRows === 0) {
+	// 		throw new InsightError("No valid Section");
+	// 	}
+	// 	// update member variables
+	// 	roomsDatabase.set(newDataset.id, newDataset.rooms);
+	// }
 
 	public async turnDatasetToRoom(id: string): Promise<DatasetRecord> {
 		// tracks number of sections in a given dataset and is initialized to 0

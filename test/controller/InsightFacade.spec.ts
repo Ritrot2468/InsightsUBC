@@ -28,7 +28,6 @@ describe("InsightFacade", function () {
 	let sections: string;
 	let rooms: string;
 
-	/*
 	describe("AddDataset - Sections", function () {
 		let sections2: string;
 		let empty: string;
@@ -710,7 +709,7 @@ describe("InsightFacade", function () {
 			}
 		});
 	});
-	*/
+
 	describe("PerformQuery", function () {
 		/**
 		 * Loads the TestQuery specified in the test name and asserts the behaviour of performQuery.
@@ -731,10 +730,11 @@ describe("InsightFacade", function () {
 			let result: InsightResult[];
 			try {
 				result = await facade.performQuery(input);
+				console.log(result)
 				if (errorExpected) {
 					expect.fail(`performQuery resolved when it should have rejected with ${expected}`);
 				}
-				expect(result).to.includes.deep.members(expected);
+				expect(result).to.include.deep.members(expected);
 				//expect(result).to.deep.equal(expected);
 			} catch (err) {
 				if (!errorExpected) {
@@ -782,7 +782,7 @@ describe("InsightFacade", function () {
 		});
 
 		//it("[sections/valid/simple.json] SELECT dept, avg WHERE avg > 97", checkQuery);
-		/*
+
 		const sectionTestCases = [
 			"[sections/valid/simple.json] SELECT dept, avg WHERE avg > 97",
 			"[sections/valid/simple1.json] SELECT dept, uuid, avg WHERE avg > 93 AND dep = cps*",
@@ -872,20 +872,21 @@ describe("InsightFacade", function () {
 			"[sections/invalid/output_too_large.json] SELECT dept, avg - RESULT TOO LARGE",
 			"[sections/invalid/reference_too_many_datasets.json] SELECT sections_dept sections_avg WHERE section_avg > 80 AND section_year = 202*",
 			"[sections/invalid/excessKeysInQuery.json] WHERE OPTIONS and HOW keys in Query",
+			"[sections/invalid/invalidOrObject.json] invalid or object",
+			"[sections/invalid/nonEmptyOrArray.json] non empty or array",
+			"[sections/invalid/orWith2Keys.json] or with 2 keys",
+
 		];
 
 		// Automated test cases for sections
 		for (const testCase of sectionTestCases) {
 			it(testCase, checkQuery);
 		}
-		*/
 
-		/*
 		// 364 rooms total
 		const roomTestCases = [
 			// valid room queries
 			"[rooms/valid/allRoomsInUbc.json] room names, no filter",
-			/*
 			"[rooms/valid/allRoomsAllColumns.json] all room columns, no filter",
 			"[rooms/valid/classroomsFurniture.json] filter by rooms furniture",
 			"[rooms/valid/latitudeQuery.json] filter by latitude",
@@ -903,6 +904,10 @@ describe("InsightFacade", function () {
 			"[rooms/valid/roomsGroupByLatOrderBySumSeats.json] group by lat order by sum seats",
 			"[rooms/valid/roomsGroupByLatAndLonOrderByCountseats.json] group by lat and lon order by count seats",
 			"[rooms/valid/applyTargetKeySameAsGroupKey.json] apply target key same as group key (group by seats then avg seats)",
+			"[rooms/valid/multipleApplyTypes.json] multiple apply types",
+			"[rooms/valid/allOrderKeysExactlyInColumns.json] all order keys exactly in columns",
+			"[rooms/valid/validOrderKeyList.json] valid order key list",
+
 
 			// invalid room queries
 			"[rooms/invalid/invalidRoomsAndSectionsQuery.json] room and sections idstrings",
@@ -918,27 +923,50 @@ describe("InsightFacade", function () {
 			"[rooms/invalid/roomsOrderMissingKeys.json] order missing keys",
 			"[rooms/invalid/extraKeysInTransformation.json] order missing keys",
 			"[rooms/invalid/invalidApplyRuleTargetKey.json] order missing keys",
-			"[rooms/invalid/invalidTransformationsMissingApply.json] order missing keys",
-			"[rooms/invalid/invalidTransformationsMissingGroup.json] order missing keys",
 			"[rooms/invalid/invalidTransformationsType.json] order missing keys",
 			"[rooms/invalid/roomsApplyRuleTargetKeyInvalidNotNumber.json] order missing keys",
 			"[rooms/invalid/roomsInvalidApplyRule.json] order missing keys",
 			"[rooms/invalid/roomsInvalidApplyRuleMultipleKeys.json] order missing keys",
 			"[rooms/invalid/roomsTransformCOUNTTargetKeyInvalidType.json] order missing keys",
 			"[rooms/invalid/roomsUnderscoreInApplyKey.json] order missing keys",
-			*/
-		//];
-		/*
+			"[rooms/invalid/setNotAddedYet.json] set not added yet",
+			"[rooms/invalid/applyWith2Keys.json] apply with 2 keys",
+			"[rooms/invalid/invalidTransformationsMissingGroup.json] transformations missing group",
+			"[rooms/invalid/invalidTransformationsMissingApply.json] transformations missing apply",
+			"[rooms/invalid/emptyArrayInGroup.json] empty array in group",
+			"[rooms/invalid/applyNoKey.json] apply no key",
+			"[rooms/invalid/invalidKeyInColumns.json] invalid key in columns",
+			"[rooms/invalid/keysInColumnsMustBeInGroupOrApply.json] keys in columns must be in group or apply",
+			"[rooms/invalid/nonNumericTypeForMax.json] non numeric type for max",
+			"[rooms/invalid/duplicateApplyTypes.json] duplicate apply types",
+			"[rooms/invalid/invalidApplyKey.json] invalid applykey",
+			"[rooms/invalid/invalidGroupKey.json] invalid group key",
+			"[rooms/invalid/misspeltApplyKey.json] misspelt apply key",
+			"[rooms/invalid/emptyStringApplyKey.json] empty string apply key",
+			"[rooms/invalid/invalidApplyToken.json] invalid apply token",
+			"[rooms/invalid/invalidApplyTokenKey.json] invalid apply token key",
+			"[rooms/invalid/invalidColumnKeyAsterisk.json] invalid column key asterisk",
+			"[rooms/invalid/mispeltTransformationsName.json] mispelt transformation name",
+			"[rooms/invalid/invalidColumnKey.json] invalid column key",
+			"[rooms/invalid/mispeltOrderKey.json] mispelt order key",
+			"[rooms/invalid/allOrderKeysNotInColumns.json] all order keys not in columns",
+			"[rooms/invalid/allOrderKeysIncludingMoreThanColumns.json] all order keys including more than column",
+			"[rooms/invalid/invalidOrderKey.json] invalid order key",
+			"[rooms/invalid/invalidOrderKey2.json] invalid order key 2",
+			"[rooms/invalid/emptyOrderKeys.json] empty order keys"
+
+		];
+
 		// Automated test cases for room
 		for (const testCase of roomTestCases) {
 			it(testCase, checkQuery);
 		}
-		*/
-		// const roomTestCases = ["[rooms/valid/allRoomsInUbc.json] all rooms in ubc"]
-		// // Automated test cases for rooms
-		// for (const testCase of roomTestCases) {
-		// 	it(testCase, checkQuery);
-		// }
+
+		//const roomTestCases = ["[rooms/valid/allRoomsInUbc.json] all rooms in ubc"]
+		// Automated test cases for rooms
+		for (const testCase of roomTestCases) {
+			it(testCase, checkQuery);
+		}
 	});
 
 	describe("ListDataset - rooms", function () {
@@ -1111,7 +1139,6 @@ describe("InsightFacade", function () {
 		// });
 	});
 
-	/*
 	describe("ListDataset - Sections", function () {
 		beforeEach(async function () {
 			// This section resets the insightFacade instance
@@ -1257,5 +1284,5 @@ describe("InsightFacade", function () {
 				expect.fail(`you failed to load the right sets ${err}`);
 			}
 		});
-	});*/
+	});
 });

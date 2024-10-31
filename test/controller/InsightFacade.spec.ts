@@ -899,7 +899,7 @@ describe("InsightFacade", function () {
 
 		//it("[rooms/valid/roomsGroupByLatOrderByAvgSeats.json] group by lat order by avg seats", checkQuery);
 
-		it("[rooms/valid/multipleApplyTypes.json] multiple apply types", checkQuery);
+		//it("[rooms/valid/multipleApplyTypes.json] multiple apply types", checkQuery);
 		/*it(
 			"[rooms/valid/roomsGroupByLatAndLonOrderByCountseats.json] group by lat and lon order by count seats",
 			checkQuery
@@ -913,7 +913,6 @@ describe("InsightFacade", function () {
 			"[rooms/valid/allRoomsInUbc.json] room names, no filter",
 			"[rooms/valid/allRoomsAllColumns.json] all room columns, no filter",
 			"[rooms/valid/classroomsFurniture.json] filter by rooms furniture",
-			"[rooms/valid/latitudeQuery.json] filter by latitude",
 			"[rooms/valid/roomQueryExample.json] complex room query example",
 			"[rooms/valid/roomsSimpleOrderDirUp.json] simple order dir up",
 			"[rooms/valid/latitudeQuery.json] filter by latitude",

@@ -1,19 +1,22 @@
-import express, { Application, Request, Response } from "express";
+import express, {Application, Request, Response, Router} from "express";
 import { StatusCodes } from "http-status-codes";
 import Log from "@ubccpsc310/folder-test/build/Log";
 import * as http from "http";
 import cors from "cors";
+import FacadeRouter from "./FacadeRouter";
 
 export default class Server {
 	private readonly port: number;
 	private express: Application;
 	private server: http.Server | undefined;
+	private facadeRouter: FacadeRouter;
 
 	constructor(port: number) {
 		Log.info(`Server::<init>( ${port} )`);
 		this.port = port;
 		this.express = express();
 
+		this.facadeRouter = new FacadeRouter();
 		this.registerMiddleware();
 		this.registerRoutes();
 
@@ -85,10 +88,16 @@ export default class Server {
 	// Registers all request handlers to routes
 	private registerRoutes(): void {
 		// This is an example endpoint this you can invoke by accessing this URL in your browser:
-		// http://localhost:4321/echo/hello
+		//
 		this.express.get("/echo/:msg", Server.echo);
+		//this.express.get("/dataset/:id/:kind", Server.echo)
 
 		// TODO: your other endpoints should go here
+		this.express.put("/dataset/:id/:kind", this.facadeRouter.putDataset);
+		this.express.put("/dataset/:id", this.facadeRouter.removeDataset);
+		this.express.put("/dataset", this.facadeRouter.removeDataset);
+		// this.express.post("/query", Router.postQuery);
+		// this.express.get("/datasets" , Router.retrieveDatasetsQuery);
 	}
 
 	// The next two methods handle the echo service.
@@ -98,6 +107,7 @@ export default class Server {
 		try {
 			Log.info(`Server::echo(..) - params: ${JSON.stringify(req.params)}`);
 			const response = Server.performEcho(req.params.msg);
+			//const response = Server.retrieveDataset(req.params);
 			res.status(StatusCodes.OK).json({ result: response });
 		} catch (err) {
 			res.status(StatusCodes.BAD_REQUEST).json({ error: err });

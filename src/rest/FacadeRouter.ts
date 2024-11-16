@@ -1,43 +1,19 @@
 import { Request, Response} from "express";
 import { StatusCodes } from "http-status-codes";
-//import multer from 'multer';
+
 import InsightFacade from "../controller/InsightFacade";
 import {IInsightFacade, InsightDatasetKind, InsightError} from "../controller/IInsightFacade";
 import Log from "@ubccpsc310/folder-test/build/Log";
-// import path from 'path';
-// import fs from "fs";
+import RestQueries from "./RestQueries";
+
 const facade: IInsightFacade = new InsightFacade()
 
-// const app = express();
-//
-// const upload = multer({dest: 'uploads/'})
-//
-// app.post('/dataset/id:/kind:', upload.single('file'), (req: Request, res: Response) => {
-// 	const id = req.params.id;
-// 	const kind = req.params.kind as InsightDatasetKind;
-// 	if (!req.file) {
-// 		return res.status(StatusCodes.BAD_REQUEST).json({
-// 			error: 'No file uploaded'
-// 		})
-// 	}
-// 	const filePath = path.resolve(req.file.path);
-//
-// 	const fileBuffer = fs.readFileSync(filePath);
-// 	const content = fileBuffer.toString('base64');
-// 	fs.unlinkSync(filePath);
-// 	facade.addDataset(id, content, kind)
-// 		.then((result) => {
-// 			res.status(StatusCodes.CREATED).json({message: "Dataset added", result});
-// 		}).catch((err) => {
-// 		res.status(StatusCodes.BAD_REQUEST).json({err: `404 Error, ${err}`});
-// 	})
-//
-// })
 export default class FacadeRouter {
 	// private facade: InsightFacade
-	// constructor() {
-	// 	this.facade = new InsightFacade();
-	// }
+	private restQueries: RestQueries;
+	constructor() {
+		this.restQueries = new RestQueries(facade);
+	}
 	public async putDataset(req: Request, res: Response): Promise<void> {
 		const id = req.params.id;
 		const kind = req.params.kind as InsightDatasetKind;
@@ -68,25 +44,27 @@ export default class FacadeRouter {
 		const id = req.params.id;
 
 		try {
+			if (!id) {
+				throw new Error("Dataset ID is required");
+			}
+
 			const result = await facade.removeDataset(id)
 			res.status(StatusCodes.OK).json({message: "Dataset removed", result});
 
 		} catch (err) {
-			res.status(StatusCodes.BAD_REQUEST).json({err: `404 Error, ${err}`});
+			res.status(StatusCodes.BAD_REQUEST).json({err: `400 Error, ${err}`});
 		}
 	}
 
 	public async listDatasets(req: Request, res: Response): Promise<void> {
-			Log.info("About to call listDatasets")
+			Log.info("Retrieving Datasets")
 			Log.info("No req", req);
 			const result = await facade.listDatasets();
 
-			Log.info("Result:",result)
 			res.status(StatusCodes.OK).json({result: result});
 			Log.info("Response sent with status OK");
-
-
 	}
+
 
 
 }

@@ -164,7 +164,7 @@ describe("Facade C3", function () {
 
 				// remove dataset
 				return request(SERVER_URL)
-					.put(ENDPOINT_URL_REMOVAL)
+					.delete(ENDPOINT_URL_REMOVAL)
 					.send(zipFileData)
 					.set("Content-Type", "application/zip");
 			})

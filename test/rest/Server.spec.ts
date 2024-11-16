@@ -33,6 +33,7 @@ describe("Facade C3", function () {
 	beforeEach(async function () {
 		// might want to add some process logging here to keep track of what is going on
 		await clearDisk();
+
 	});
 
 	afterEach(function () {
@@ -173,6 +174,56 @@ describe("Facade C3", function () {
 				Log.info(res.body)
 				expect(res.status).to.be.equal(StatusCodes.OK);
 				expect(res.body.result).to.be.equal('section2');
+			})
+			.catch((err) => {
+				Log.error(err);
+
+			});
+	});
+
+	it("should list with no datasets added", async function () {
+		const SERVER_URL = "http://localhost:4321";
+		const ENDPOINT_URL = "/dataset";
+		try {
+			return request(SERVER_URL)
+				.get(ENDPOINT_URL)
+				.then(function (res: Response) {
+					Log.info(`Response: ${JSON.stringify(res.body)}`);
+					expect(res.status).to.be.equal(StatusCodes.OK);
+				})
+		} catch (err) {
+			Log.error(err);
+			expect.fail("FAILED");
+			// and some more logging here!
+		}
+	});
+
+	it("should list with valid datasets added", async function () {
+		const SERVER_URL = "http://localhost:4321";
+		const GET_ENDPOINT_URL = "/dataset";
+		const ENDPOINT_URL = "/dataset/section2/sections";
+		const ZIP_FILE_DATA = "test/resources/archives/sections/test3.zip";
+
+		const zipFileData = fs.readFileSync(ZIP_FILE_DATA)
+		return request(SERVER_URL)
+			.put(ENDPOINT_URL)
+			.send(zipFileData)
+			.set("Content-Type", "application/zip")
+			.then(function (res: Response) {
+				// Check first response
+				Log.info(`First add response: ${JSON.stringify(res.body)}`);
+				expect(res.status).to.be.equal(StatusCodes.OK);
+
+				// get dataset
+				return request(SERVER_URL)
+					.get(GET_ENDPOINT_URL)
+			})
+			.then(function (res: Response) {
+				// second response - it should fail
+				Log.info(`Removal response: ${JSON.stringify(res.body)}`);
+				Log.info(res.body)
+				expect(res.status).to.be.equal(StatusCodes.OK);
+				expect(res.body.result).to.deep.equal([ { id: 'section2', kind: 'sections', numRows: 2 } ]);
 			})
 			.catch((err) => {
 				Log.error(err);

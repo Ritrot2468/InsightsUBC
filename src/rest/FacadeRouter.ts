@@ -1,8 +1,9 @@
-import { Request, Response } from "express";
+import { Request, Response} from "express";
 import { StatusCodes } from "http-status-codes";
 //import multer from 'multer';
 import InsightFacade from "../controller/InsightFacade";
 import {IInsightFacade, InsightDatasetKind, InsightError} from "../controller/IInsightFacade";
+import Log from "@ubccpsc310/folder-test/build/Log";
 // import path from 'path';
 // import fs from "fs";
 const facade: IInsightFacade = new InsightFacade()
@@ -75,15 +76,16 @@ export default class FacadeRouter {
 		}
 	}
 
-	public async listDataset( res: Response): Promise<void> {
-
-		try {
+	public async listDatasets(req: Request, res: Response): Promise<void> {
+			Log.info("About to call listDatasets")
+			Log.info("No req", req);
 			const result = await facade.listDatasets();
-			res.status(StatusCodes.OK).json({message: "Dataset List", result});
 
-		} catch (err) {
-			res.status(StatusCodes.BAD_REQUEST).json({err: `404 Error, ${err}`});
-		}
+			Log.info("Result:",result)
+			res.status(StatusCodes.OK).json({result: result});
+			Log.info("Response sent with status OK");
+
+
 	}
 
 

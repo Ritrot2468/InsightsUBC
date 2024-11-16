@@ -133,8 +133,13 @@ export default class InsightFacade implements IInsightFacade {
 
 	public async listDatasets(): Promise<InsightDataset[]> {
 		// reads the list of dataset ids already on disk
+		console.log("about to get list of ids");
+		if (!fs.existsSync("./data")) {
+			return [];
+		}
 
 		const currIDs = await fs.readdir("./data");
+		console.log("currIDs:", currIDs);
 
 		// reads their content info on disk and parses into InsightDataset[](works for rooms as well)
 		return this.secDiskReader.logInsightKindFromDisk(currIDs);

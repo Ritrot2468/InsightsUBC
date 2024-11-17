@@ -45,7 +45,7 @@ describe("Facade C3", function () {
 		const ENDPOINT_URL = "/dataset/section/sections";
 		const ZIP_FILE_DATA = "test/resources/archives/sections/test3.zip";
 
-		const zipFileData = fs.readFileSync(ZIP_FILE_DATA);
+		const zipFileData = await fs.promises.readFile(ZIP_FILE_DATA);
 		try {
 			return request(SERVER_URL)
 				.put(ENDPOINT_URL)
@@ -65,7 +65,7 @@ describe("Facade C3", function () {
 		const SERVER_URL = "http://localhost:4321";
 		const ENDPOINT_URL = "/dataset/section1/sections";
 		const ZIP_FILE_DATA = "test/resources/archives/sections/test3.zip";
-		const zipFileData = fs.readFileSync(ZIP_FILE_DATA);
+		const zipFileData = await fs.promises.readFile(ZIP_FILE_DATA);
 
 		// First add
 		const firstAddResponse = await request(SERVER_URL)
@@ -91,7 +91,7 @@ describe("Facade C3", function () {
 	// 	const SERVER_URL = "http://localhost:4321";
 	// 	const ENDPOINT_URL = "/dataset/section/sections";
 	// 	const ZIP_FILE_DATA = "test/resources/archives/sections/test3.zip";
-	// 	const zipFileData = fs.readFileSync(ZIP_FILE_DATA);
+	// 	const zipFileData = await fs.promises.readFile(ZIP_FILE_DATA);
 	//
 	// 	// First add
 	// 	return request(SERVER_URL)
@@ -127,7 +127,7 @@ describe("Facade C3", function () {
 		const ENDPOINT_URL = "/dataset/section_/sections";
 		const ZIP_FILE_DATA = "test/resources/archives/sections/test3.zip";
 
-		const zipFileData = fs.readFileSync(ZIP_FILE_DATA);
+		const zipFileData = await fs.promises.readFile(ZIP_FILE_DATA);
 		try {
 			return request(SERVER_URL)
 				.put(ENDPOINT_URL)
@@ -150,7 +150,7 @@ describe("Facade C3", function () {
 		const ENDPOINT_URL_REMOVAL = "/dataset/section2";
 		const ZIP_FILE_DATA = "test/resources/archives/sections/test3.zip";
 
-		const zipFileData = fs.readFileSync(ZIP_FILE_DATA);
+		const zipFileData = await fs.promises.readFile(ZIP_FILE_DATA);
 		return request(SERVER_URL)
 			.put(ENDPOINT_URL)
 			.send(zipFileData)
@@ -201,7 +201,7 @@ describe("Facade C3", function () {
 		const ENDPOINT_URL = "/dataset/courses/sections";
 		const ZIP_FILE_DATA = "test/resources/archives/sections/test3.zip";
 
-		const zipFileData = fs.readFileSync(ZIP_FILE_DATA);
+		const zipFileData = await fs.promises.readFile(ZIP_FILE_DATA);
 		return request(SERVER_URL)
 			.put(ENDPOINT_URL)
 			.send(zipFileData)

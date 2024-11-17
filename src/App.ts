@@ -7,7 +7,6 @@ import Server from "./rest/Server";
 export class App {
 	public async initServer(port: number): Promise<void> {
 		Log.info(`App::initServer( ${port} ) - start`);
-
 		const server = new Server(port);
 		return server
 			.start()

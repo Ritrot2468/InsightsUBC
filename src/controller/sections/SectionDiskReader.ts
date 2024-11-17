@@ -57,6 +57,7 @@ export default class SectionDiskReader extends SectionsParser {
 		});
 
 		const result = await Promise.all(allPromises);
+
 		return result;
 	}
 

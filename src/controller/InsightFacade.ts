@@ -147,6 +147,5 @@ export default class InsightFacade implements IInsightFacade {
 		//console.log("currIDs:", currIDs);
 
 		// reads their content info on disk and parses into InsightDataset[](works for rooms as well)
-
 	}
 }

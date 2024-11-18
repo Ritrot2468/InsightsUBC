@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
 import InsightFacade from "../controller/InsightFacade";
-import { IInsightFacade, InsightDatasetKind, InsightError } from "../controller/IInsightFacade";
+import { IInsightFacade, InsightDatasetKind } from "../controller/IInsightFacade";
 import Log from "@ubccpsc310/folder-test/build/Log";
 
 const facade: IInsightFacade = new InsightFacade();
@@ -26,13 +26,9 @@ export default class FacadeRouter {
 			}
 			const content = req.body.toString("base64");
 			const result = await facade.addDataset(id, content, kind);
-			res.status(StatusCodes.OK).json({ message: "Dataset added", result });
+			res.status(StatusCodes.OK).json({ result: result });
 		} catch (err: any) {
-			if (err instanceof InsightError) {
-				res.status(StatusCodes.BAD_REQUEST).json({ err: "InsightError", message: err.message });
-			} else {
-				res.status(StatusCodes.BAD_REQUEST).json({ err: "Error", message: err.message });
-			}
+			res.status(StatusCodes.BAD_REQUEST).json({ error: err });
 		}
 	}
 
@@ -45,9 +41,9 @@ export default class FacadeRouter {
 			}
 
 			const result = await facade.removeDataset(id);
-			res.status(StatusCodes.OK).json({ message: "Dataset removed", result });
+			res.status(StatusCodes.OK).json({ result: result });
 		} catch (err) {
-			res.status(StatusCodes.BAD_REQUEST).json({ err: `400 Error, ${err}` });
+			res.status(StatusCodes.BAD_REQUEST).json({ error: err });
 		}
 	}
 
@@ -67,12 +63,12 @@ export default class FacadeRouter {
 			.performQuery(query)
 			.then((result) => {
 				Log.info("Result: ", result);
-				res.status(StatusCodes.OK).json({ message: "Dataset added", result });
+				res.status(StatusCodes.OK).json({ result: result });
 				return res;
 			})
 			.catch((err) => {
 				Log.error("Error: ", err.msg);
-				res.status(StatusCodes.BAD_REQUEST).json({ message: "Query Error", err });
+				res.status(StatusCodes.BAD_REQUEST).json({ error: err });
 			});
 	}
 	// public async getAllAverageForACourse(req: Request, res: Response): Promise<void> {

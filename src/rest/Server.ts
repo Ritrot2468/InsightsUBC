@@ -95,7 +95,7 @@ export default class Server {
 		// TODO: your other endpoints should go here
 		this.express.put("/dataset/:id/:kind", this.facadeRouter.putDataset);
 		this.express.delete("/dataset/:id", this.facadeRouter.removeDataset);
-		this.express.get("/dataset", this.facadeRouter.listDatasets);
+		this.express.get("/datasets", this.facadeRouter.listDatasets);
 		this.express.post("/query", this.facadeRouter.queryDatasets);
 
 		//this.express.get("/dataset", this.facadeRouter.listDatasets);

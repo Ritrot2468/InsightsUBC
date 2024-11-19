@@ -318,6 +318,7 @@ describe("Facade C3", function () {
 				Log.info(`Query response: ${JSON.stringify(res.body)}`);
 				Log.info(res.body);
 				expect(res.status).to.be.equal(StatusCodes.BAD_REQUEST);
+				expect(res.body.error).to.be.a("string");
 			})
 			.catch((err) => {
 				Log.error(err);

@@ -15,7 +15,7 @@ export default class FacadeRouter {
 	public async putDataset(req: Request, res: Response): Promise<void> {
 		const id = req.params.id;
 		const kind = req.params.kind as InsightDatasetKind;
-		Log.info("id: ", id)
+		Log.info("id: ", id);
 
 		try {
 			if (!id || !kind) {
@@ -29,7 +29,7 @@ export default class FacadeRouter {
 			const result = await facade.addDataset(id, content, kind);
 			res.status(StatusCodes.OK).json({ result: result });
 		} catch (err: any) {
-			res.status(StatusCodes.BAD_REQUEST).json({ error: err });
+			res.status(StatusCodes.BAD_REQUEST).json({ error: err.message });
 		}
 	}
 
@@ -37,17 +37,13 @@ export default class FacadeRouter {
 		const id = req.params.id;
 
 		try {
-			if (!id) {
-				throw new Error("Dataset ID is required");
-			}
-
 			const result = await facade.removeDataset(id);
 			res.status(StatusCodes.OK).json({ result: result });
-		} catch (error) {
+		} catch (error: any) {
 			if (error instanceof NotFoundError) {
-				res.status(StatusCodes.NOT_FOUND).json({ error: error });
+				res.status(StatusCodes.NOT_FOUND).json({ error: error.message });
 			} else {
-				res.status(StatusCodes.BAD_REQUEST).json({ error: error });
+				res.status(StatusCodes.BAD_REQUEST).json({ error: error.message });
 			}
 		}
 	}
@@ -67,8 +63,8 @@ export default class FacadeRouter {
 		try {
 			const result = await facade.performQuery(query);
 			res.status(StatusCodes.OK).json({ result: result });
-		} catch (error) {
-			res.status(StatusCodes.BAD_REQUEST).json({ error: error });
+		} catch (error: any) {
+			res.status(StatusCodes.BAD_REQUEST).json({ error: error.message });
 		}
 	}
 	// public async getAllAverageForACourse(req: Request, res: Response): Promise<void> {

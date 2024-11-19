@@ -63,16 +63,12 @@ export default class FacadeRouter {
 	public async queryDatasets(req: Request, res: Response): Promise<void> {
 		const query: any = req.body;
 		//console.log("Query:", query);
-		facade
-			.performQuery(query)
-			.then((result) => {
-				Log.info("Result: ", result);
-				res.status(StatusCodes.OK).json({ result: result });
-			})
-			.catch((err) => {
-				Log.error("Error: ", err.msg);
-				res.status(StatusCodes.BAD_REQUEST).json({ error: err });
-			});
+		try {
+			const result = await facade.performQuery(query);
+			res.status(StatusCodes.OK).json({ result: result });
+		} catch (error) {
+			res.status(StatusCodes.BAD_REQUEST).json({ error: error });
+		}
 	}
 	// public async getAllAverageForACourse(req: Request, res: Response): Promise<void> {
 	// 	const courseDept = req.params.courseDept;

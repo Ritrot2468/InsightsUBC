@@ -11,7 +11,7 @@ export const fetchDatasets = async (): Promise<any> => {
 
 export const addDatasetToUI = async (id: string): Promise<any> => {
 	try {
-		const response = await fetch(`http://localhost:4321/dataset/${id}/sections`, {
+		const response = await fetch(`/dataset/${id}/sections`, {
 			method: "PUT"
 		});
 		if (!response.ok) {

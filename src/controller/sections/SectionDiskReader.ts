@@ -41,25 +41,57 @@ export default class SectionDiskReader extends SectionsParser {
 	// Writes InsightDataset info about a dataset from disk
 	public async logInsightKindFromDisk(ids: string[]): Promise<InsightDataset[]> {
 		const allPromises = ids.map(async (id) => {
-			const file = await fs.promises.readFile(`./data/${id}/kind`, "utf8");
-			const obj = JSON.parse(file);
+			return new Promise<InsightDataset>((resolve, reject) => {
+				fs.readFile(`./data/${id}/kind`, "utf8", (err, file) => {
+					if (err) {
+						return reject(err); // Reject if file read fails
+					}
 
-			const numRows = obj.table[0].numRows as number;
-			const kind = obj.table[0].kind as InsightDatasetKind;
+					try {
+						const obj = JSON.parse(file);
 
-			const newInsightDataset: InsightDataset = {
-				id: id,
-				kind: kind,
-				numRows: numRows,
-			};
+						const numRows = obj.table[0].numRows as number;
+						const kind = obj.table[0].kind as InsightDatasetKind;
 
-			return newInsightDataset;
+						const newInsightDataset: InsightDataset = {
+							id: id,
+							kind: kind,
+							numRows: numRows,
+						};
+
+						resolve(newInsightDataset);
+					} catch (parseError) {
+						reject(parseError); // Reject if JSON parsing fails
+					}
+				});
+			});
 		});
 
 		const result = await Promise.all(allPromises);
-
 		return result;
 	}
+
+	// public async logInsightKindFromDisk(ids: string[]): Promise<InsightDataset[]> {
+	// 	const allPromises = ids.map(async (id) => {
+	// 		const file = await fs.promises.readFile(`./data/${id}/kind`, "utf8");
+	// 		const obj = JSON.parse(file);
+	//
+	// 		const numRows = obj.table[0].numRows as number;
+	// 		const kind = obj.table[0].kind as InsightDatasetKind;
+	//
+	// 		const newInsightDataset: InsightDataset = {
+	// 			id: id,
+	// 			kind: kind,
+	// 			numRows: numRows,
+	// 		};
+	//
+	// 		return newInsightDataset;
+	// 	});
+	//
+	// 	const result = await Promise.all(allPromises);
+	//
+	// 	return result;
+	// }
 
 	// REQUIRES: id - name of dataset to be retrieved from disk (id IS NOT IN datasets ALREADY!!!!)
 	//           datasets - sets you'll be mapping new DatasetRecord to

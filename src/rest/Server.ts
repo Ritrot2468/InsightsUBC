@@ -15,8 +15,8 @@ export default class Server {
 		Log.info(`Server::<init>( ${port} )`);
 		this.port = port;
 		this.express = express();
-
 		this.facadeRouter = new FacadeRouter();
+
 		this.registerMiddleware();
 		this.registerRoutes();
 
@@ -97,10 +97,6 @@ export default class Server {
 		this.express.delete("/dataset/:id", this.facadeRouter.removeDataset);
 		this.express.get("/datasets", this.facadeRouter.listDatasets);
 		this.express.post("/query", this.facadeRouter.queryDatasets);
-
-		//this.express.get("/dataset", this.facadeRouter.listDatasets);
-		// this.express.post("/query", Router.postQuery);
-		// this.express.get("/datasets" , Router.retrieveDatasetsQuery);
 	}
 
 	// The next two methods handle the echo service.

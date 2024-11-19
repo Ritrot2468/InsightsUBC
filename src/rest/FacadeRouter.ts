@@ -15,6 +15,7 @@ export default class FacadeRouter {
 	public async putDataset(req: Request, res: Response): Promise<void> {
 		const id = req.params.id;
 		const kind = req.params.kind as InsightDatasetKind;
+		Log.info("id: ", id)
 
 		try {
 			if (!id || !kind) {

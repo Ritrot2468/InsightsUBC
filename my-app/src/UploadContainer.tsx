@@ -16,13 +16,7 @@ const UploadContainer: React.FC<UploadContainerProps> = ({ onUploadComplete }) =
 
 	const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
 		if (e.target.files && e.target.files.length > 0) {
-			const file = e.target.files[0];
-			if (file.type === "application/zip") {
-				setUploadedFile(file);
-				setError(null); // Clear any previous error
-			} else {
-				setError("Please upload a valid ZIP file.");
-			}
+			setUploadedFile(e.target.files[0]);
 		}
 	};
 
@@ -49,7 +43,10 @@ const UploadContainer: React.FC<UploadContainerProps> = ({ onUploadComplete }) =
 			});
 
 			if (!response.ok) {
-				throw new Error("Failed to upload file.");
+				const errorData = await response.json();
+				const errorMessage = errorData?.error || "Failed to upload file.";
+				setError(errorMessage);
+				//throw new Error("Failed to upload file.");
 			}
 
 			console.log("File uploaded successfully:", response);

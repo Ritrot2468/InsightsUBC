@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 
 import InsightFacade from "../controller/InsightFacade";
-import { IInsightFacade, InsightDatasetKind } from "../controller/IInsightFacade";
+import { IInsightFacade, InsightDatasetKind, NotFoundError } from "../controller/IInsightFacade";
 import Log from "@ubccpsc310/folder-test/build/Log";
 
 const facade: IInsightFacade = new InsightFacade();
@@ -42,8 +42,12 @@ export default class FacadeRouter {
 
 			const result = await facade.removeDataset(id);
 			res.status(StatusCodes.OK).json({ result: result });
-		} catch (err) {
-			res.status(StatusCodes.BAD_REQUEST).json({ error: err });
+		} catch (error) {
+			if (error instanceof NotFoundError) {
+				res.status(StatusCodes.NOT_FOUND).json({ error: error });
+			} else {
+				res.status(StatusCodes.BAD_REQUEST).json({ error: error });
+			}
 		}
 	}
 
@@ -64,7 +68,6 @@ export default class FacadeRouter {
 			.then((result) => {
 				Log.info("Result: ", result);
 				res.status(StatusCodes.OK).json({ result: result });
-				return res;
 			})
 			.catch((err) => {
 				Log.error("Error: ", err.msg);

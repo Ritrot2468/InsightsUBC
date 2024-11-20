@@ -67,37 +67,4 @@ export default class FacadeRouter {
 			res.status(StatusCodes.BAD_REQUEST).json({ error: error.message });
 		}
 	}
-	// public async getAllAverageForACourse(req: Request, res: Response): Promise<void> {
-	// 	const courseDept = req.params.courseDept;
-	// 	const courseNum = req.params.courseNum;
-	// 	const setId = req.params.setId;
-	// 	const query = `{
-	//     "WHERE": {
-	//         "AND": [
-	//             {"IS": {"${setId}_dept": "${courseDept}"}},
-	//             {"IS": {"${setId}_id": "${courseNum}"}}
-	//         ]
-	//     },
-	//     "OPTIONS": {
-	//         "COLUMNS": ["${setId}_year", "averageGrades"],
-	//         "ORDER": "${setId}_year"
-	//     },
-	//     "TRANSFORMATIONS": {
-	//         "GROUP": ["${setId}_year"],
-	//         "APPLY": [
-	//             {"averageGrades": {"AVG": "${setId}_avg"}}
-	//         ]
-	//     }
-	// }`;
-	// 	facade.performQuery(query).then( result => {
-	// 		console.log(query)
-	// 		Log.info("Result: ", result);
-	// 		res.status(StatusCodes.OK).json({message: "Dataset added", result});
-	// 		return res;
-	// 	}).catch(err => {
-	// 		Log.error("Error: ", err.msg);
-	// 		res.status(StatusCodes.BAD_REQUEST).json({message: "Query Error", err});
-	// 	})
-	//
-	// }
 }

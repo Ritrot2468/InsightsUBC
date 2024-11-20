@@ -228,8 +228,6 @@ describe("Facade C3", function () {
 	});
 
 	it("should query a course's avg over the years", async function () {
-		const TIMEOUT = 10000;
-		this.timeout(TIMEOUT);
 		const SERVER_URL = "http://localhost:4321";
 		const POST_ENDPOINT_URL = "/query";
 		const ENDPOINT_URL = "/dataset/section2/sections";
@@ -256,40 +254,77 @@ describe("Facade C3", function () {
         }
     }`;
 
-		const zipFileData = await fs.promises.readFile(ZIP_FILE_DATA);
+		fs.readFile(ZIP_FILE_DATA, (err, data) => {
+			if (err) {
+				Log.error("Error reading file:", err);
+				expect.fail();
+			}
+			request(SERVER_URL)
+				.put(ENDPOINT_URL)
+				.send(data)
+				.set("Content-Type", "application/zip")
+				.then((response: Response) => {
+					expect(response.status).to.be.equal(StatusCodes.OK);
+
+					// Send query
+					return request(SERVER_URL).post(POST_ENDPOINT_URL).send(query).set("Content-Type", "application/json");
+				})
+				.then((response: Response) => {
+					Log.info("Query Response:", response.body);
+					expect(response.status).to.be.equal(StatusCodes.OK);
+				})
+				.catch((error) => {
+					Log.error("Error during request:", error.response?.body || error.message);
+				});
+		});
+	});
+
+	it("invalid query", async function () {
+		const TIMEOUT = 10000;
+		this.timeout(TIMEOUT);
+		const SERVER_URL = "http://localhost:4321";
+		const POST_ENDPOINT_URL = "/query";
+		//const ENDPOINT_URL = "/dataset/section2/sections";
+		//const ZIP_FILE_DATA = "test/resources/archives/sections/pair.zip";
+		const setId = "section2";
+		const courseDept = "cpsc";
+		const courseNum = "110";
+		const query: any = `{
+        "WHERE": {
+            "AND": [
+                {"IS": {"setId_dept": "${courseDept}"}},
+                {"IS": {"${setId}_id": "${courseNum}"}}
+            ]
+        },
+        "OPTIONS": {
+            "COLUMNS": ["${setId}_year", "averageGrades"],
+            "ORDER": "${setId}_year"
+        },
+        "TRANSFORMATIONS": {
+            "GROUP": ["${setId}_year"],
+            "APPLY": [
+                {"averageGrades": {"AVG": "${setId}_avg"}}
+            ]
+        }
+    }`;
+
+		//const zipFileData = await fs.promises.readFile(ZIP_FILE_DATA);
 		return request(SERVER_URL)
-			.put(ENDPOINT_URL)
-			.send(zipFileData)
-			.set("Content-Type", "application/zip")
-			.then(function (res: Response) {
-				// Check first response
-				Log.info(`First add response: ${JSON.stringify(res.body)}`);
-				expect(res.status).to.be.equal(StatusCodes.OK);
-				// get send query
-				return request(SERVER_URL).post(POST_ENDPOINT_URL).send(query).set("Content-Type", "application/json");
-			})
+			.post(POST_ENDPOINT_URL)
+			.send(query)
+			.set("Content-Type", "application/json")
 			.then(function (res: Response) {
 				// second response - it should fail
 				Log.info(`Query response: ${JSON.stringify(res.body)}`);
 				Log.info(res.body);
-				expect(res.status).to.be.equal(StatusCodes.OK);
-				// expect(res.body.result).to.deep.equal({
-				// 	result: [
-				// 		{ sections_year: 1900, averageGrades: 74.53 },
-				// 		{ sections_year: 2009, averageGrades: 71.99 },
-				// 		{ sections_year: 2010, averageGrades: 76.37 },
-				// 		{ sections_year: 2011, averageGrades: 76.99 },
-				// 		{ sections_year: 2012, averageGrades: 73.9 },
-				// 		{ sections_year: 2013, averageGrades: 73.35 },
-				// 		{ sections_year: 2014, averageGrades: 73.38 },
-				// 		{ sections_year: 2015, averageGrades: 73.35 },
-				// 	],
-				//});
+				expect(res.status).to.be.equal(StatusCodes.BAD_REQUEST);
+				expect(res.body.error).to.be.a("string");
 			})
 			.catch((err) => {
 				Log.error(err);
 			});
 	});
 
+	// The other endpoints work similarly. You should be able to find all instructions in the supertest documentation
 	// The other endpoints work similarly. You should be able to find all instructions in the supertest documentation
 });

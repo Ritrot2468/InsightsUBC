@@ -13,7 +13,7 @@ const DatasetInfoContainer: React.FC<DatasetInfoContainerProps> = ({ datasets, o
 		<div className="bg-white shadow-md p-6 rounded-md">
 			<h2 className="text-center text-xl font-semibold mb-4">Your Section Datasets</h2>
 			{datasets.length > 0 ? (
-				<div className="space-y-4 max-h-80 overflow-y-auto w-full max-w-md">
+				<div className="space-y-4 max-h-80 overflow-y-auto w-full max-w-full">
 					{datasets.map((dataset) => (
 						<Dataset
 							key={dataset.id}

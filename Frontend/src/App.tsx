@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import DatasetInfoContainer from "./DatasetInfoContainer";
-import UploadContainer from "./UploadContainer";
-import { fetchDatasets , deleteDataset} from "./api";
+import DatasetInfoContainer from "./components/DatasetInfoContainer";
+import UploadContainer from "./components/UploadContainer";
+import { fetchDatasets, deleteDataset } from "./api";
 import { InsightDataset } from "../../src/controller/IInsightFacade";
+import InsightsContainer from "./components/InsightsContainer";
 import Log from "@ubccpsc310/folder-test/build/Log";
 
 function App() {
@@ -14,7 +15,7 @@ function App() {
 		const getDatasets = async () => {
 			try {
 				const data = await fetchDatasets();
-				Log.info(data.result)
+				Log.info(data.result);
 				setDatasets(data.result);
 			} catch (err) {
 				setError("Failed to load datasets. Please try again later.");
@@ -27,7 +28,7 @@ function App() {
 	const handleUploadComplete = async () => {
 		try {
 			const data = await fetchDatasets();
-			console.log(data)
+			console.log(data);
 			setDatasets(data.result);
 		} catch {
 			setError("Failed to reload datasets.");
@@ -49,17 +50,19 @@ function App() {
 				<h1 className="text-3xl font-bold">InsightUBC</h1>
 			</header>
 
-			<div className="flex w-full gap-9">
+			<div className="flex w-full gap-10 mt-4">
 				{/* Upload Container */}
-				<UploadContainer onUploadComplete={handleUploadComplete} />
+				<div className="flex-none w-full max-w-md">
+					<UploadContainer onUploadComplete={handleUploadComplete} />
+				</div>
 
 				{/* Dataset Info Container */}
-				<div className="w-full max-w-3xl mt-6">
-					<DatasetInfoContainer
-						datasets={datasets}
-						onDeleteDataset={handleDeleteDataset}/>
-
+				<div className="w-full">
+					<DatasetInfoContainer datasets={datasets} onDeleteDataset={handleDeleteDataset} />
 				</div>
+			</div>
+			<div className="flex w-full mt-10">
+				<InsightsContainer datasets={datasets} />
 			</div>
 
 			{/* Error Handling - Inspired by GPT*/}

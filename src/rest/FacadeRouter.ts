@@ -56,13 +56,13 @@ export default class FacadeRouter {
 			res.status(StatusCodes.OK).json({ result: result });
 			Log.info("Response sent with status OK");
 		} catch (error: any) {
-			Log.info(`failed to list datasets, erro: ${error.message}`);
+			Log.info(`failed to list datasets, error: ${error.message}`);
 		}
 	}
 
 	public async queryDatasets(req: Request, res: Response): Promise<void> {
 		const query: any = req.body;
-		//console.log("Query:", query);
+		console.log("Query:", query);
 		try {
 			const result = await facade.performQuery(query);
 			res.status(StatusCodes.OK).json({ result: result });

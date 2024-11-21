@@ -1,23 +1,42 @@
-
 import Log from "@ubccpsc310/folder-test/build/Log";
-export const fetchDatasets = async (): Promise<any> => {
+import { InsightResult } from "../../src/controller/IInsightFacade";
+
+async function fetchDatasets(): Promise<any> {
 	const response = await fetch("http://localhost:4321/datasets");
 	if (!response.ok) {
 		throw new Error("Failed to fetch datasets.");
 	}
-	Log.info(response)
-		return response.json()
+	Log.info(response);
+	return response.json();
+}
 
-};
-
-export const deleteDataset = async (id: string): Promise<any> => {
+async function deleteDataset(id: string): Promise<any> {
 	try {
 		const response = await fetch(`http://localhost:4321/dataset/${id}`, {
-			method: "DELETE"
+			method: "DELETE",
 		});
 
-		return response.json()
-	} catch (error)  {
-
-	}
+		return response.json();
+	} catch (error) {}
 }
+
+async function queryDataset(query: Object): Promise<any> {
+	console.log(JSON.stringify(query));
+	const response = await fetch("http://localhost:4321/query", {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify(query),
+	});
+
+	//console.log(response.json());
+
+	if (!response.ok) {
+		throw new Error("Failed to query dataset.");
+	}
+
+	return response.json();
+}
+
+export { fetchDatasets, deleteDataset, queryDataset };

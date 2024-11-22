@@ -1,62 +1,43 @@
-import React, { useState, useEffect } from "react";
-import { InsightDataset } from "../../../src/controller/IInsightFacade";
-import Dataset from "../Dataset";
+import React, { useState, useEffect, useRef } from "react";
 import DropdownInput from "./Dropdown";
 import { queryDataset } from "../api";
 import Log from "@ubccpsc310/folder-test/build/Log";
-import { InsightResult } from "../../../src/controller/IInsightFacade";
+import { BarChartYear } from "./Chart";
 
-interface InsightsContainerProps {
-	datasets: InsightDataset[];
-}
+const insightOptions = [
+	"Courses with the highest average by year",
+	"Professors with the lowest section averages by department",
+	"Average of a course throughout the years",
+];
 
-interface Query {
-	WHERE: object,
+function InsightsContainer({ datasets }) {
+	const [selectedDataset, setSelectedDataset] = useState(null);
+	const [selectedInsight, setSelectedInsight] = useState(null);
+	const [optionalDropdowns, setOptionalDropdowns] = useState([]);
+	const [selectedYear, setSelectedYear] = useState(null);
+	const [queryResult, setQueryResult] = useState([]);
+	const [graph, setGraph] = useState(null);
 
+	const datasetOptions = datasets.map((dataset) => dataset.id);
 
-}
-
-function InsightsContainer({ datasets }: InsightsContainerProps): React.ReactElement {
-	const [selectedDataset, setSelectedDataset] = useState<string | null>(null);
-	const [selectedInsight, setSelectedInsight] = useState<string | null>(null);
-	const [optionalDropdowns, setOptionalDropdowns] = useState<React.ReactElement[] | null>([]);
-	const [selectedYear, setSelectedYear] = useState<string | null>(null);
-	const [queryResult, setQueryResult] = useState<InsightResult[]>([]);
-
-	const datasetOptions: string[] = datasets.map((dataset) => dataset.id);
-	const insightOptions: string[] = [
-		"Courses with the highest average by year",
-		"Professors with the lowest section averages by department",
-		"Average of a course througout the years",
-	];
-
-	const handleSelectDataset = (event: React.ChangeEvent<HTMLSelectElement>): void => {
+	const handleSelectDataset = (event) => {
 		setSelectedDataset(event.target.value);
-		handleInsights();
 	};
 
-	const handleSelectInsight = (event: React.ChangeEvent<HTMLSelectElement>): void => {
+	const handleSelectInsight = (event) => {
 		setSelectedInsight(event.target.value);
-		handleInsights();
 	};
 
-	const handleSelectYear = (event: React.ChangeEvent<HTMLSelectElement>): void => {
+	const handleSelectYear = (event) => {
 		setSelectedYear(event.target.value);
-		handleInsights();
 	};
 
 	useEffect(() => {
-		handleInsights();
-	});
-
-	let graph;
-	function handleInsights(): void {
-		console.log(selectedInsight);
-		console.log(selectedDataset);
 		if (selectedInsight === null || selectedDataset === null) {
 			setOptionalDropdowns([]);
+			return;
 		} else if (selectedInsight === insightOptions[0]) {
-			const intermediateResult: InsightResult[] = [];
+			let intermediateResult = [];
 			// courses w highest avg by year
 			// group by year count query
 			// `${selectedDataset}_year`
@@ -82,23 +63,23 @@ function InsightsContainer({ datasets }: InsightsContainerProps): React.ReactEle
 			};
 			const queryByYear = {
 				WHERE: {
-					"EQ": {
-						`${selectedDataset}_year`:`${selectedYear}`
-					}
+					EQ: {
+						[`${selectedDataset}_year`]: `${selectedYear}`,
+					},
 				},
 				OPTIONS: {
-					COLUMNS: [`${selectedDataset}_year`],
+					COLUMNS: [`${selectedDataset}_dept`, `${selectedDataset}_id`, `${selectedDataset}_avg`],
 					ORDER: {
 						dir: "DOWN",
-						keys: [`${selectedDataset}_year`],
+						keys: [`${selectedDataset}_avg`],
 					},
 				},
 				TRANSFORMATIONS: {
-					GROUP: [`${selectedDataset}_year`],
+					GROUP: [`${selectedDataset}_dept`, `${selectedDataset}_id`],
 					APPLY: [
 						{
-							count: {
-								COUNT: `${selectedDataset}_year`,
+							avg: {
+								AVG: `${selectedDataset}_avg`,
 							},
 						},
 					],
@@ -107,8 +88,7 @@ function InsightsContainer({ datasets }: InsightsContainerProps): React.ReactEle
 			const performQuery = async () => {
 				try {
 					const data = await queryDataset(query);
-					Log.info(data.result);
-					setQueryResult(data.result);
+					intermediateResult = data.result;
 				} catch (err) {
 					Log.error("Failed to query years.");
 				}
@@ -116,7 +96,7 @@ function InsightsContainer({ datasets }: InsightsContainerProps): React.ReactEle
 			performQuery();
 
 			if (queryResult !== undefined) {
-				const yearOptions: string[] = queryResult.map((insight) => {
+				const yearOptions = intermediateResult.map((insight) => {
 					return String(insight[`${selectedDataset}_year`]);
 				});
 				setOptionalDropdowns([
@@ -129,11 +109,18 @@ function InsightsContainer({ datasets }: InsightsContainerProps): React.ReactEle
 					/>,
 				]);
 			}
-
-			const performQueryFinal = async () => {
-				try {
-					const data = await queryDataset(query);
-				}
+			if (selectedYear !== null) {
+				const performQueryFinal = async () => {
+					try {
+						const data = await queryDataset(queryByYear);
+						Log.info(data.result);
+						setQueryResult(data.result);
+					} catch (err) {
+						Log.error("Failed to query by year.");
+					}
+				};
+				performQueryFinal();
+				setGraph(<BarChartYear dataList={queryResult} />);
 			}
 		} else if (selectedInsight === insightOptions[1]) {
 			// professors with the lowest section averages by dept
@@ -144,7 +131,7 @@ function InsightsContainer({ datasets }: InsightsContainerProps): React.ReactEle
 			// filter dept group by id count query
 			// group by
 		}
-	}
+	}, [selectedDataset, selectedInsight, selectedYear, queryResult]);
 
 	return (
 		<div className="flex-cols min-h-full w-full bg-white rounded-md justify-center p-6 shadow-md">
@@ -167,7 +154,7 @@ function InsightsContainer({ datasets }: InsightsContainerProps): React.ReactEle
 					/>
 					<div>{optionalDropdowns}</div>
 				</div>
-				<div>{}</div>
+				<div>{graph}</div>
 			</div>
 		</div>
 	);

@@ -244,7 +244,6 @@ function InsightsContainer({ datasets }) {
 			return;
 		}
 
-		let deptOptions;
 		if (selectedInsight === insightOptions[2]) {
 			// group by dept count query
 			const fetchDept = async () => {
@@ -271,78 +270,70 @@ function InsightsContainer({ datasets }) {
 
 				try {
 					const data = await queryDataset(query);
-					deptOptions = data.result.map((item) => String(item[`${selectedDataset}_dept`]));
-
-					setOptionalDropdowns([
+					const deptOptions = data.result.map((item) => String(item[`${selectedDataset}_dept`]));
+					const deptDropdown = (
 						<DropdownInput
 							label="Dept:"
 							selection={selectedDept}
 							selectHandler={handleSelectDept}
 							defaultOption="Select a Dept"
 							options={deptOptions}
-						/>,
-					]);
+						/>
+					);
+					setOptionalDropdowns([deptDropdown]);
+
+					if (selectedDept) {
+						const fetchId = async () => {
+							const query = {
+								WHERE: {
+									IS: {
+										[`${selectedDataset}_dept`]: selectedDept,
+									},
+								},
+								OPTIONS: {
+									COLUMNS: [`${selectedDataset}_id`],
+									ORDER: {
+										dir: "DOWN",
+										keys: [`${selectedDataset}_id`],
+									},
+								},
+								TRANSFORMATIONS: {
+									GROUP: [`${selectedDataset}_id`],
+									APPLY: [
+										{
+											count: {
+												COUNT: `${selectedDataset}_id`,
+											},
+										},
+									],
+								},
+							};
+
+							try {
+								const data = await queryDataset(query);
+								const idOptions = data.result.map((item) => String(item[`${selectedDataset}_id`]));
+								setOptionalDropdowns([
+									deptDropdown,
+									<DropdownInput
+										label="Course ID:"
+										selection={selectedId}
+										selectHandler={handleSelectId}
+										defaultOption="Select a course id"
+										options={idOptions}
+									/>,
+								]);
+							} catch (err) {
+								Log.error("Failed to query course IDs.");
+							}
+						};
+						fetchId();
+					}
 				} catch (err) {
 					Log.error("Failed to query dept.");
 				}
 			};
 
 			fetchDept();
-		}
-
-		if (selectedInsight === insightOptions[2] && selectedDept) {
-			// Fetch id and generate dropdown
-			const fetchId = async () => {
-				const query = {
-					WHERE: {
-						IS: {
-							[`${selectedDataset}_dept`]: selectedDept,
-						},
-					},
-					OPTIONS: {
-						COLUMNS: [`${selectedDataset}_id`],
-						ORDER: {
-							dir: "DOWN",
-							keys: [`${selectedDataset}_id`],
-						},
-					},
-					TRANSFORMATIONS: {
-						GROUP: [`${selectedDataset}_id`],
-						APPLY: [
-							{
-								count: {
-									COUNT: `${selectedDataset}_id`,
-								},
-							},
-						],
-					},
-				};
-
-				try {
-					const data = await queryDataset(query);
-					const idOptions = data.result.map((item) => String(item[`${selectedDataset}_id`]));
-					setOptionalDropdowns([
-						<DropdownInput
-							label="Dept:"
-							selection={selectedDept}
-							selectHandler={handleSelectDept}
-							defaultOption="Select a Dept"
-							options={deptOptions}
-						/>,
-						<DropdownInput
-							label="Course ID:"
-							selection={selectedId}
-							selectHandler={handleSelectId}
-							defaultOption="Select a course id"
-							options={idOptions}
-						/>,
-					]);
-				} catch (err) {
-					Log.error("Failed to query course IDs.");
-				}
-			};
-
-			fetchId();
 		}
 	}, [selectedDataset, selectedInsight, insightOptions, selectedDept, selectedId]);
 

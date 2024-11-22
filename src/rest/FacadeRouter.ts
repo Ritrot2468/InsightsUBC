@@ -62,7 +62,7 @@ export default class FacadeRouter {
 
 	public async queryDatasets(req: Request, res: Response): Promise<void> {
 		const query: any = req.body;
-		console.log("Query:", query);
+		//console.log("Query:", query);
 		try {
 			const result = await facade.performQuery(query);
 			res.status(StatusCodes.OK).json({ result: result });

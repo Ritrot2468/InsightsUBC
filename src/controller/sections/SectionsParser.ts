@@ -1,6 +1,7 @@
 import fs from "fs-extra";
 import Section, { Mfield, Sfield } from "./Section";
 import Log from "@ubccpsc310/folder-test/build/Log";
+import { InsightError } from "../IInsightFacade";
 
 export interface DatasetRecord {
 	id: string;
@@ -61,7 +62,7 @@ export default class SectionsParser {
 		// list of all courses under the dataset file
 		const path = await fs.readdir(`./data/${id}/courses/`).catch((err) => {
 			Log.info(err);
-			throw new Error("ZIP file missing courses directory");
+			throw new InsightError("ZIP file missing courses directory");
 		});
 		for (const course of path) {
 			const promise = fs

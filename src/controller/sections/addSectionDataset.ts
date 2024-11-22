@@ -32,7 +32,7 @@ export default class AddSectionDataset {
 			if (err instanceof InsightError) {
 				throw err;
 			}
-			throw new Error(`Invalid file: ${err}`);
+			throw new InsightError(`Invalid file: ${err}`);
 		}
 	}
 }

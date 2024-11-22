@@ -1,7 +1,7 @@
 import fs from "fs-extra";
 import JSZip from "jszip";
 import SectionsParser from "./SectionsParser";
-import { InsightDatasetKind } from "../IInsightFacade";
+import { InsightDatasetKind, InsightError } from "../IInsightFacade";
 import Log from "@ubccpsc310/folder-test/build/Log";
 
 export default class SectionDiskWriter extends SectionsParser {
@@ -15,7 +15,7 @@ export default class SectionDiskWriter extends SectionsParser {
 		const buffer = Buffer.from(content, "base64");
 		const zip = await JSZip.loadAsync(buffer).catch((err) => {
 			Log.info(err);
-			throw new Error("Not a ZIP File");
+			throw new InsightError("Not a ZIP File");
 		});
 		await this.logSectionDataset(zip, id);
 	}
@@ -35,7 +35,7 @@ export default class SectionDiskWriter extends SectionsParser {
 
 			if (name.match(/^courses\/\w/) && name.match(/^[^.]+$/)) {
 				if (!zip.files[key]) {
-					throw new Error("Missing courses directory");
+					throw new InsightError("Missing courses directory");
 				}
 				const promiseContent = zip.files[key].async("string").then(async (content0) => {
 					const jsonData = JSON.parse(content0);

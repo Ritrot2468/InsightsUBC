@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import Log from "@ubccpsc310/folder-test/build/Log";
 
 interface UploadContainerProps {
 	onUploadComplete: () => void;

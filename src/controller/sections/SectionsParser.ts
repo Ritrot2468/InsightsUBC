@@ -1,5 +1,6 @@
 import fs from "fs-extra";
 import Section, { Mfield, Sfield } from "./Section";
+import Log from "@ubccpsc310/folder-test/build/Log";
 
 export interface DatasetRecord {
 	id: string;
@@ -83,7 +84,8 @@ export default class SectionsParser {
 					return { id, file };
 				})
 				.catch((err) => {
-					throw err;
+					Log.info(err);
+					throw new Error ("Invalid ZIP File: Missing courses directory")
 				});
 
 			allPromises.push(promise);

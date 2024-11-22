@@ -1,7 +1,8 @@
 import fs from "fs-extra";
 import JSZip from "jszip";
 import SectionsParser from "./SectionsParser";
-import { InsightDatasetKind } from "../IInsightFacade";
+import {InsightDatasetKind, InsightError} from "../IInsightFacade";
+import Log from "@ubccpsc310/folder-test/build/Log";
 
 export default class SectionDiskWriter extends SectionsParser {
 	// Every SectionDiskWriter needs to be able to parse sections using SectionsParser
@@ -11,9 +12,17 @@ export default class SectionDiskWriter extends SectionsParser {
 	}
 
 	public async logSectionsDatasetOnDisk(content: string, id: string): Promise<void> {
-		const buffer = Buffer.from(content, "base64");
-		const zip = await JSZip.loadAsync(buffer);
-		await this.logSectionDataset(zip, id);
+
+
+			const buffer = Buffer.from(content, "base64");
+			const zip = await JSZip.loadAsync(buffer).catch(err => {
+				Log.info(err);
+				throw new Error("Not a ZIP File")
+			});
+			await this.logSectionDataset(zip, id);
+
+
+
 	}
 
 	// REQUIRES: zip - current dataset content as a JSZIP
@@ -44,6 +53,8 @@ export default class SectionDiskWriter extends SectionsParser {
 				});
 
 				allPromises.push(promiseContent);
+			} else {
+				throw new Error("Zip File missing 'courses' directory");
 			}
 		}
 

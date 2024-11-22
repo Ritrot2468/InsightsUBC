@@ -1,5 +1,7 @@
 import fs from "fs-extra";
 import Section, { Mfield, Sfield } from "./Section";
+import Log from "@ubccpsc310/folder-test/build/Log";
+import { InsightError } from "../IInsightFacade";
 
 export interface DatasetRecord {
 	id: string;
@@ -58,7 +60,10 @@ export default class SectionsParser {
 		const sections: Section[] = [];
 
 		// list of all courses under the dataset file
-		const path = await fs.readdir(`./data/${id}/courses/`);
+		const path = await fs.readdir(`./data/${id}/courses/`).catch((err) => {
+			Log.info(err);
+			throw new InsightError("ZIP file missing courses directory");
+		});
 		for (const course of path) {
 			const promise = fs
 				.readJson(`./data/${id}/courses/${course}`)
@@ -70,20 +75,14 @@ export default class SectionsParser {
 					file.result = validSectionsInCourse;
 					// turn all valid sections to Sections objects
 					validSectionsInCourse.forEach((section: any) => {
-						if (section.Section === "overall") {
-							const newSection = this.createSection(section, id);
-							newSection.setMfield(newSection.getMFieldIndex("year"), SectionsParser.OVERALL_SECTION_YEAR);
-							newSection.year = SectionsParser.OVERALL_SECTION_YEAR;
-							sections.push(newSection);
-						} else {
-							sections.push(this.createSection(section, id));
-						}
+						this.turnOldCoursestoOverall(section, id, sections);
 					});
 
 					return { id, file };
 				})
 				.catch((err) => {
-					throw err;
+					Log.info(err);
+					throw new Error("Invalid ZIP File: Missing courses directory");
 				});
 
 			allPromises.push(promise);
@@ -92,6 +91,17 @@ export default class SectionsParser {
 		await Promise.all(allPromises);
 		const datasetRecord: DatasetRecord = { id: id, sections: sections };
 		return datasetRecord;
+	}
+
+	private turnOldCoursestoOverall(section: any, id: string, sections: Section[]): void {
+		if (section.Section === "overall") {
+			const newSection = this.createSection(section, id);
+			newSection.setMfield(newSection.getMFieldIndex("year"), SectionsParser.OVERALL_SECTION_YEAR);
+			newSection.year = SectionsParser.OVERALL_SECTION_YEAR;
+			sections.push(newSection);
+		} else {
+			sections.push(this.createSection(section, id));
+		}
 	}
 
 	// REQUIRES: jsonData - parsed JSON Object of a valid section from the result key in a given course file

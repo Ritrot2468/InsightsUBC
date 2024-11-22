@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {deleteDataset} from "./api";
+import { deleteDataset } from "./api";
 
 interface DatasetProps {
 	id: string;
@@ -22,15 +22,16 @@ class Dataset extends Component<DatasetProps, DatasetState> {
 	handleClose = () => {
 		const { id, onClose } = this.props;
 
-		deleteDataset(id).then(() => {
-			this.setState({ isVisible: false }, () => {
-				onClose(id);
+		deleteDataset(id)
+			.then(() => {
+				this.setState({ isVisible: false }, () => {
+					onClose(id);
+				});
+			})
+			.catch(() => {
+				console.error("Failed to delete dataset.");
 			});
-		}).catch(() => {
-			console.error("Failed to delete dataset.");
-		});
 	};
-
 
 	render() {
 		const { id, numRows } = this.props;

@@ -39,7 +39,7 @@ const UploadContainer: React.FC<UploadContainerProps> = ({ onUploadComplete }) =
 				headers: {
 					"Content-Type": "application/octet-stream",
 				},
-				body: formData
+				body: formData,
 			});
 
 			if (!response.ok) {
@@ -52,6 +52,7 @@ const UploadContainer: React.FC<UploadContainerProps> = ({ onUploadComplete }) =
 			console.log("File uploaded successfully:", response);
 
 			onUploadComplete();
+			setInputValue("");
 		} catch (err) {
 			console.error(err);
 			setError("An error occurred while uploading the file.");
@@ -59,7 +60,7 @@ const UploadContainer: React.FC<UploadContainerProps> = ({ onUploadComplete }) =
 	};
 
 	return (
-		<div className="w-full max-w-md">
+		<div className="w-full max-w-md bg-white rounded-md shadow-md p-6">
 			<div className="mb-4">
 				<label htmlFor="inputField" className="block mb-2 font-semibold">
 					Dataset ID:
@@ -70,7 +71,7 @@ const UploadContainer: React.FC<UploadContainerProps> = ({ onUploadComplete }) =
 					value={inputValue}
 					onChange={handleInputChange}
 					className="border rounded px-4 py-2 w-full"
-					placeholder="Type something..."
+					placeholder="ID must not contain '_' and must be unique"
 				/>
 			</div>
 
@@ -82,18 +83,13 @@ const UploadContainer: React.FC<UploadContainerProps> = ({ onUploadComplete }) =
 					id="fileUpload"
 					type="file"
 					onChange={handleFileUpload}
-					className="block w-full"
+					className="block w-full border py-1 px-1 rounded"
 				/>
-				{uploadedFile && (
-					<p className="text-green-700 mt-2">File ready: {uploadedFile.name}</p>
-				)}
+				{uploadedFile && <p className="text-green-700 mt-2">File ready: {uploadedFile.name}</p>}
 			</div>
 
 			<div>
-				<button
-					onClick={handleSubmit}
-					className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700"
-				>
+				<button onClick={handleSubmit} className="bg-blue-500 w-full text-white px-4 py-2 rounded hover:bg-blue-700">
 					Submit
 				</button>
 			</div>

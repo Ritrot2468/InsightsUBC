@@ -33,6 +33,7 @@
 		"chai": "4.3.4",
 		"chai-as-promised": "7.1.1",
 		"chai-http": "4.4.0",
+		"concurrently": "^9.1.0",
 		"eslint": "8.57.0",
 		"eslint-config-prettier": "9.1.0",
 		"eslint-plugin-descriptive": "^1.4.1",
@@ -54,6 +55,8 @@
 		"lint:fix": "eslint src test --ext .ts --fix",
 		"prettier:check": "prettier src/**/*.ts test/**/*.ts --check",
 		"prettier:fix": "prettier src/**/*.ts test/**/*.ts --write",
-		"start": "ts-node src/App.ts"
+		"start": "concurrently \"npm run start-backend\" \"npm run start-frontend\"",
+		"start-backend": "ts-node src/App.ts",
+		"start-frontend": "npm start --prefix frontend"
 	}
 }

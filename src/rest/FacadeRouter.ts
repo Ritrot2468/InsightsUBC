@@ -51,10 +51,13 @@ export default class FacadeRouter {
 	public async listDatasets(req: Request, res: Response): Promise<void> {
 		Log.info("Retrieving Datasets");
 		Log.info("No req", req);
-		const result = await facade.listDatasets();
-
-		res.status(StatusCodes.OK).json({ result: result });
-		Log.info("Response sent with status OK");
+		try {
+			const result = await facade.listDatasets();
+			res.status(StatusCodes.OK).json({ result: result });
+			Log.info("Response sent with status OK");
+		} catch (error: any) {
+			Log.info(`failed to list datasets, error: ${error.message}`);
+		}
 	}
 
 	public async queryDatasets(req: Request, res: Response): Promise<void> {

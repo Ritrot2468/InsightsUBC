@@ -157,7 +157,7 @@ function InsightsContainer({ datasets }) {
 					OPTIONS: {
 						COLUMNS: [`${selectedDataset}_dept`],
 						ORDER: {
-							dir: "DOWN",
+							dir: "UP",
 							keys: [`${selectedDataset}_dept`],
 						},
 					},
@@ -252,7 +252,7 @@ function InsightsContainer({ datasets }) {
 					OPTIONS: {
 						COLUMNS: [`${selectedDataset}_dept`],
 						ORDER: {
-							dir: "DOWN",
+							dir: "UP",
 							keys: [`${selectedDataset}_dept`],
 						},
 					},
@@ -293,7 +293,7 @@ function InsightsContainer({ datasets }) {
 								OPTIONS: {
 									COLUMNS: [`${selectedDataset}_id`],
 									ORDER: {
-										dir: "DOWN",
+										dir: "UP",
 										keys: [`${selectedDataset}_id`],
 									},
 								},
@@ -395,9 +395,9 @@ function InsightsContainer({ datasets }) {
 	}, [selectedDataset, selectedInsight, selectedDept, insightOptions, selectedId]);
 
 	return (
-		<div className="flex-cols min-h-full w-full bg-white rounded-md justify-center p-6 shadow-md">
+		<div className="flex-cols min-h-92 w-full bg-white rounded-md justify-center p-6 shadow-md">
 			<div className="flex text-3xl font-semibold justify-center">Insights</div>
-			<div className="flex w-full mt-6">
+			<div className="flex w-full my-10 pb-4">
 				<div className="flex-col w-1/4">
 					<DropdownInput
 						label="Dataset ID:"

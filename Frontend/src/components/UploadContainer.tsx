@@ -9,8 +9,11 @@ const UploadContainer: React.FC<UploadContainerProps> = ({ onUploadComplete }) =
 	const [inputValue, setInputValue] = useState<string>("");
 	const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 	const [error, setError] = useState<string | null>(null);
+	const [success, setSuccess] = useState<string | null>(null);
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		//setError(null);
+		setSuccess(null);
 		setInputValue(e.target.value);
 	};
 
@@ -23,9 +26,10 @@ const UploadContainer: React.FC<UploadContainerProps> = ({ onUploadComplete }) =
 	const handleSubmit = async () => {
 		if (!uploadedFile) {
 			setError("Please upload a file before submitting.");
+			//setSuccess(null);
 			return;
 		}
-
+		//setSuccess(null);
 		setError(null);
 		try {
 			const formData = await uploadedFile.arrayBuffer();
@@ -46,16 +50,19 @@ const UploadContainer: React.FC<UploadContainerProps> = ({ onUploadComplete }) =
 				const errorData = await response.json();
 				const errorMessage = errorData?.error || "Failed to upload file.";
 				setError(errorMessage);
-				//throw new Error("Failed to upload file.");
+				throw new Error(errorMessage);
 			}
 
-			console.log("File uploaded successfully:", response);
-
-			onUploadComplete();
+			//console.log("File uploaded successfully:", response);
+			setSuccess(`${inputValue} was added successfully`);
 			setInputValue("");
-		} catch (err) {
+			onUploadComplete();
+
+		} catch (err: any) {
 			console.error(err);
-			setError("An error occurred while uploading the file.");
+			//setError("An error occurred while uploading the file.");
+			setError(err.message);
+			//setSuccess(null);
 		}
 	};
 
@@ -95,6 +102,7 @@ const UploadContainer: React.FC<UploadContainerProps> = ({ onUploadComplete }) =
 			</div>
 
 			{error && <p className="text-red-500 mt-4">{error}</p>}
+			{success && <p className="text-green-500 mt-4">{success}</p>}
 		</div>
 	);
 };

@@ -3,7 +3,10 @@
 This repository contains starter code for the class project.
 Please keep your repository private.
 
+## C3 DEMO:
 ## C3 DEMO FILE VIDEO: https://screenrec.com/share/zJOLW9K3Rc
+## VIEW ON YOUTUBE LINK: https://youtu.be/51aPahCnuBc
+
 For information about the project, autotest, and the checkpoints, see the course webpage.
 
 ## Configuring your environment

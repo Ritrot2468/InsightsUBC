@@ -221,6 +221,13 @@ function ScatterPlotYear({ dataList, selectedDataset }) {
 					font: {
 						size: 14,
 					},
+					callback: function (value) {
+						// Remove commas if the value is greater than 1000
+						if (value > 1000) {
+							return value.toString().replace(/,/g, "");
+						}
+						return value;
+					},
 				},
 			},
 			y: {

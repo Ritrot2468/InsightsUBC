@@ -1,6 +1,5 @@
 # Demo:
-## C3 DEMO FILE VIDEO: https://screenrec.com/share/zJOLW9K3Rc
-## VIEW ON YOUTUBE LINK: https://youtu.be/51aPahCnuBc
+## C3 DEMO YOUTUBE LINK: https://youtu.be/6v1DGQZnZXc
 
 # Getting Started with Create React App
 
